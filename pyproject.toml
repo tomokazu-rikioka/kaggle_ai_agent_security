@@ -1,0 +1,45 @@
+[project]
+name = "kaggle-ai-agent-security"
+version = "0.1.0"
+description = "AI Agent Security - Multi-Step Tool Attacks (Kaggle) — 攻撃アルゴリズム探索"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # --- validation ロジック層（全 tier 必須・GPU 不要） ---
+    "gymnasium>=0.29,<1",   # 公式採点と同じ gym 環境
+    "pydantic>=2",          # SDK が内部で使用
+    # --- validation 実モデル層（GPU/Metal。ロジック層には不要だがローカル統一のため） ---
+    "llama-cpp-python>=0.3", # GGUF 推論（gpt-oss / gemma）
+    "huggingface-hub>=0.23", # GGUF 取得（hf_hub_download）
+    # --- 運用（Kaggle CLI / 設定読み込み） ---
+    "kaggle>=1.6",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "nbformat>=5.10",  # build_notebook.py が submission.ipynb を組み立てる
+    "ipykernel>=7",    # ローカルで Notebook を確認する場合
+]
+
+[tool.uv]
+# アプリケーションリポジトリ（配布パッケージではない）。自身をビルド/インストールしない。
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["E402", "I001"]
+# attack.py は /kaggle/working/attack.py として単一ファイルでロードされる自己完結スクリプト。
+# ベースライン継承の再エクスポート（F401）やトップレベル副作用（E402）を許容する。
+"experiments/**/attack.py" = ["E402", "F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["validation", "scripts"]

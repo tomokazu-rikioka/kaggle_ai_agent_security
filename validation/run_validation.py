@@ -210,6 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--candidates-in", default=None, help="生成をスキップして候補 JSON を読み込む")
     ap.add_argument("--candidates-out", default=None, help="生成した候補 JSON の保存先")
     ap.add_argument("--report-out", default=None, help="レポートのテキスト保存先")
+    ap.add_argument("--summary-out", default=None, help="ガードレール別スコアの JSON 保存先")
     args = ap.parse_args(argv)
 
     guardrails = [g.strip() for g in args.guardrails.split(",") if g.strip()]
@@ -288,6 +289,26 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.report_out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.report_out).write_text(report)
         print(f"[run] レポート保存: {args.report_out}")
+
+    if args.summary_out:
+        payload = {
+            "agent": args.agent,
+            "n_candidates": len(candidates),
+            "seed": args.seed,
+            "env": args.env,
+            "guardrails": {
+                r["guardrail"]: {
+                    "score": r["summary"]["score"],
+                    "score_raw": r["summary"]["score_raw"],
+                    "findings_count": r["summary"]["findings_count"],
+                    "unique_cells": r["summary"]["unique_cells"],
+                }
+                for r in rows
+            },
+        }
+        Path(args.summary_out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.summary_out).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
+        print(f"[run] サマリ保存: {args.summary_out}")
     return 0
 
 

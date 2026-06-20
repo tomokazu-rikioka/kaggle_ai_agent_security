@@ -1,0 +1,98 @@
+"""experiments/<exp>/attack.py を提出用 submission.ipynb に焼き込む。
+
+評価器は提出された Notebook を実行し、その結果 `/kaggle/working/attack.py` が存在することを
+期待する（downloads/.../jed_attack_inference_server.py が同パスを単一ファイルロードする）。
+そこで本スクリプトは attack.py の中身を **base64 で 1 セルに埋め込み**、実行時に
+`/kaggle/working/attack.py` へ復元するだけの薄い Notebook を生成する。
+
+base64 を使う理由: attack.py に `'''` や任意のバイト列が含まれても壊れない（文字列リテラル
+埋め込みのエスケープ事故を避ける）。
+
+併せて kernel-metadata.json の id / title / code_file を exp 名に同期する。
+
+使い方:
+    uv run python scripts/ops/build_notebook.py exp001
+    # -> experiments/exp001/submission.ipynb と kernel-metadata.json を更新
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+from pathlib import Path
+
+import nbformat as nbf
+
+EXPERIMENTS_DIR = Path("experiments")
+KAGGLE_USER = "rikitomo0526"
+
+
+def _code_cell_source(attack_src: str) -> str:
+    """attack.py を base64 で埋め込み、/kaggle/working/attack.py へ復元するセル本体。"""
+    b64 = base64.b64encode(attack_src.encode("utf-8")).decode("ascii")
+    return (
+        "# 自動生成: experiments/<exp>/attack.py を /kaggle/working/attack.py へ復元する。\n"
+        "# 評価器はこのファイルを単一ファイルとしてロードして AttackAlgorithm.run() を実行する。\n"
+        "import base64\n"
+        "import pathlib\n"
+        "\n"
+        f'_ATTACK_B64 = "{b64}"\n'
+        '_src = base64.b64decode(_ATTACK_B64).decode("utf-8")\n'
+        '_out = pathlib.Path("/kaggle/working/attack.py")\n'
+        "_out.write_text(_src)\n"
+        'print("wrote", _out, ":", len(_src), "bytes")\n'
+    )
+
+
+def build(exp: str) -> Path:
+    """experiments/<exp>/attack.py から submission.ipynb を生成し、メタを同期する。"""
+    exp_dir = EXPERIMENTS_DIR / exp
+    attack_path = exp_dir / "attack.py"
+    if not attack_path.is_file():
+        raise FileNotFoundError(f"{attack_path} が存在しません")
+
+    attack_src = attack_path.read_text()
+
+    nb = nbf.v4.new_notebook()
+    nb.cells = [
+        nbf.v4.new_markdown_cell(
+            f"# {exp} — submission\n\n"
+            "このセルは `attack.py` を `/kaggle/working/` に書き出すだけ。"
+            "評価基盤が `attack.py` をロードして攻撃候補を採点する。"
+        ),
+        nbf.v4.new_code_cell(_code_cell_source(attack_src)),
+    ]
+    nb.metadata["kernelspec"] = {"name": "python3", "language": "python", "display_name": "Python 3"}
+    nb.metadata["language_info"] = {"name": "python"}
+
+    out_path = exp_dir / "submission.ipynb"
+    nbf.write(nb, str(out_path))
+    print(f"[build] {out_path} を生成（attack.py {len(attack_src)} bytes）")
+
+    _sync_kernel_metadata(exp, exp_dir)
+    return out_path
+
+
+def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
+    """kernel-metadata.json の id / title / code_file を exp 名に揃える。"""
+    km_path = exp_dir / "kernel-metadata.json"
+    if not km_path.is_file():
+        raise FileNotFoundError(f"{km_path} が存在しません")
+    km = json.loads(km_path.read_text())
+    km["id"] = f"{KAGGLE_USER}/ai-agent-security-attack-{exp.replace('_', '-')}"
+    km["title"] = f"AI Agent Security - Attack {exp}"
+    km["code_file"] = "submission.ipynb"
+    km_path.write_text(json.dumps(km, indent=2) + "\n")
+    print(f"[build] {km_path} を同期（id={km['id']}）")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="attack.py を提出用 submission.ipynb に焼く")
+    parser.add_argument("exp", help="実験名 (例: exp001)")
+    args = parser.parse_args()
+    build(args.exp)
+
+
+if __name__ == "__main__":
+    main()

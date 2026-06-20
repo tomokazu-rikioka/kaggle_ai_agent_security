@@ -8,9 +8,9 @@
 ## 3 行で
 
 ```bash
-# 0) セットアップ（uv 推奨）
-uv venv --python 3.12 .venv && source .venv/bin/activate
-uv pip install -r requirements-validation.txt   # 実モデルを使わないなら gymnasium+pydantic だけでよい
+# 0) セットアップ（リポジトリ直下で。依存の正は pyproject.toml）
+uv sync                              # 依存をインストール（.venv 作成）
+# 以降 `uv run python -m validation...`（または source .venv/bin/activate）
 
 # 1) ロジック層（GPU 不要・数秒）: 自分の attack.py を回帰チェック
 python -m validation.run_validation --attack path/to/attack.py --agent deterministic \
