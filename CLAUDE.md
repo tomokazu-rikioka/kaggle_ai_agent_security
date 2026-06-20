@@ -24,7 +24,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 | `make validate-real EXP=exp001` | 実モデル検証（gpt_oss・GPU/Metal・要 GGUF） |
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push` |
-| `/update-score exp001` | `docs/SCORE.md` の行を更新（スキル） |
+| `/update-score exp001` | `docs/scores/SCORE.md` の行を更新（スキル） |
 
 ## アーキテクチャ
 
@@ -62,9 +62,9 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 
 ### スコア管理
 
-`docs/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
+`docs/scores/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
 ローカル列は `validation/runs/<exp>/summary_*.json` を元に `/update-score <exp>` スキルが反映、
-LB 列・changes 列は `docs/SCORE.md` に直接記入する。
+LB 列・changes 列は `docs/scores/SCORE.md` に直接記入する。
 
 ## このコンペの要点
 

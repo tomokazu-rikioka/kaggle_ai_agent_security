@@ -38,7 +38,7 @@ kaggle_ai_agent_security/
 │   └── submit.py                                #   build → kaggle kernels push
 ├── validation/                                  # ローカル検証パイプライン（公式採点を再現）
 ├── docs/                                        # ドキュメント
-│   ├── SCORE.md                                 #   スコア表（直接編集 / update-score スキル）
+│   ├── scores/SCORE.md                          #   スコア表（直接編集 / update-score スキル）
 │   └── competition-research/                    #   調査・戦略ノート
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
 ```
@@ -81,12 +81,12 @@ attack.py を編集 → `make validate` → `make validate-real` → `make build
 
 ## スコア管理
 
-スコアは [`docs/SCORE.md`](docs/SCORE.md) を**直接編集**して管理する（単一ソース）。
+スコアは [`docs/scores/SCORE.md`](docs/scores/SCORE.md) を**直接編集**して管理する（単一ソース）。
 
 - **ローカル列** (`local_public` 等): `make validate*` が `validation/runs/<exp>/summary_*.json` を
   書き出し、`/update-score <exp>` スキルがその exp の行へ反映（実モデルのサマリを優先採用）。
   `public` が公開 LB 相関、`provenance`/`strict` は非公開汎化の代理。
-- **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/SCORE.md` に直接記入する
+- **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/scores/SCORE.md` に直接記入する
   （または Claude に依頼）。1 提出で 4 スコアが返るので、確認して転記する。
 
 ## ローカル検証
