@@ -16,7 +16,7 @@ uv sync                              # 依存をインストール（.venv 作�
 python -m validation.run_validation --attack path/to/attack.py --agent deterministic \
     --gen-guardrail allow --guardrails allow,public,strict,provenance
 
-# 2) 実モデル層（GPU/Metal 必須）: 公開 LB と相関するスコア
+# 2) 実モデル層（Colab or Kaggle の GPU で）: 公開 LB と相関するスコア
 python -m validation.run_validation --attack path/to/attack.py --agent gpt_oss \
     --guardrails public --candidates 20 --env gym
 ```
@@ -24,6 +24,8 @@ python -m validation.run_validation --attack path/to/attack.py --agent gpt_oss \
 ---
 
 ## 3 つの検証 tier
+
+> ロジック層は手元（CPU で可）。**実モデル層は Colab or Kaggle の GPU で実行する**（Mac/Metal は非対応）。
 
 | tier | agent | GPU | 速度 | 何がわかるか |
 |---|---|---|---|---|
@@ -40,18 +42,17 @@ python -m validation.run_validation --attack path/to/attack.py --agent gpt_oss \
 ## Q&A（ユーザーの 3 質問）
 
 ### GPU は必要？
-- **ロジック層: 不要**（`deterministic`、CPU 数秒）。
-- **実モデル層: 必須**だが NVIDIA でなくてよい。コンペは GGUF を llama.cpp で回すので、
-  **Mac の Apple Silicon GPU（Metal）でそのまま動く**（本機 M4 Pro で `llama_supports_gpu_offload=True`、
-  Metal working set 実測 **≈19GB**）。`gpt-oss-20b Q4_K_M`（約12GB）は **19GB に快適**。
-  `gemma-4-26B-A4B Q4_K_M`（約16GB）は 19GB working set だと**余裕僅少**（文脈長を絞る/他アプリ終了）→ Colab/Kaggle 推奨。
+- **ロジック層: 不要**（`deterministic`、CPU 数秒。手元で回る）。
+- **実モデル層: 必須**。**Colab or Kaggle の GPU で実行する**（Mac/Metal は非対応のため手元では回さない）。
+  GGUF を llama.cpp（CUDA ビルド）で回す。`gpt-oss-20b Q4_K_M`（約12GB）は無料 T4(16GB) で快適、
+  `gemma-4-26B-A4B Q4_K_M`（約16GB）は L4(24GB)/A100 推奨。
 
 ### どのくらい時間？（概算・誤差大）
 | 構成 | 目安 | HW |
 |---|---|---|
-| ロジック層 600 候補 | 数秒〜2分 | Mac CPU |
-| gpt-oss 10〜20 候補 | 約10〜20分 | Mac Metal |
-| 100 候補・public・1〜2モデル | 約1.5〜4時間 | Mac / Colab |
+| ロジック層 600 候補 | 数秒〜2分 | 手元 CPU |
+| gpt-oss 10〜20 候補 | 約10〜20分 | Colab T4 |
+| 100 候補・public・1〜2モデル | 約1.5〜4時間 | Colab L4 / A100 |
 | 約600 候補・両モデル・public | 約8〜16時間（夜間） | Kaggle T4×2 / Colab L4-A100 |
 
 支配項は `候補数 × メッセージ数 × tool hop` の LLM 呼び出し。リプレイはモデルを再実行するので
@@ -87,22 +88,18 @@ python -m validation.run_validation --attack path/to/attack.py --agent gpt_oss \
 > ⚠️ 公式「gemma」ターゲットの実体は **Gemma4Agent + 26B**。`aicomp --agent gemma`（gemma-3-4b）は別物なので
 > LB 相関には使わない。本パイプラインの `--agent gemma` は自動で 26B（`gemma_4`）にエイリアスされる。
 
-ダウンロード（初回のみ・約12〜16GB）:
+ダウンロード（Colab/Kaggle 上で・初回のみ・約12〜16GB）:
 ```bash
 python -m validation.download_models gpt_oss     # gpt-oss-20b Q4_K_M
-python -m validation.download_models gemma_4     # gemma-4-26B Q4_K_M（Colab/Kaggle 推奨）
+python -m validation.download_models gemma_4     # gemma-4-26B Q4_K_M
 # 取得済みファイルを直接指定する場合:
-export GPT_OSS_MODEL_PATH=~/models/gpt-oss-20b-Q4_K_M.gguf
+export GPT_OSS_MODEL_PATH=/path/to/gpt-oss-20b-Q4_K_M.gguf
 ```
 RAM が厳しい時は `LLAMA_N_GPU_LAYERS`（GPU に載せる層数）/ `LLAMA_N_CTX`（文脈長, 既定 8192）で調整。
 
-### Mac(Metal)
-```bash
-uv pip install llama-cpp-python huggingface_hub     # Metal 対応で入る
-python -m validation.run_validation --agent gpt_oss --guardrails public --candidates 10 --env gym
-```
+> 実モデルは **Colab or Kaggle の 2 択**で回す（Mac/Metal は非対応）。
 
-### Google Colab（ハイブリッド推奨）
+### Google Colab
 `validation/colab_validation.ipynb` を開くだけ。要点:
 - ランタイム → GPU（`gemma_4` を回すなら **L4(24GB) か A100**。無料 T4(16GB) は gpt_oss のみ快適）。
 - llama.cpp は CUDA ビルド: `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python`。
@@ -118,7 +115,7 @@ T4×2 = **採点と同一 HW**。新規 GPU Notebook で本リポジトリ + SDK
 
 1. **開発中**: `--agent deterministic --gen-guardrail allow` で attack.py の疎通・採点を即チェック（`python -m validation.selftest` が回帰ガード）。
 2. **候補を固定**: `--candidates-out runs/cand.json` で生成候補を保存。
-3. **実モデルで採点**: `--candidates-in runs/cand.json --agent gpt_oss --guardrails public,provenance` を Mac/Colab で。生成を再実行せず採点だけ回せる。
+3. **実モデルで採点**: `--candidates-in runs/cand.json --agent gpt_oss --guardrails public,provenance` を Colab/Kaggle で。生成を再実行せず採点だけ回せる。
 4. **汎化チェック**: public で高く provenance/strict で消える候補を捨て、転移する攻撃ファミリを残す。
 5. **最終**: Kaggle T4×2 で full 600 候補・両モデルを夜間実行 → 4 行（`gpt_oss_*` / `gemma_4_*`）の表を確定。
 

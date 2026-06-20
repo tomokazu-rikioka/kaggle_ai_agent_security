@@ -10,7 +10,7 @@
   python -m validation.run_validation --agent deterministic \
       --guardrails public,strict,provenance --budget-s 30
 
-  # 実モデル smoke（Mac Metal）: gpt-oss を public で 10 候補
+  # 実モデル smoke（Colab/Kaggle の GPU で）: gpt-oss を public で 10 候補
   python -m validation.run_validation --agent gpt_oss --guardrails public \
       --candidates 10 --budget-s 600 --env gym
 
@@ -221,7 +221,7 @@ def main(argv: list[str] | None = None) -> int:
     fixtures_dir = paths.resolve_fixtures_dir(None)
     print(f"[run] fixtures={fixtures_dir}")
     if args.agent not in NO_GPU_AGENTS:
-        print(f"[run] agent={args.agent} は実モデル（GPU/Metal 必須・GGUF ロードに時間がかかります）")
+        print(f"[run] agent={args.agent} は実モデル（GPU 必須・Colab/Kaggle 推奨・GGUF ロードに時間がかかります）")
 
     agent_factory = build_local_agent_factory(args.agent)
 

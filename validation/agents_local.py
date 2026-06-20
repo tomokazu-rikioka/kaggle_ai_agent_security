@@ -4,7 +4,7 @@
 - gpt_oss / gemma_4 : 公式採点と同一の GGUF + llama.cpp 経路。
     LlamaCppChatTemplateBackend.from_model_path(n_gpu_layers=-1, n_ctx=8192) で
     GGUF を **1 回だけ**ロードし、その backend を共有して agent ラッパを量産する
-    （候補ごとに 12GB を再ロードしないため必須）。Mac は Metal、Colab/Kaggle は CUDA。
+    （候補ごとに 12GB を再ロードしないため必須）。Colab/Kaggle の GPU（CUDA）で実行する。
 
 GGUF の所在は公式モデルサーバ（gpt_oss_model_server.py / gemma_model_server.py）と
 同じ env var で解決する：

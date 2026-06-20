@@ -52,9 +52,10 @@ uv sync                       # 依存をインストール（.venv 作成）
 # 公式 SDK（MIT・git 管理）。vendor/aicomp_sdk_pkg/ に展開済みで clone に同梱される。
 #   validation/paths.py が sys.path に追加してロードする（pip install しない）。
 
-# 実モデル検証や提出に必要:
+# 提出に必要:
 #   ~/.kaggle/kaggle.json（Kaggle API トークン）
-#   GGUF モデル: uv run python -m validation.download_models gpt_oss
+# 実モデル検証は Colab or Kaggle の GPU 上で（GGUF を download_models で取得）。
+#   validation/colab_validation.ipynb を参照。
 ```
 
 ## 典型ワークフロー
@@ -66,8 +67,8 @@ make new-exp NAME=exp001
 # 2. ロジック層で検証（deterministic・GPU 不要・数秒）— 配線と採点の確認
 make validate EXP=exp001
 
-# 3. 実モデルで検証（gpt_oss・GPU/Metal・要 GGUF）— 公開 LB と相関する本物スコア
-make validate-real EXP=exp001 CANDIDATES=30
+# 3. 実モデルで検証（公開 LB と相関する本物スコア）— Colab or Kaggle の GPU で
+#    validation/colab_validation.ipynb（同じ run_validation CLI を GPU 上で実行）
 
 # 4. 提出 Notebook を生成して push
 make build EXP=exp001          # experiments/exp001/submission.ipynb を生成
@@ -75,7 +76,7 @@ make submit EXP=exp001         # kaggle kernels push
 make status EXP=exp001         # カーネル実行状態を確認
 ```
 
-attack.py を編集 → `make validate` → `make validate-real` → `make build`/`make submit` を回す。
+attack.py を編集 → `make validate` → 実モデル検証（Colab or Kaggle）→ `make build`/`make submit` を回す。
 **同じ `experiments/exp001/attack.py` がローカル検証でも提出でも使われる**（単一の真実源）ため、
 手元で検証した実体がそのまま提出される。
 
@@ -83,16 +84,17 @@ attack.py を編集 → `make validate` → `make validate-real` → `make build
 
 スコアは [`docs/scores/SCORE.md`](docs/scores/SCORE.md) を**直接編集**して管理する（単一ソース）。
 
-- **ローカル列** (`local_public` 等): `make validate*` が `validation/runs/<exp>/summary_*.json` を
-  書き出し、`/update-score <exp>` スキルがその exp の行へ反映（実モデルのサマリを優先採用）。
-  `public` が公開 LB 相関、`provenance`/`strict` は非公開汎化の代理。
+- **ローカル列** (`local_public` 等): `make validate`（ロジック層）と Colab/Kaggle の実モデル実行が
+  `validation/runs/<exp>/summary_*.json` を書き出し、`/update-score <exp>` スキルがその exp の行へ
+  反映（実モデルのサマリを優先採用）。`public` が公開 LB 相関、`provenance`/`strict` は非公開汎化の代理。
 - **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/scores/SCORE.md` に直接記入する
   （または Claude に依頼）。1 提出で 4 スコアが返るので、確認して転記する。
 
 ## ローカル検証
 
 `validation/` が公式採点（`eval_predicates` / `score_attack`）をオフライン再現する。
-3 ティア（ロジック層 / 実モデル層 / 汎化代理）。詳細は
+3 ティア（ロジック層 / 実モデル層 / 汎化代理）。ロジック層は手元（`make validate`）、
+**実モデル層は Colab or Kaggle の GPU** で回す。詳細は
 [`validation/README.md`](validation/README.md)。
 
 ## ドキュメント

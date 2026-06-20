@@ -21,7 +21,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 |---|---|
 | `make new-exp NAME=exp001` | 実験を作成（`experiments/_template` を複製） |
 | `make validate EXP=exp001` | ロジック層検証（deterministic・GPU 不要・数秒） |
-| `make validate-real EXP=exp001` | 実モデル検証（gpt_oss・GPU/Metal・要 GGUF） |
+| 実モデル検証（gpt_oss / gemma_4） | **Colab or Kaggle** で実行（`validation/colab_validation.ipynb`） |
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push` |
 | `/update-score exp001` | `docs/scores/SCORE.md` の行を更新（スキル） |
@@ -55,7 +55,7 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 `python -m validation.run_validation --attack experiments/expNNN/attack.py --agent <a> --guardrails <g>`
 が公式採点（`eval_predicates` / `score_attack`）を再現する。
 - `--agent deterministic`: ロジック層（配線・採点の確認。GPU 不要）。
-- `--agent gpt_oss` / `gemma_4`: 実モデル（公開 LB 相関）。
+- `--agent gpt_oss` / `gemma_4`: 実モデル（公開 LB 相関）。**Colab or Kaggle で実行**（Mac/Metal は非対応）。
 - ガードレール `public`=公開 LB 相関、`strict`/`provenance`=非公開汎化の代理。
 - **public で出て strict/provenance で消える攻撃は overfit 疑い**。
 - `--summary-out` でガードレール別スコアの JSON を出力（`/update-score` スキルが読む）。
