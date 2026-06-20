@@ -2,7 +2,7 @@
 
 本ファイルは `aicomp_sdk` **v3.1.0** の**実際の実装**を文書化する — 採点・述語・cell・環境・公開ガードレールの正確なロジック。公式 Overview とコードが食い違う場合は**コードが正**。攻撃設計において最も有用なファイル。
 
-SDK は `downloads/aicomp_sdk_pkg/`（git 管理外）にローカル展開済みで、`eval_predicates`・`cell_signature`・`score_attack`・`ReplayHarness` を直接実行して検証できる。
+SDK は `vendor/aicomp_sdk_pkg/`（MIT・git 管理）にローカル展開済みで、`eval_predicates`・`cell_signature`・`score_attack`・`ReplayHarness` を直接実行して検証できる。
 
 ## 0. 中核メカニズム（1 段落で）
 

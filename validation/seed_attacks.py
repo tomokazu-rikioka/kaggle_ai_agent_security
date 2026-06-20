@@ -1,6 +1,6 @@
 """パイプライン検証＆出発点用の「種」攻撃。
 
-`downloads/.../fixtures/web_corpus.json` の注入ページ（page_2/4/5/13/14…）を
+`vendor/.../fixtures/web_corpus.json` の注入ページ（page_2/4/5/13/14…）を
 deterministic エージェントに開かせ、注入指示を踏ませる固定候補を返す。env を探索せず
 決まった候補を返すだけなので、ロジック層のプラグイン疎通・採点・ガードレール差分の
 確認に使える。

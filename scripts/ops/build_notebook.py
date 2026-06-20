@@ -1,7 +1,7 @@
 """experiments/<exp>/attack.py を提出用 submission.ipynb に焼き込む。
 
 評価器は提出された Notebook を実行し、その結果 `/kaggle/working/attack.py` が存在することを
-期待する（downloads/.../jed_attack_inference_server.py が同パスを単一ファイルロードする）。
+期待する（vendor/.../jed_attack_inference_server.py が同パスを単一ファイルロードする）。
 そこで本スクリプトは attack.py の中身を **base64 で 1 セルに埋め込み**、実行時に
 `/kaggle/working/attack.py` へ復元するだけの薄い Notebook を生成する。
 

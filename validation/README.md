@@ -106,7 +106,7 @@ python -m validation.run_validation --agent gpt_oss --guardrails public --candid
 `validation/colab_validation.ipynb` を開くだけ。要点:
 - ランタイム → GPU（`gemma_4` を回すなら **L4(24GB) か A100**。無料 T4(16GB) は gpt_oss のみ快適）。
 - llama.cpp は CUDA ビルド: `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python`。
-- このリポジトリと `downloads/aicomp_sdk_pkg/` を Drive かアップロードで配置 → 同じ CLI を実行。
+- 本リポジトリを clone するだけで `vendor/aicomp_sdk_pkg/`（git 同梱）も入る → 同じ CLI を実行。
 
 ### Kaggle 無料 GPU（最終相関チェック）
 T4×2 = **採点と同一 HW**。新規 GPU Notebook で本リポジトリ + SDK を配置し同じ CLI を実行。

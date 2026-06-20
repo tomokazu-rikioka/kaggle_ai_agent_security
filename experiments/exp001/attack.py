@@ -3,7 +3,7 @@
 評価器は提出された `/kaggle/working/attack.py` を
 `importlib.util.spec_from_file_location` で **単一ファイル** としてロードし、
 `AttackAlgorithm` クラスの `run(env, config)` を 1 回実行する
-（downloads/.../kaggle_evaluation/.../jed_attack_inference_server.py）。
+（vendor/.../kaggle_evaluation/.../jed_attack_inference_server.py）。
 
 そのため本ファイルは以下を守ること:
   * クラス名は `AttackAlgorithm` 固定（評価器が名前で探す）。

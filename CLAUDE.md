@@ -12,8 +12,8 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 
 - Python 3.12 / `uv` 管理。スクリプトは `uv run ...` で実行。
 - ruff（`line-length=120`, `select=E,W,F,I,UP,B,SIM`）。`make lint` / `make format`。
-- 公式 SDK は `downloads/aicomp_sdk_pkg/`（git 管理外）。`validation/paths.py` が sys.path に追加して
-  ロードする（pip install しない）。`import aicomp_sdk...` はこれで解決。
+- 公式 SDK は `vendor/aicomp_sdk_pkg/`（MIT・private repo なので git 管理）。`validation/paths.py` が
+  sys.path に追加してロードする（pip install しない）。`import aicomp_sdk...` はこれで解決。
 
 ## よく使うコマンド
 
@@ -30,7 +30,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 
 ### 提出の仕組み（最重要）
 
-評価器（`downloads/.../kaggle_evaluation/.../jed_attack_inference_server.py`）は
+評価器（`vendor/.../kaggle_evaluation/.../jed_attack_inference_server.py`）は
 `/kaggle/working/attack.py` を `importlib.util.spec_from_file_location` で
 **単一ファイルとしてロード**し、`AttackAlgorithm.run(env, config)` を 1 回実行する。
 

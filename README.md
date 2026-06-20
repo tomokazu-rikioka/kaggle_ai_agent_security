@@ -40,7 +40,7 @@ kaggle_ai_agent_security/
 ├── docs/                                        # ドキュメント
 │   ├── SCORE.md                                 #   スコア表（直接編集 / update-score スキル）
 │   └── competition-research/                    #   調査・戦略ノート
-└── downloads/aicomp_sdk_pkg/                    # 公式 SDK（git 管理外・展開済み）
+└── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
 ```
 
 ## セットアップ
@@ -49,7 +49,7 @@ kaggle_ai_agent_security/
 uv python pin 3.12
 uv sync                       # 依存をインストール（.venv 作成）
 
-# 公式 SDK（git 管理外）。downloads/aicomp_sdk_pkg/ に展開されている前提。
+# 公式 SDK（MIT・git 管理）。vendor/aicomp_sdk_pkg/ に展開済みで clone に同梱される。
 #   validation/paths.py が sys.path に追加してロードする（pip install しない）。
 
 # 実モデル検証や提出に必要:
