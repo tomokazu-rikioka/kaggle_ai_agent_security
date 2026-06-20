@@ -1,6 +1,6 @@
 # 実験スコア一覧
 
-> このファイルは**直接編集**して運用する（スコアの単一ソース）。
+> このファイルは直接編集して運用する（スコアの単一ソース）。
 > - `local_*` 列: `/update-score <exp>` スキルが `validation/runs/<exp>/summary_*.json` から記入。
 > - `lb_*` 列・`changes` 列: 直接記入する（または Claude に依頼）。
 > - `local_public` が公開 LB と相関、`local_provenance`/`local_strict` は非公開汎化の代理。
