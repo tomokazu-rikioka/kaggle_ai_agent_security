@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from aicomp_sdk.core.predicates import _contains_secret
+from aicomp_sdk.core.predicates import payload_exfiltrates_secret
 from aicomp_sdk.core.tools.http import PRIVATE_NET_RE
 from aicomp_sdk.guardrails.base import Decision, GuardrailBase
 
@@ -58,11 +58,18 @@ class Guardrail(GuardrailBase):
         if target and any(p in target for p in _ULTRA_DANGEROUS):
             return Decision.deny(f"sensitive target in {tool_name}: '{target[:40]}'")
 
-        # --- 3) data ホールを塞ぐ：ペイロードの秘密を検出して遮断 ---
+        # --- 3) data ホールを塞ぐ：ペイロードの秘密/機微キーワードを検出して遮断 ---
+        # v3.1.2 では scorer 同等の検出を公開ヘルパー payload_exfiltrates_secret に集約
+        # （SECRET_MARKER とセッションで読取済みの実 secret を照合）。厳しめ代理として、
+        # さらに ultra-dangerous キーワードを含む payload も遮断し公開GRの data 穴を塞ぐ。
         if tool_name in ("http.post", "email.send"):
             for key in _PAYLOAD_KEYS:
-                if _contains_secret(str(tool_args.get(key, "") or "")):
+                payload = str(tool_args.get(key, "") or "")
+                if payload_exfiltrates_secret(payload):
                     return Decision.deny(f"secret payload in {tool_name}.{key}")
+                low = payload.lower()
+                if any(p in low for p in _ULTRA_DANGEROUS):
+                    return Decision.deny(f"sensitive keyword in {tool_name}.{key}")
 
         # --- 4) private-net への送信を遮断 ---
         if tool_name == "http.post" and PRIVATE_NET_RE.search(str(tool_args.get("url", "") or "")):
