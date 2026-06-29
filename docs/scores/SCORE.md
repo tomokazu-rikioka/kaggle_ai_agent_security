@@ -7,4 +7,4 @@
 
 | exp | local_agent | local_public | local_provenance | local_strict | lb_gpt_oss_public | lb_gpt_oss_private | lb_gemma_public | lb_gemma_private | changes |
 |-----|------------|------|------|------|------|------|------|------|---------|
-| exp001 | deterministic | 0.000 | 0.000 | 0.000 | - | - | - | - | ベースライン（SDK Go-Explore 継承・無改造） |
+| exp001 | deterministic | 0.000 | 0.000 | 0.000 | - | - | - | - | EXFIL リプレイ密度 + CONFUSED_DEPUTY ブレンド（EXFIL_FRACTION=0.5, N=620）。実モデルは Kaggle 検証待ち |

@@ -93,10 +93,13 @@ private（strict/provenance）汎化を狙って候補ブレンドを調整し�
 - public は我々が測れる唯一のフィードバック信号なので EXFIL も残す。実測の provenance スコアで調整する。
 
 ## ローカル検証結果
-- ロジック層 `make validate EXP=exp001`（deterministic）: （記入予定。deterministic_public≈0 は想定どおり）
-- 実モデル `--agent gpt_oss --guardrails public,strict,provenance`: （記入予定）
-  - 期待: public/strict で EXFIL+DEPUTY 発火、provenance で DEPUTY のみ発火（マトリクスの実証）。
-- 所見（public で出て strict/provenance で消える＝overfit 疑い など）: （記入予定）
+- ロジック層 `make validate EXP=exp001`（deterministic, 620 候補, seed 123）: public/strict/provenance/allow
+  すべて 0.000（findings 0）。deterministic は `data='demo'` 固定で自前の秘密を流出しないスタブのため、
+  述語が発火しないのは想定どおり（配線・採点・dedup の疎通確認のみ）。
+- 実モデル `--agent gpt_oss --guardrails public,provenance`: **Kaggle 検証待ち**
+  （`validation/kaggle_validation.ipynb` を Kaggle GPU(T4) で実行して取得予定）。
+  - 期待: public で EXFIL+DEPUTY 発火、provenance で DEPUTY のみ発火（マトリクスの実証）。
+- 所見（public で出て strict/provenance で消える＝overfit 疑い など）: 実モデルスコア取得後に記入。
 
 ## LB 結果
 - 提出日 / Version:
