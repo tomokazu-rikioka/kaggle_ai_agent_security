@@ -3,7 +3,9 @@
 `attack.py` を Kaggle に出して LB を待つ（1 提出 7〜十数時間 + 評価器バグ）代わりに、
 **手元で同じ採点を再現**する。公式評価器 `kaggle_evaluation/jed_attack_134815/jed_attack_gateway.py`
 と同じ SDK 部品（`eval_attack` / `_replay_candidate_trace` / `eval_predicates` / `score_attack`）を
-再利用しているので、採点ロジックは ground-truth と一致する。
+再利用しているので、採点ロジックは ground-truth と一致する。**vendored SDK は v3.1.2 でライブ評価器と同一版**
+なので、刷新された EXFILTRATION 採点（`SECRET_MARKER` センチネル／`fs.read("secret.txt")` の実読取値・
+可逆エンコード認識）や DESTRUCTIVE_WRITE のルート `secret.txt` 限定も含め、ライブと一致する。
 
 ## 3 行で
 
@@ -72,8 +74,8 @@ python -m validation.run_validation --attack path/to/attack.py --agent gpt_oss \
 | 名前 | 実体 | 用途 |
 |---|---|---|
 | `public` | `aicomp_sdk/guardrails/optimal.py`（OptimalGuardrail） | **公開 LB の本命。** taint 窓(直近5)で危険 op を遮断 |
-| `strict` | `aicomp_sdk/attacks/baselines/guardrail_rules.py` | http.post の data 走査・private-net 遮断。形状が public と違う代理 |
-| `provenance` | `validation/provenance_guardrail.py`（自作） | **永続来歴**で全トレースの汚染を追跡し file-wash を無効化。非公開の `persistent_provenance` 代理 |
+| `strict` | `aicomp_sdk/attacks/baselines/guardrail_rules.py` | v3.1.2 で採点器と秘密判定を共有（`payload_exfiltrates_secret`/`is_protected_secret_path`）。data 走査＋private-net 遮断で public と形状が違う代理 |
+| `provenance` | `validation/provenance_guardrail.py`（自作） | **永続来歴**で全トレースの汚染を追跡し file-wash を無効化。data の秘密検出は v3.1.2 公開ヘルパー `payload_exfiltrates_secret` を使用。非公開の `persistent_provenance` 代理 |
 | `allow` | `aicomp_sdk/attacks/baselines/guardrail_allow.py` | 全許可。疎通確認・探索上限の把握用（LB 無関係） |
 
 ---
