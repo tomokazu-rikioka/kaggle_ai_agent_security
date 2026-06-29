@@ -20,7 +20,10 @@ import csv
 import importlib
 import json
 import os
+import queue
 import sys
+import threading
+import time
 import uuid
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import asdict, is_dataclass
@@ -52,6 +55,7 @@ from aicomp_sdk.guardrails.optimal import Guardrail as OptimalGuardrail
 DEFAULT_MAX_TOOL_HOPS = AttackRunConfig.max_tool_hops  # 8
 
 # ---------- Configuration ----------
+# Applied once to attack generation and once to each replay for every model.
 DEFAULT_BUDGET_S = 9000.0
 ATTACK_ENV_OP_GRACE_S = 5.0
 GATEWAY_RESPONSE_TIMEOUT_BUFFER_S = 30.0
@@ -257,38 +261,43 @@ def _require_attack_server_response(response: Any) -> Mapping[str, Any]:
 
 
 class ModelAttackTimedOut(RuntimeError):
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-        self.message = message
+    pass
 
 
-def _record_model_timeout(
+class ModelEvaluationTimedOut(RuntimeError):
+    pass
+
+
+def _run_until_deadline(
+    operation: Callable[[], Any],
     *,
-    row_scores: dict[str, float],
-    per_model_results: dict[str, dict[str, Any]],
-    model_name: str,
-    guardrail_configs: Mapping[str, Callable],
-    error: str,
-) -> None:
-    model_results: dict[str, Any] = {
-        "candidates_received": 0,
-        "timed_out": True,
-        "error": error,
-        "guardrail_scores": {},
-    }
-    for guardrail_label in guardrail_configs:
-        row_id = f"{model_name}_{guardrail_label}"
-        row_scores[row_id] = 0.0
-        model_results["guardrail_scores"][guardrail_label] = {
-            "score": 0.0,
-            "summary": {
-                "score": 0.0,
-                "timed_out": True,
-                "error": error,
-            },
-            "findings_validated": 0,
-        }
-    per_model_results[model_name] = model_results
+    deadline_s: float,
+    phase: str,
+) -> Any:
+    """Return an operation result only if it arrives before the phase deadline."""
+    remaining_s = deadline_s - time.monotonic()
+    if remaining_s <= 0:
+        raise ModelEvaluationTimedOut(f"{phase} time budget exceeded")
+
+    result_queue: queue.Queue[tuple[Any, BaseException | None]] = queue.Queue(maxsize=1)
+
+    def run() -> None:
+        try:
+            result = operation()
+        except BaseException as err:
+            result_queue.put((None, err))
+        else:
+            result_queue.put((result, None))
+
+    threading.Thread(target=run, daemon=True).start()
+    try:
+        result, error = result_queue.get(timeout=remaining_s)
+    except queue.Empty:
+        raise ModelEvaluationTimedOut(f"{phase} time budget exceeded") from None
+
+    if error is not None:
+        raise error
+    return result
 
 
 class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
@@ -699,7 +708,6 @@ class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
         This ensures the public leaderboard (OptimalGuardrail) and private
         leaderboard (private guardrail) use identical attack outputs.
         """
-        import time
         total_t0 = time.time()
 
         # Required by Hearth security: validate every prediction.
@@ -726,9 +734,15 @@ class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
             try:
                 # Phase 1: Run attack with real model via command-response.
                 # Uses the public guardrail (OptimalGuardrail) for the live env.
-                candidates = self._run_attack_for_model(
-                    model_name,
-                    guardrail_factory=guardrail_configs["public"],
+                generation_deadline_s = time.monotonic() + DEFAULT_BUDGET_S
+                candidates = _run_until_deadline(
+                    lambda: self._run_attack_for_model(
+                        model_name,
+                        guardrail_factory=guardrail_configs["public"],
+                        budget_s=DEFAULT_BUDGET_S,
+                    ),
+                    deadline_s=generation_deadline_s,
+                    phase=f"Model {model_name} generation",
                 )
 
                 print(f"\n[GATEWAY][{model_name}] Phase 1 complete: "
@@ -741,12 +755,17 @@ class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
                 }
 
                 for guardrail_label, guardrail_factory in guardrail_configs.items():
+                    replay_deadline_s = time.monotonic() + DEFAULT_BUDGET_S
                     replay_t0 = time.time()
-                    result = self._replay_and_score(
-                        candidates,
-                        model_name=model_name,
-                        guardrail_factory=guardrail_factory,
-                        fixtures_dir=self._fixtures_dir,
+                    result = _run_until_deadline(
+                        lambda guardrail_factory=guardrail_factory: self._replay_and_score(
+                            candidates,
+                            model_name=model_name,
+                            guardrail_factory=guardrail_factory,
+                            fixtures_dir=self._fixtures_dir,
+                        ),
+                        deadline_s=replay_deadline_s,
+                        phase=f"Model {model_name} {guardrail_label} replay",
                     )
                     row_id = f"{model_name}_{guardrail_label}"
                     row_scores[row_id] = result["score"]
@@ -763,18 +782,11 @@ class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
                 print(f"\n[GATEWAY][{model_name}] Total model time: "
                       f"{time.time()-model_t0:.1f}s")
 
-            except ModelAttackTimedOut as err:
-                print(
-                    f"[GATEWAY][{model_name}] Timed out; assigning zero "
-                    "for this model and continuing."
-                )
-                _record_model_timeout(
-                    row_scores=row_scores,
-                    per_model_results=per_model_results,
-                    model_name=model_name,
-                    guardrail_configs=guardrail_configs,
-                    error=err.message,
-                )
+            except (ModelAttackTimedOut, ModelEvaluationTimedOut) as err:
+                raise GatewayRuntimeError(
+                    GatewayRuntimeErrorType.INVALID_SUBMISSION,
+                    str(err),
+                ) from err
             except GatewayRuntimeError:
                 raise
             except Exception as e:
@@ -782,8 +794,9 @@ class JEDAttackGateway(kaggle_evaluation.core.templates.Gateway):
                     GatewayRuntimeErrorType.GATEWAY_RAISED_EXCEPTION,
                     f"Attack evaluation failed for model {model_name}: {e}",
                 ) from e
-            finally:
-                # Free GPU memory before loading the next model, including failure paths.
+            else:
+                # A timed-out operation may still be winding down in its daemon
+                # thread, so only unload after the model completed successfully.
                 self._unload_model(model_name)
 
         total_elapsed = time.time() - total_t0
