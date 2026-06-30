@@ -43,7 +43,7 @@ private（strict/provenance）汎化を狙って候補ブレンドを調整し�
 - 検算: `620 × (16 + 2) / 200000 × 1000 = 55.8`（fire rate f≈1）。
 
 ## 重要発見：述語 × ガードレール マトリクス
-`predicates.py` / `guardrail_rules.py`(strict) / `validation/provenance_guardrail.py` /
+`predicates.py` / `guardrail_rules.py`(strict) / `scripts/eval/eval_driver.py` の `ProvenanceGuardrail` /
 `aicomp_sdk/guardrails/optimal.py`(public) を精読して厳密導出:
 
 | 述語 (sev→raw) | 発火条件 | public | strict | provenance |
@@ -92,13 +92,11 @@ private（strict/provenance）汎化を狙って候補ブレンドを調整し�
 - 勝利条件は private。private≈provenance なら DEPUTY 比を上げる価値が大きい。
 - public は我々が測れる唯一のフィードバック信号なので EXFIL も残す。実測の provenance スコアで調整する。
 
-## ローカル検証結果
-- ロジック層 `make validate EXP=exp001`（deterministic, 620 候補, seed 123）: public/strict/provenance/allow
-  すべて 0.000（findings 0）。deterministic は `data='demo'` 固定で自前の秘密を流出しないスタブのため、
-  述語が発火しないのは想定どおり（配線・採点・dedup の疎通確認のみ）。
-- 実モデル `--agent gpt_oss --guardrails public,provenance`: **Kaggle 検証待ち**
-  （`validation/kaggle_validation.ipynb` を Kaggle GPU(T4) で実行して取得予定）。
-  - 期待: public で EXFIL+DEPUTY 発火、provenance で DEPUTY のみ発火（マトリクスの実証）。
+## 評価結果（make eval）
+- `make eval EXP=exp001`（gpt_oss / gemma_4 × public,strict,provenance, seed 123）: **Kaggle 検証待ち**。
+  `make eval` が Kaggle GPU で採点し `experiments/exp001/scores.json` を回収する。
+  - 期待: public で EXFIL+DEPUTY 発火、strict で EXFIL（TOKEN=admin123）も生存、provenance で DEPUTY のみ発火
+    （上のマトリクスの実証）。
 - 所見（public で出て strict/provenance で消える＝overfit 疑い など）: 実モデルスコア取得後に記入。
 
 ## LB 結果

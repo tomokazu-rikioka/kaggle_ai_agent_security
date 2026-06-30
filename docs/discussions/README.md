@@ -2,7 +2,7 @@
 
 このディレクトリは、`Bookmarks.json`（本コンペの Kaggle Discussion URL **24 件**の原本リスト）の中身を
 Playwright で本文＋コメントまで取得し、**テーマ別 6 ファイル**に日本語要約したもの。
-各 Discussion は「**要旨** → **注目コメント**（運営回答・重要知見・反論）→ **攻略への示唆**（`attack.py` / `validation/` / `SCORE.md` への含意）」で整理している。
+各 Discussion は「**要旨** → **注目コメント**（運営回答・重要知見・反論）→ **攻略への示唆**（`attack.py` / `make eval` / `SCORE.md` への含意）」で整理している。
 
 - 役割分担: `docs/competition-research/` が**公式仕様・SDK 解析**、本ディレクトリが**参加者・運営の Discussion で得た発見・質問・回答**。
 - 取得日: 2026-06-29。当時の評価器バージョンは `v3.1.2`。
@@ -62,4 +62,4 @@ public/private env の差、候補転送（candidate-transfer）設計。**勝�
 - **private 汎化の核心**: 712371（`attack.py` は private env を見ない盲目 transfer）＋ 708629 / 711152。online 適応は前提にできない。
 - **候補数 sizing**: 9000 秒/フェーズ律速で replay 総時間が支配（708272, 709581）。実測で候補 ~600 が安全圏（708926, 709357, 712542）。
 - **EXFIL の version 依存**: v3.1.2 は `fs.read(secret.txt)` 前提・可逆エンコード（URL/base64/hex/reversal）を認識（709539, 712542, 712642）。ハードコード payload は 0 点。
-- **公開 LB の信頼度**: 旧評価器の 0 点提出が LB 上位に固定（714765）。公開 notebook は採点バージョンを疑い、`validation/` のローカル採点を一次シグナルに。
+- **公開 LB の信頼度**: 旧評価器の 0 点提出が LB 上位に固定（714765）。公開 notebook は採点バージョンを疑い、`make eval`（Kaggle GPU でのローカル採点）を一次シグナルに。

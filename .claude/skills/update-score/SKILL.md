@@ -1,6 +1,6 @@
 ---
 name: update-score
-description: docs/scores/SCORE.md（実験スコア表）の行を更新する。validation の local スコア反映、LB スコアや変更内容の記入に使う。トリガー: "スコア更新", "SCORE.md 更新", "スコアを記入", "/update-score"
+description: docs/scores/SCORE.md（実験スコア表）の行を更新する。make eval の scores.json から local スコアを反映、LB スコアや変更内容の記入に使う。トリガー: "スコア更新", "SCORE.md 更新", "スコアを記入", "/update-score"
 ---
 
 # update-score
@@ -15,32 +15,33 @@ description: docs/scores/SCORE.md（実験スコア表）の行を更新する�
 ## 手順
 
 ### 1. local スコアを取得
-`validation/runs/<exp>/summary_*.json` を読む。複数エージェントのサマリがあれば
-**gpt_oss > gemma_4 > gemma > deterministic** の優先順で 1 つ採用する。
-次のコマンドで採用エージェントと public/provenance/strict スコアを取得する
-（先頭の `EXP=exp001` だけを対象 exp 名に置き換える）:
+`experiments/<exp>/scores.json`（`make eval` が回収するマージ済み出力）を読む。複数モデルがあれば
+**gpt_oss > gemma_4** の優先順で 1 つ採用する。次のコマンドで採用モデルと public/provenance/strict
+スコアを取得する（先頭の `EXP=exp001` だけを対象 exp 名に置き換える）:
 
 ```bash
 EXP=exp001 uv run python - <<'PY'
-import json, os, glob, pathlib
+import json, os, pathlib
 exp = os.environ["EXP"]
-prio = ["gpt_oss", "gemma_4", "gemma", "deterministic"]
-files = {pathlib.Path(p).stem.removeprefix("summary_"): p
-         for p in glob.glob(f"validation/runs/{exp}/summary_*.json")}
-if not files:
-    print("NO_SUMMARY")
+prio = ["gpt_oss", "gemma_4", "gemma"]
+path = pathlib.Path(f"experiments/{exp}/scores.json")
+if not path.is_file():
+    print("NO_SCORES")
 else:
-    agent = next((a for a in prio if a in files), next(iter(files)))
-    g = json.loads(pathlib.Path(files[agent]).read_text()).get("guardrails", {})
-    def s(k):
-        v = g.get(k, {}).get("score")
-        return "-" if v is None else f"{v:.3f}"
-    print(agent, s("public"), s("provenance"), s("strict"))
+    models = json.loads(path.read_text()).get("models", {})
+    model = next((m for m in prio if m in models), next(iter(models), None))
+    if model is None:
+        print("NO_SCORES")
+    else:
+        g = models[model].get("guardrails", {})
+        def s(k):
+            v = g.get(k, {}).get("score")
+            return "-" if v is None else f"{v:.3f}"
+        print(model, s("public"), s("provenance"), s("strict"))
 PY
 ```
 
-`NO_SUMMARY` が出たら、「先に `make validate EXP=<exp>`（ロジック層・GPU 不要）または
-`make validate-real EXP=<exp>`（実モデル）を実行してください」と案内して終了する。
+`NO_SCORES` が出たら、「先に `make eval EXP=<exp>`（Kaggle GPU で採点）を実行してください」と案内して終了する。
 
 ### 2. docs/scores/SCORE.md を更新
 - `docs/scores/SCORE.md` を Read し、表のヘッダ列を確認する。

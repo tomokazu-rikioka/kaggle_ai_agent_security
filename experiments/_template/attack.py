@@ -23,7 +23,7 @@ from aicomp_sdk.attacks.baselines.attacker_goexplore import AttackAlgorithm as _
 class AttackAlgorithm(_GoExploreBaseline):
     """SDK の Go-Explore ベースラインを継承した出発点。
 
-    まずはベースラインのまま `make validate` / `make build` / `make submit` が
+    まずはベースラインのまま `make eval` / `make build` / `make submit` が
     通ることを確認し、その後 `run()` をオーバーライドして攻撃候補の質を上げる。
     """
 

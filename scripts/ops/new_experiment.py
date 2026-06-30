@@ -44,8 +44,8 @@ def main() -> None:
     print("次のステップ:")
     print(f"  1. {new_dir}/attack.py の run() を編集（兄弟 import 不可・単一ファイル自己完結）")
     print(f"  2. {new_dir}/notes.md に狙いを記録")
-    print(f"  3. make validate EXP={args.name}        # ロジック層（GPU 不要・数秒）")
-    print(f"  4. make validate-real EXP={args.name}   # 実モデル（GPU/Metal）")
+    print(f"  3. make eval EXP={args.name} CANDIDATES=30   # Kaggle で smoke 採点（build→push→wait→fetch）")
+    print(f"  4. /update-score {args.name}                 # scores.json を SCORE.md へ反映")
     print(f"  5. make build EXP={args.name} && make submit EXP={args.name}")
 
 

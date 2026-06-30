@@ -12,16 +12,17 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 
 - Python 3.12 / `uv` 管理。スクリプトは `uv run ...` で実行。
 - ruff（`line-length=120`, `select=E,W,F,I,UP,B,SIM`）。`make lint` / `make format`。
-- 公式 SDK は `vendor/aicomp_sdk_pkg/`（MIT・private repo なので git 管理）。`validation/paths.py` が
-  sys.path に追加してロードする（pip install しない）。`import aicomp_sdk...` はこれで解決。
+- 公式 SDK は `vendor/aicomp_sdk_pkg/`（MIT・private repo なので git 管理）。Kaggle 評価では SDK を
+  dataset として添付し `scripts/eval/eval_driver.py` が `--sdk-root` で sys.path 解決する（pip install
+  しない）。`import aicomp_sdk...` はこれで解決。
 
 ## よく使うコマンド
 
 | コマンド | 用途 |
 |---|---|
 | `make new-exp NAME=exp001` | 実験を作成（`experiments/_template` を複製） |
-| `make validate EXP=exp001` | ロジック層検証（deterministic・GPU 不要・数秒） |
-| 実モデル検証（gpt_oss / gemma_4） | **Colab or Kaggle** で実行（`validation/colab_validation.ipynb`） |
+| `make eval EXP=exp001` | Kaggle GPU で採点（build→push→wait→fetch）。`CANDIDATES=30` で smoke |
+| `make sdk-dataset` | 評価用 SDK dataset を生成（vendor 更新時のみ。要 `kaggle datasets create`） |
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push` |
 | `/update-score exp001` | `docs/scores/SCORE.md` の行を更新（スキル） |
@@ -48,23 +49,27 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 
 `experiments/expNNN/{attack.py, kernel-metadata.json, notes.md}` のフラット構成。
 探索アルゴリズムの構造そのものを差し替えるため、child-exp（YAML 差分）は採用しない。
-**同じ attack.py がローカル検証でも提出でも使われる**ので、検証した実体がそのまま提出される。
+**同じ attack.py が評価でも提出でも使われる**ので、評価した実体がそのまま提出される。
 
-### ローカル検証（validation/ は無改変で活用）
+### 評価（Kaggle GPU でローカル採点）
 
-`python -m validation.run_validation --attack experiments/expNNN/attack.py --agent <a> --guardrails <g>`
-が公式採点（`eval_predicates` / `score_attack`）を再現する。
-- `--agent deterministic`: ロジック層（配線・採点の確認。GPU 不要）。
-- `--agent gpt_oss` / `gemma_4`: 実モデル（公開 LB 相関）。**Colab or Kaggle で実行**（Mac/Metal は非対応）。
+`make eval EXP=expNNN` がローカルから Kaggle API で攻撃を採点する一本道。`scripts/ops/run_eval.py` が
+モデルごとに `eval.ipynb` を build（`scripts/eval/eval_driver.py` と attack.py を base64 で焼く）→
+`kaggle kernels push` → status ポーリング → `kaggle kernels output` で `scores.json` を回収し
+`experiments/<exp>/scores.json` にマージする。
+- 採点ドライバ `scripts/eval/eval_driver.py` は公式採点（`eval_predicates` /
+  `summarize_attack_findings`）を **生成1回・ガードレール別リプレイ多**で再現する自己完結ファイル。
+- モデルは `gpt_oss`（20b）/ `gemma_4`（26B）。GPU 必須なので Kaggle 上で実行（Mac/Metal 非対応）。
 - ガードレール `public`=公開 LB 相関、`strict`/`provenance`=非公開汎化の代理。
-- **public で出て strict/provenance で消える攻撃は overfit 疑い**。
-- `--summary-out` でガードレール別スコアの JSON を出力（`/update-score` スキルが読む）。
+  **public で出て strict/provenance で消える攻撃は overfit 疑い**。
+- SDK は `make sdk-dataset` で作る Kaggle dataset（`rikitomo0526/aiagent-security-sdk`）を Add Input で
+  添付（vendor 更新時のみアップロード）。GGUF は Internet ON で HF hub から取得。
 
 ### スコア管理
 
 `docs/scores/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
-ローカル列は `validation/runs/<exp>/summary_*.json` を元に `/update-score <exp>` スキルが反映、
-LB 列・changes 列は `docs/scores/SCORE.md` に直接記入する。
+ローカル列は `make eval` が回収する `experiments/<exp>/scores.json` を元に `/update-score <exp>` スキルが
+反映、LB 列・changes 列は `docs/scores/SCORE.md` に直接記入する。
 
 ## このコンペの要点
 
@@ -79,7 +84,7 @@ LB 列・changes 列は `docs/scores/SCORE.md` に直接記入する。
 
 - 実験名は `exp{NNN}`（ゼロ詰め 3 桁）。
 - コメント・docstring は日本語。型ヒントを付ける。
-- `attack.py` は **単一ファイル自己完結**（兄弟 import 禁止）。
-- `validation/` は壊さない（追加は後方互換の純増のみ）。
+- `attack.py` と `scripts/eval/eval_driver.py` は **単一ファイル自己完結**（Notebook へ base64 で
+  焼くため兄弟 import 禁止）。
 - コミットは Conventional Commits（`feat:` / `fix:` / `docs:` など）。
 - Kaggle ページ（discussion/overview）の確認は Playwright MCP を使う（WebFetch は JS ページで失敗）。

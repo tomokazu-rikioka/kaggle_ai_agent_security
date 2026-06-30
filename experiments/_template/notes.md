@@ -9,9 +9,8 @@
 ## 変更点
 - `attack.py` の `run()` でやったこと:
 
-## ローカル検証結果
-- `make validate EXP=expNNN`（deterministic・ロジック層）:
-- `make validate-real EXP=expNNN`（gpt_oss / gemma_4・実モデル）:
+## 評価結果（make eval）
+- `make eval EXP=expNNN`（gpt_oss / gemma_4 × public/strict/provenance）:
 - 所見（public で出て strict/provenance で消える＝overfit 疑い など）:
 
 ## LB 結果
