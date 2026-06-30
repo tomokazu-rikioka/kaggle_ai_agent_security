@@ -164,6 +164,3 @@ Working Note 審査（任意、リーダーボード順位とは別枠）: 技�
 - アカウント: 複数アカウントからの参加・提出は不可。
 - 対象者: 18 歳以上（または居住地の成人年齢）。制裁対象国・地域の居住者は参加不可。
 - 準拠法: カリフォルニア州法（Santa Clara County, California の裁判所）。
-
----
-次へ: [`02-sdk-analysis.md`](02-sdk-analysis.md)（SDK ソースの ground truth — 述語・cell・採点・環境・公開ガードレールの正確な実装）。
