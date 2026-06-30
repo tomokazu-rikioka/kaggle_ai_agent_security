@@ -5,11 +5,11 @@ description = "AI Agent Security - Multi-Step Tool Attacks (Kaggle) — 攻撃�
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    # validation ロジック層（全 tier 必須・GPU 不要）
+    # eval ロジック層（全 tier 必須・GPU 不要）
     "gymnasium>=0.29,<1", # 公式採点と同じ gym 環境
     "pydantic>=2",        # SDK が内部で使用
 
-    # validation 実モデル層（GPU/Metal。ロジック層には不要だがローカル統一のため）
+    # eval 実モデル層（GPU/Metal。ロジック層には不要だがローカル統一のため）
     "llama-cpp-python>=0.3", # GGUF 推論（gpt-oss / gemma）
     "huggingface-hub>=0.23", # GGUF 取得（hf_hub_download）
 
@@ -44,4 +44,4 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM"]
 "experiments/**/attack.py" = ["E402", "F401"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["validation", "scripts"]
+known-first-party = ["scripts"]

@@ -2,7 +2,8 @@
 
 1. build_notebook.build(exp) で submission.ipynb を生成し kernel-metadata.json を同期
 2. `kaggle kernels push -p experiments/<exp>` で push
-push 後はカーネルが実行され、評価基盤が submission.csv（4 スコア）を生成する。
+push 後はカーネルが実行され、評価基盤が attack.py をロードして攻撃候補を採点する
+（gpt_oss/gemma × public/private の 4 スコア）。
 実行状態は `make status EXP=<exp>` で確認できる。
 
 使い方:

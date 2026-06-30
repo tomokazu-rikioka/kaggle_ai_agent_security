@@ -42,7 +42,8 @@ kaggle_ai_agent_security/
 │   └── eval/eval_driver.py                      #   自己完結の採点ドライバ（Kaggle GPU で実行）
 ├── docs/                                        # ドキュメント
 │   ├── scores/SCORE.md                          #   スコア表（直接編集 / update-score スキル）
-│   └── competition-research/                    #   調査・戦略ノート
+│   ├── competition-research/                    #   調査・戦略ノート
+│   └── discussions/                             #   Discussion 要約（テーマ別索引）
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
 ```
 
@@ -110,3 +111,4 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 |---|---|
 | [`docs/competition-research/01-competition-overview.md`](docs/competition-research/01-competition-overview.md) | 公式仕様（述語・採点式・提出形式・制約） |
 | [`docs/competition-research/02-sdk-analysis.md`](docs/competition-research/02-sdk-analysis.md) | SDK ソース解析（ground truth） |
+| [`docs/competition-research/03-agent-behavior-and-scoring-flow.md`](docs/competition-research/03-agent-behavior-and-scoring-flow.md) | エージェント挙動と採点フロー（動的解説） |
