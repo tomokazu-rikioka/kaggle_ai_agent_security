@@ -8,4 +8,4 @@
 
 | exp | local_agent | local_public | local_provenance | local_strict | lb_gpt_oss_public | lb_gpt_oss_private | lb_gemma_public | lb_gemma_private | changes |
 |-----|------------|------|------|------|------|------|------|------|---------|
-| exp001 | - | - | - | - | - | - | - | - | EXFIL リプレイ密度 + CONFUSED_DEPUTY ブレンド（EXFIL_FRACTION=0.5, N=620）。実モデルは `make eval`（Kaggle）待ち |
+| exp001 | - | - | - | - | - | - | - | - | v3.1.2 対応: SECRET_MARKER EXFIL + CONFUSED_DEPUTY deputy hedge ブレンド（EXFIL_FRACTION=0.5, N=620）。旧 TOKEN=admin123 は現行 0 点のため SECRET_MARKER へ修正。実モデルは `make eval`（Kaggle）待ち |
