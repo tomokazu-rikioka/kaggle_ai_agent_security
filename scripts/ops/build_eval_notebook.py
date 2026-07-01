@@ -32,11 +32,29 @@ EVAL_BUILD_DIR = Path("build") / "eval"
 DRIVER_PATH = Path("scripts") / "eval" / "eval_driver.py"
 KAGGLE_USER = "rikitomo0526"
 SDK_DATASET = f"{KAGGLE_USER}/aiagent-security-sdk"
+COMPETITION = "ai-agent-security-multi-step-tool-attacks"  # competition_sources（コンペ紐付け）
+MACHINE_SHAPE = "NvidiaTeslaT4"  # T4×2（AAS 実績。gpt_oss 11.6GB / gemma 16.9GB とも余裕。P100 は gemma 不可）
 MODELS = ("gpt_oss", "gemma_4")
 
-# SDK を展開する作業先（/kaggle/working には置かない＝output を小さく保つ）
-SDK_WORK_DIR = "/tmp/aas_sdk"
-SDK_ROOT = f"{SDK_WORK_DIR}/vendor/aicomp_sdk_pkg"
+# GGUF は Kaggle Models から Add Input で添付し HF hub DL を回避する（AAS Local Validation 方式）。
+# eval_driver の _resolve_gguf_path が *_MODEL_PATH env を優先するので、run セルでこのパスを export する。
+GGUF_MODEL_SOURCES = {
+    "gpt_oss": "llkh0a/gpt-oss-20b-gguf/pytorch/default/1",
+    "gemma_4": "llkh0a/gemma-4-26b-a4b-it-ud-q4-k-m-gguf/pytorch/default/1",
+}
+GGUF_PATHS = {
+    "gpt_oss": "/kaggle/input/models/llkh0a/gpt-oss-20b-gguf/pytorch/default/1/gpt_oss/gpt-oss-20b-Q4_K_M.gguf",
+    "gemma_4": (
+        "/kaggle/input/models/llkh0a/gemma-4-26b-a4b-it-ud-q4-k-m-gguf/pytorch/default/1/"
+        "gemma/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf"
+    ),
+}
+GGUF_PATH_ENVS = {"gpt_oss": "GPT_OSS_MODEL_PATH", "gemma_4": "GEMMA_MODEL_PATH"}
+
+# SDK は competition data（competition_sources）の公式パッケージを直接使う（AAS 方式）。
+# 競技データ直下に aicomp_sdk(v3.1.2)+kaggle_evaluation+fixtures がある。SDK dataset の Add Input は
+# competition 添付時に /kaggle/input/datasets/<owner>/<slug>/ へ移動し、直下走査で見つからないため使わない。
+SDK_ROOT = f"/kaggle/input/competitions/{COMPETITION}"
 
 
 def _b64_write_cell(comment: str, src: str, dest: str) -> str:
@@ -54,44 +72,44 @@ def _b64_write_cell(comment: str, src: str, dest: str) -> str:
 
 
 def _install_cell() -> str:
-    """依存導入（CUDA 版 llama-cpp-python）。Kaggle GPU 上で llama.cpp を CUDA ビルドする。"""
+    """依存導入。llama-cpp-python は CUDA 事前ビルド wheel を使う。
+
+    Kaggle GPU は CUDA 12.8 だが nvcc がなく、``CMAKE_ARGS=-DGGML_CUDA=on`` のソースビルドは
+    cmake 構成段階で失敗する（診断カーネルで確認）。abetlen の事前ビルド CUDA wheel(cu124)は
+    CUDA 12.8 ランタイム上で後方互換に動作するため、ビルド不要で確実・高速。
+    """
     return (
-        "import os\n"
         "!pip -q install gymnasium 'pydantic>=2' huggingface_hub\n"
-        "os.environ['CMAKE_ARGS'] = '-DGGML_CUDA=on'  # CUDA 版 llama-cpp-python\n"
-        "!pip -q install llama-cpp-python\n"
-        "import llama_cpp; print('llama_cpp OK')\n"
+        "!pip -q install llama-cpp-python "
+        "--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124\n"
+        "import llama_cpp; print('llama_cpp OK', llama_cpp.__version__)\n"
     )
 
 
 def _sdk_cell() -> str:
-    """Add Input した SDK dataset を /tmp へ展開（assets.zip / 生ファイル 両対応）。"""
+    """競技データ（competition_sources）の公式 SDK を使う（AAS 方式）。
+
+    SDK dataset は competition 添付時に /kaggle/input/datasets/<owner>/<slug>/ へ移動し、直下走査で
+    見つからないため使わず、競技データ直下の aicomp_sdk(v3.1.2) を eval_driver が --sdk-root で載せる。
+    """
     return (
-        "import os, glob, zipfile, shutil\n"
-        f'SDK_WORK = "{SDK_WORK_DIR}"\n'
-        "src = None\n"
-        "for c in sorted(glob.glob('/kaggle/input/*')):\n"
-        "    if os.path.isfile(os.path.join(c, 'assets.zip')) or os.path.isdir(os.path.join(c, 'vendor')):\n"
-        "        src = c; break\n"
-        "assert src, 'SDK dataset を Add Input してください（rikitomo0526/aiagent-security-sdk）'\n"
-        "os.makedirs(SDK_WORK, exist_ok=True)\n"
-        "zip_path = os.path.join(src, 'assets.zip')\n"
-        "if os.path.isfile(zip_path):\n"
-        "    with zipfile.ZipFile(zip_path) as z: z.extractall(SDK_WORK)\n"
-        "    print('assets.zip を展開:', SDK_WORK)\n"
-        "else:\n"
-        "    shutil.copytree(os.path.join(src, 'vendor'), os.path.join(SDK_WORK, 'vendor'), dirs_exist_ok=True)\n"
-        "    print('生ファイルをコピー:', SDK_WORK)\n"
-        f'assert os.path.isdir("{SDK_ROOT}/aicomp_sdk"), "SDK が見つからない: {SDK_ROOT}"\n'
-        f'print("SDK OK ->", "{SDK_ROOT}")\n'
+        "import os\n"
+        f'assert os.path.isdir("{SDK_ROOT}/aicomp_sdk"), '
+        f'"competition data に aicomp_sdk が無い（competition_sources 未添付?）: {SDK_ROOT}"\n'
+        f'print("SDK OK (competition data) ->", "{SDK_ROOT}")\n'
     )
 
 
 def _run_cell(exp: str, model: str, candidates: int | None, budget_s: float, guardrails: str) -> str:
     """eval_driver.py を実行して scores.json を書き出すセル。"""
     cand = f" --candidates {candidates}" if candidates is not None else ""
+    gguf_path = GGUF_PATHS[model]
+    path_env = GGUF_PATH_ENVS[model]
     return (
-        "import json\n"
+        "import json, os\n"
+        f'os.environ["{path_env}"] = "{gguf_path}"  # Kaggle Models 添付の GGUF（HF hub DL 回避）\n'
+        f'assert os.path.exists("{gguf_path}"), "GGUF が見つからない（Add Input 未添付?）: {gguf_path}"\n'
+        f'print("GGUF:", "{gguf_path}")\n'
         "!python /kaggle/working/eval_driver.py \\\n"
         "    --attack /kaggle/working/attack.py \\\n"
         f"    --model {model} --guardrails {guardrails} \\\n"
@@ -130,8 +148,8 @@ def build(
         nbf.v4.new_markdown_cell(
             f"# {exp} — eval ({model})\n\n"
             f"attack.py を実モデル **{model}** で `{guardrails}` ガードレールへリプレイ採点する。\n\n"
-            "**Kaggle 設定**: Accelerator=GPU（gemma_4 は T4×2 推奨）, Internet=ON, "
-            f"Add Input=`{SDK_DATASET}`。この Notebook は採点には関与しない（提出用とは別物）。"
+            "**Kaggle 設定**: Accelerator=GPU T4×2, Internet=ON, "
+            "Add Input=競技データ + GGUF Model。採点には関与しない（提出用とは別物）。"
         ),
         nbf.v4.new_markdown_cell("## ① 依存（llama.cpp は CUDA ビルド）"),
         nbf.v4.new_code_cell(_install_cell()),
@@ -172,10 +190,11 @@ def _write_kernel_metadata(exp: str, model: str, out_dir: Path) -> None:
         "enable_tpu": False,
         "enable_internet": True,  # GGUF DL と llama-cpp CUDA ビルドに必須
         "keywords": [],
-        "dataset_sources": [SDK_DATASET],
+        "dataset_sources": [],  # SDK は competition data（competition_sources）から取る
         "kernel_sources": [],
-        "competition_sources": [],
-        "model_sources": [],
+        "competition_sources": [COMPETITION],
+        "model_sources": [GGUF_MODEL_SOURCES[model]],
+        "machine_shape": MACHINE_SHAPE,  # T4×2（AAS 実績。gemma は P100 不可なので両モデル T4×2 に統一）
     }
     km_path = out_dir / "kernel-metadata.json"
     km_path.write_text(json.dumps(km, indent=2) + "\n")

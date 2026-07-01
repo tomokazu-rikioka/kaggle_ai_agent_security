@@ -22,7 +22,8 @@ sdk-dataset:
 ## eval: Kaggle で採点（build→push→wait→fetch）。例: make eval EXP=exp001 CANDIDATES=30
 eval:
 	uv run python scripts/ops/run_eval.py $(EXP) \
-	  $(if $(MODELS),--models $(MODELS),) $(if $(CANDIDATES),--candidates $(CANDIDATES),)
+	  $(if $(MODELS),--models $(MODELS),) $(if $(CANDIDATES),--candidates $(CANDIDATES),) \
+	  $(if $(TIMEOUT),--timeout $(TIMEOUT),)
 
 # === 提出 ===
 
