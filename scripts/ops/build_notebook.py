@@ -45,6 +45,28 @@ def _code_cell_source(attack_src: str) -> str:
     )
 
 
+def _serve_cell_source() -> str:
+    """評価サーバ（JEDAttackInferenceServer）を起動し提出フォーマットを出力するセル。
+
+    公式 getting-started と同じ: competition data の kaggle_evaluation を sys.path に載せ、
+    ``serve()`` で attack.py をロードして採点・submission を出力する。このセルが無いと
+    submission.csv が生成されず「submission.csv が必要」提出エラーになる。
+    """
+    return (
+        "import sys, glob\n"
+        "from pathlib import Path\n"
+        "# competition data 直下（kaggle_evaluation / aicomp_sdk がある）を import パスへ。\n"
+        "for _c in glob.glob('/kaggle/input/**/kaggle_evaluation', recursive=True):\n"
+        "    _root = str(Path(_c).parent)\n"
+        "    if _root not in sys.path:\n"
+        "        sys.path.insert(0, _root)\n"
+        "    break\n"
+        "# 評価サーバ起動 → attack.py をロードし submission を出力（実採点は競技 rerun 時）。\n"
+        "import kaggle_evaluation.jed_attack_134815.jed_attack_inference_server as _srv\n"
+        "_srv.JEDAttackInferenceServer().serve()\n"
+    )
+
+
 def build(exp: str) -> Path:
     """experiments/<exp>/attack.py から submission.ipynb を生成し、メタを同期する。"""
     exp_dir = EXPERIMENTS_DIR / exp
@@ -58,10 +80,11 @@ def build(exp: str) -> Path:
     nb.cells = [
         nbf.v4.new_markdown_cell(
             f"# {exp} — submission\n\n"
-            "このセルは `attack.py` を `/kaggle/working/` に書き出すだけ。"
-            "評価基盤が `attack.py` をロードして攻撃候補を採点する。"
+            "① `attack.py` を `/kaggle/working/` へ書き出し、② 評価サーバ `serve()` を起動して"
+            "submission を出力する（公式 getting-started と同じ構成）。"
         ),
         nbf.v4.new_code_cell(_code_cell_source(attack_src)),
+        nbf.v4.new_code_cell(_serve_cell_source()),
     ]
     nb.metadata["kernelspec"] = {"name": "python3", "language": "python", "display_name": "Python 3"}
     nb.metadata["language_info"] = {"name": "python"}
