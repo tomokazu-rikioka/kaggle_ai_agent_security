@@ -105,11 +105,32 @@
 - public は我々が測れる唯一の実測フィードバックなので EXFIL も残す。make eval の provenance スコアで調整する。
 
 ## 評価結果（make eval）
-- `make eval EXP=exp001`（gpt_oss / gemma_4 × public,strict,provenance, seed 123）: **Kaggle 検証待ち**。
-  `make eval` が Kaggle GPU で `eval_driver.py` を実行し `experiments/exp001/scores.json` を回収する。
-  - 期待: public で EXFIL+DEPUTY 発火（≈37.2 上限）、strict/provenance は DEPUTY のみ生存（≈9.3 上限）。
-    EXFIL が strict/provenance で消えるのは**仕様どおり**（public 限定の主柱）。
-- 所見（fire rate、overfit 疑い等）: 実モデルスコア取得後に記入。
+- `make eval EXP=exp001 MODELS=gpt_oss`（gpt_oss × public,strict,provenance, seed 123, N=620）: **2026-07 実測**。
+  配管: Kaggle Models 添付（`llkh0a/gpt-oss-20b-gguf`）+ cu124 prebuilt wheel + private SDK dataset。P100。
+
+  | guardrail | score | raw | findings | cells | predicates |
+  |---|---|---|---|---|---|
+  | public | 37.02 | 7404 | 614 | 614 | EXFILTRATION 310 + CONFUSED_DEPUTY 304 |
+  | strict | 9.12 | 1824 | 304 | 304 | CONFUSED_DEPUTY 304 |
+  | provenance | 9.12 | 1824 | 304 | 304 | CONFUSED_DEPUTY 304 |
+
+  - **理論マトリクス完全再現**: EXFIL は public のみ（strict/provenance で 0＝消滅）、DEPUTY は全 GR で生存。
+    理論ブレンド値（37.2 / 9.3 / 9.3）とほぼ一致（DEPUTY 6 件未発火ぶん微減）。
+  - **fire rate**: EXFIL 310/310＝100%、DEPUTY 304/310≈98%。検算: EXFIL `310×18=5580`(public のみ) +
+    DEPUTY `304×6=1824`(全 GR) → public 7404 / strict・prov 1824。実測 raw と一致。
+  - overfit 評価: public 37.02 のうち EXFIL 質量（5580）は strict/provenance で全消滅し、private 代理で
+    生き残るのは deputy の 9.12 のみ＝**設計どおり**（EXFIL は public 専用の主柱、deputy が private の核心）。
+- `make eval EXP=exp001 MODELS=gemma_4`（gemma_4, T4×2, N=620）: **2026-07 実測**。SDK は competition data から取得（AAS 方式）。
+
+  | guardrail | score | raw | findings | cells | predicates |
+  |---|---|---|---|---|---|
+  | public | 36.81 | 7362 | 607 | 607 | EXFILTRATION 310 + CONFUSED_DEPUTY 297 |
+  | strict | 8.91 | 1782 | 297 | 297 | CONFUSED_DEPUTY 297 |
+  | provenance | 8.91 | 1782 | 297 | 297 | CONFUSED_DEPUTY 297 |
+
+  - gpt_oss とほぼ同等（public 36.81 vs 37.02）。EXFIL は gemma でも 310/310＝100% 発火（懸念した
+    Gemma4Agent の dotted tool-name パーサ問題は起きず）。deputy fire rate 297/310≈95.8%（gpt_oss 98%）。
+  - 両モデルで理論マトリクス再現（EXFIL=public のみ、deputy=全 GR）。private 代理で残るのは deputy の ~9 点。
 
 ## LB 結果
 - 提出日 / Version:

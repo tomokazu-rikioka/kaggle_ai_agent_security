@@ -8,4 +8,4 @@
 
 | exp | local_agent | local_public | local_provenance | local_strict | lb_gpt_oss_public | lb_gpt_oss_private | lb_gemma_public | lb_gemma_private | changes |
 |-----|------------|------|------|------|------|------|------|------|---------|
-| exp001 | - | - | - | - | - | - | - | - | v3.1.2 対応: SECRET_MARKER EXFIL + CONFUSED_DEPUTY deputy hedge ブレンド（EXFIL_FRACTION=0.5, N=620）。旧 TOKEN=admin123 は現行 0 点のため SECRET_MARKER へ修正。実モデルは `make eval`（Kaggle）待ち |
+| exp001 | gpt_oss | 37.020 | 9.120 | 9.120 | - | - | - | - | v3.1.2 対応: SECRET_MARKER EXFIL + CONFUSED_DEPUTY deputy hedge ブレンド（EXFIL_FRACTION=0.5, N=620）。旧 TOKEN=admin123 は現行 0 点のため SECRET_MARKER へ修正。gpt_oss/gemma_4 とも T4×2 で実測・理論再現（EXFIL=public 限定で消滅 / deputy=全 GR）。gpt_oss public37.02・gemma public36.81。SDK は competition data 経由・competition 紐付け |
