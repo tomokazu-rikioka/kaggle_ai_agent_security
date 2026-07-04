@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 from pathlib import Path
 
 import nbformat as nbf
@@ -51,10 +52,9 @@ GGUF_PATHS = {
 }
 GGUF_PATH_ENVS = {"gpt_oss": "GPT_OSS_MODEL_PATH", "gemma_4": "GEMMA_MODEL_PATH"}
 
-# SDK は competition data（competition_sources）の公式パッケージを直接使う（AAS 方式）。
-# 競技データ直下に aicomp_sdk(v3.1.2)+kaggle_evaluation+fixtures がある。SDK dataset の Add Input は
-# competition 添付時に /kaggle/input/datasets/<owner>/<slug>/ へ移動し、直下走査で見つからないため使わない。
-SDK_ROOT = f"/kaggle/input/competitions/{COMPETITION}"
+# SDK（aicomp_sdk）は competition data（competition_sources）に含まれる。Add Input のマウント先は
+# 仕様変更で変わり得るため固定パスに依存せず、②SDK セルで /kaggle/input を再帰探索して
+# AICOMP_SDK_ROOT に設定する。競技データが一時的に未マウントなら run_eval が再 push でリトライする。
 
 
 def _b64_write_cell(comment: str, src: str, dest: str) -> str:
@@ -87,16 +87,29 @@ def _install_cell() -> str:
 
 
 def _sdk_cell() -> str:
-    """競技データ（competition_sources）の公式 SDK を使う（AAS 方式）。
+    """競技データ配下の aicomp_sdk を再帰探索し AICOMP_SDK_ROOT に設定する（マウント先非依存）。
 
-    SDK dataset は competition 添付時に /kaggle/input/datasets/<owner>/<slug>/ へ移動し、直下走査で
-    見つからないため使わず、競技データ直下の aicomp_sdk(v3.1.2) を eval_driver が --sdk-root で載せる。
+    Add Input のマウント先（/kaggle/input/<slug>/ や /kaggle/input/competitions/<slug>/ 等）が
+    変わっても動くよう /kaggle/input 以下を glob 探索する。見つからなければ /kaggle/input の中身を
+    出力して診断し明確に失敗させる（Kaggle の一時マウント失敗なら run_eval が再 push で拾う）。
+    eval_driver は env AICOMP_SDK_ROOT を見て SDK を sys.path に載せる。
     """
     return (
-        "import os\n"
-        f'assert os.path.isdir("{SDK_ROOT}/aicomp_sdk"), '
-        f'"competition data に aicomp_sdk が無い（competition_sources 未添付?）: {SDK_ROOT}"\n'
-        f'print("SDK OK (competition data) ->", "{SDK_ROOT}")\n'
+        "import os, glob\n"
+        "def _find_sdk_root():\n"
+        "    for _hit in glob.glob('/kaggle/input/**/aicomp_sdk/__init__.py', recursive=True):\n"
+        "        _root = os.path.dirname(os.path.dirname(_hit))\n"
+        "        if os.path.isdir(os.path.join(_root, 'aicomp_sdk')):\n"
+        "            return _root\n"
+        "    return None\n"
+        "_sdk_root = _find_sdk_root()\n"
+        "if _sdk_root is None:\n"
+        "    print('[SDK] aicomp_sdk が見つからず。/kaggle/input の内容:')\n"
+        "    for _p in sorted(glob.glob('/kaggle/input/*')):\n"
+        "        print('  -', _p)\n"
+        "    raise SystemExit('aicomp_sdk 未検出: competition_sources 未マウント?')\n"
+        "os.environ['AICOMP_SDK_ROOT'] = _sdk_root\n"
+        "print('SDK OK ->', _sdk_root)\n"
     )
 
 
@@ -113,7 +126,7 @@ def _run_cell(exp: str, model: str, candidates: int | None, budget_s: float, gua
         "!python /kaggle/working/eval_driver.py \\\n"
         "    --attack /kaggle/working/attack.py \\\n"
         f"    --model {model} --guardrails {guardrails} \\\n"
-        f"    --sdk-root {SDK_ROOT} --exp {exp}{cand} --budget-s {int(budget_s)} \\\n"
+        f"    --exp {exp}{cand} --budget-s {int(budget_s)} \\\n"
         "    --out /kaggle/working/scores.json\n"
         "print('--- scores.json ---')\n"
         "print(json.dumps(json.load(open('/kaggle/working/scores.json')), ensure_ascii=False, indent=2))\n"
@@ -179,9 +192,13 @@ def build(
 def _write_kernel_metadata(exp: str, model: str, out_dir: Path) -> None:
     """評価カーネルの kernel-metadata.json を生成（GPU/Internet ON・SDK dataset 添付）。"""
     slug_model = model.replace("_", "-")  # Kaggle slug は underscore 不可
+    # EVAL_ID_SUFFIX: 作成失敗で壊れたカーネル id（"Notebook not found" 恒久化）を避けるため、
+    # 新しい id に切り替えるための任意サフィックス。既定は空（通常運用では id を変えない）。
+    id_suffix = os.environ.get("EVAL_ID_SUFFIX", "")
     km = {
-        "id": f"{KAGGLE_USER}/ai-agent-security-eval-{exp.replace('_', '-')}-{slug_model}",
-        "title": f"AI Agent Security - Eval {exp} {model}",
+        "id": f"{KAGGLE_USER}/ai-agent-security-eval-{exp.replace('_', '-')}-{slug_model}{id_suffix}",
+        # title も suffix を含める（title→slug が id に解決しないと 409 Conflict になるため）
+        "title": f"AI Agent Security - Eval {exp} {model}{id_suffix}",
         "code_file": "eval.ipynb",
         "language": "python",
         "kernel_type": "notebook",

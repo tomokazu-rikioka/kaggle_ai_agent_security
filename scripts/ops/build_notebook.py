@@ -98,13 +98,22 @@ def build(exp: str) -> Path:
 
 
 def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
-    """kernel-metadata.json の id / title / code_file を exp 名に揃える。"""
+    """kernel-metadata.json の id / title / code_file を exp 名に揃える。
+
+    既存 id がこの exp の既定 slug（ai-agent-security-attack-<exp>）そのもの、またはその派生
+    （末尾にサフィックスを付けた別名、例: -v2）の場合は尊重して上書きしない。Kaggle 側で slug が
+    壊れて別名へ手動リネームした値を次回 build で既定 slug に戻さないため。それ以外（別 exp から
+    複製した id や未設定）は既定 slug に設定する。
+    """
     km_path = exp_dir / "kernel-metadata.json"
     if not km_path.is_file():
         raise FileNotFoundError(f"{km_path} が存在しません")
     km = json.loads(km_path.read_text())
-    km["id"] = f"{KAGGLE_USER}/ai-agent-security-attack-{exp.replace('_', '-')}"
-    km["title"] = f"AI Agent Security - Attack {exp}"
+    default_id = f"{KAGGLE_USER}/ai-agent-security-attack-{exp.replace('_', '-')}"
+    existing = km.get("id", "")
+    if existing != default_id and not existing.startswith(default_id + "-"):
+        km["id"] = default_id
+        km["title"] = f"AI Agent Security - Attack {exp}"
     km["code_file"] = "submission.ipynb"
     km_path.write_text(json.dumps(km, indent=2) + "\n")
     print(f"[build] {km_path} を同期（id={km['id']}）")

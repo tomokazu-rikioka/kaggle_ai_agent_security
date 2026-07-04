@@ -31,6 +31,7 @@ from build_eval_notebook import EXPERIMENTS_DIR, MODELS, build
 
 POLL_INTERVAL_S = 60
 DEFAULT_TIMEOUT_S = 6 * 3600  # 1 カーネルあたりの最大待ち時間
+RETRY_ATTEMPTS = 2  # error 終了時の再 push リトライ回数（Kaggle の一時的な入力マウント失敗対策）
 
 
 def _kernel_id(out_dir: Path) -> str:
@@ -73,6 +74,31 @@ def _wait_for(kernel_id: str, *, timeout_s: int, interval_s: int) -> str:
     return "timeout"
 
 
+def _wait_fetch_with_retry(
+    model: str, out_dir: Path, *, timeout_s: int, interval_s: int, max_attempts: int
+) -> dict | None:
+    """1 モデルを wait→fetch。error 終了なら再 push してリトライする。
+
+    Kaggle 側の一時的な入力マウント失敗（競技データが添付されず assert で落ちる等）は
+    再実行で解消することが多いため、error のときだけ再 push して待ち直す。timeout は
+    コストが大きいのでリトライしない。complete で scores を回収できたら返す。
+    """
+    kid = _kernel_id(out_dir)
+    for attempt in range(1, max_attempts + 1):
+        status = _wait_for(kid, timeout_s=timeout_s, interval_s=interval_s)
+        if status == "complete":
+            scores = _fetch_scores(kid, out_dir)
+            if scores is not None:
+                return scores
+            sys.stderr.write(f"[run-eval] {model}: complete だが scores.json を回収できず。\n")
+            return None
+        sys.stderr.write(f"[run-eval] {model}: 完了せず（{status}, 試行 {attempt}/{max_attempts}）。\n")
+        if status == "error" and attempt < max_attempts:
+            sys.stderr.write(f"[run-eval] {model}: 一時失敗の可能性。再 push してリトライします。\n")
+            _push(out_dir)
+    return None
+
+
 def _fetch_scores(kernel_id: str, out_dir: Path) -> dict | None:
     """kernels output で scores.json を回収して dict を返す。"""
     output_dir = out_dir / "output"
@@ -87,11 +113,23 @@ def _fetch_scores(kernel_id: str, out_dir: Path) -> dict | None:
 
 
 def _merge_and_save(exp: str, per_model: dict[str, dict]) -> Path:
-    """全モデルの scores を experiments/<exp>/scores.json にマージ保存。"""
-    payload = {"exp": exp, "models": per_model}
+    """今回採点したモデルの scores を experiments/<exp>/scores.json にマージ保存。
+
+    既存 scores.json のモデル結果を保持し、今回採点したモデルだけを上書き更新する。
+    これにより 1 モデルだけ再 eval しても他モデルの結果が消えない（例: gpt_oss だけ
+    再 eval しても既存の gemma_4 結果が残る）。
+    """
     out_path = EXPERIMENTS_DIR / exp / "scores.json"
+    existing: dict[str, dict] = {}
+    if out_path.is_file():
+        try:
+            existing = json.loads(out_path.read_text()).get("models", {})
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+    merged = {**existing, **per_model}
+    payload = {"exp": exp, "models": merged}
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
-    print(f"[run-eval] マージ保存: {out_path}")
+    print(f"[run-eval] マージ保存: {out_path}（models: {', '.join(merged)}）")
     return out_path
 
 
@@ -158,15 +196,12 @@ def main() -> None:
             print(f"  kaggle kernels status {_kernel_id(d)}")
         return
 
-    # --- 3) wait + 4) fetch（モデルごと） ---
+    # --- 3) wait + 4) fetch（モデルごと、error は再 push リトライ） ---
     per_model: dict[str, dict] = {}
     for model, d in out_dirs.items():
-        kid = _kernel_id(d)
-        status = _wait_for(kid, timeout_s=args.timeout, interval_s=args.poll_interval)
-        if status != "complete":
-            sys.stderr.write(f"[run-eval] {model}: 完了せず（{status}）。スキップ。\n")
-            continue
-        scores = _fetch_scores(kid, d)
+        scores = _wait_fetch_with_retry(
+            model, d, timeout_s=args.timeout, interval_s=args.poll_interval, max_attempts=RETRY_ATTEMPTS
+        )
         if scores is not None:
             per_model[model] = scores
 

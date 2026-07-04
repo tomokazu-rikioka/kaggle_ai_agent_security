@@ -88,3 +88,31 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
   焼くため兄弟 import 禁止）。
 - コミットは Conventional Commits（`feat:` / `fix:` / `docs:` など）。
 - Kaggle ページ（discussion/overview）の確認は Playwright MCP を使う（WebFetch は JS ページで失敗）。
+
+## 運用上の教訓・注意（実験ループ）
+
+### 実験制約は勝手に変えない（最重要）
+- ユーザが指定した実験制約（例: **eval は N=300 固定・gemma のみ**）は厳守する。発見や最適化の都合で
+  変えたくなっても、**まずユーザに確認**してから変える。過去に N を無断で 500→fill(1375〜2000) へ上げ、
+  手法比較の妥当性を毀損した（QD=8.25 と fill=40.62 を「手法差」と誤読。実際は大半が N の差）。
+  **N を揃えないと手法比較は無効**。
+- スコアの絶対値追求（高 N・fill）と、手法の優劣判定（N 固定比較）は**別問題**。混同しない。
+
+### local eval と live（提出）は別物
+- ローカル `eval_driver.py` は **replay に締切が無い**ので高 N・高 K（多メッセージ連鎖）でも完走して
+  高スコアが出るが、**live では再現しない**。live は全 replay が `time_budget_s`（9000 秒/モデル）に
+  縛られ、所要 ≈ N×K×t_cand。
+- **遅い `gpt_oss`（~24s/候補）が律速**。N=300・K(=1メッセージ)なら 300×24=7200s<9000s で
+  **無測定でも両モデル INVALID 安全**。N=300・K=2 は gpt_oss で 14400s>9000s → **INVALID（提出丸ごと失格）**。
+- 従って **fill(高 N) や M/K-stacking のローカル高スコアは提出に使えない**（local 限定アーティファクト）。
+  提出設計の詳細リスクは `docs/analysis/2026-07-submission-design-risks.md`。
+
+### Kaggle eval 運用の落とし穴（`make eval`）
+- **同時 GPU バッチ枠 = 2**。3 本以上同時に push しない。テスト用/他/提出カーネルの実行も枠を数える。
+  **1 ラウンド = 2 並列**を厳守。
+- **枠オーバーで作成失敗した kernel id は "Notebook not found" が恒久化**（同 id 再 push では回復しない）。
+  → `EVAL_ID_SUFFIX=-r2` 等の環境変数で**新 id に切替**（`build_eval_notebook.py` 対応済み。
+  id・title 両方に suffix が付く。**title を揃えないと 409 Conflict**＝title→slug が id に解決しないため）。
+- CLI の「キャンセル」（走行中カーネルへ CPU 版を再 push）は**元の GPU 実行を殺さない場合がある**。
+  status API は最新版を返すので裏で走る旧版が見えない。**確実な枠解放は Kaggle UI の Stop Session**。
+- **連続 push を避ける**（枠飽和 → id 破損の連鎖）。

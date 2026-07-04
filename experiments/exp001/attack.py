@@ -95,7 +95,8 @@ from aicomp_sdk.attacks import AttackAlgorithmBase, AttackCandidate, AttackRunCo
 # ════════════════════════════════════════════════════════════════════════
 # 返す候補総数。実用上限 ~600（候補 ≤2000 だが over-return で timeout する）。
 # score ≈ (Σ severity 質量 + 2N) / 200000 × 1000。原典の勝ち構成は N=620。
-N_CANDIDATES: int = 620
+# 候補数スイープ実験: exp001=300（本ファイル）/ exp002=500 で候補数とスコアの線形性を比較。
+N_CANDIDATES: int = 300
 
 # 1 メッセージの最大文字数。短いほどリプレイ単価 c が下がり、予算内 N_eff が増える
 # （原典: 400→260 字で N_eff 400→450）。勝ち構成は 140。
