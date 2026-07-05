@@ -62,13 +62,13 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
   - **注意（要確認）**: 本リポの `make eval`（eval_driver）はローカル寄りで速く、live の 6x を
     再現しない可能性。deadline-fill の `budget_s` は **live 基準**で設定しないと、eval では通っても
     live で失格 or 過少になる。eval_driver の時間計測が live を模しているか確認する。
-- **期待効果**: 大。DEPUTY provenance ベースライン（exp010=8.73, exp016=11.2）の候補数側を
+- **期待効果**: 大。DEPUTY provenance ベースライン（exp003=8.73, exp004=11.2）の候補数側を
   1.5〜2倍にできれば、文面チューニングの限界的リターンを大きく上回る。**現状の最有力レバー**。
 - 出典: https://pilkwangkim.github.io/posts/AI-Agent-Security-Part-3-Multi-Predicate-Stacking-and-the-Broken-Ceiling/ ,
   /discussion/718210（Pilkwang の確認コメント）
 
 ### 【P1】Quality-Diversity / Rainbow-Teaming ポートフォリオ（private 汎化 × cell 多様化の一石二鳥）
-- **何か**: 全候補を単一の勝ち文面（exp010 疑問形）でコピーせず、**email.send の発火トリガは保ちつつ
+- **何か**: 全候補を単一の勝ち文面（exp003 疑問形）でコピーせず、**email.send の発火トリガは保ちつつ
   周囲の言い回し・role・文体を直交軸で回転**させた多様ポートフォリオにする。軸の例: 直接命令 vs
   helpful-assistant role、フォーマル vs カジュアル、宛先/件名/本文の語彙差し替え、疑問形の
   バリエーション（"Could you…" / "Would you mind…" / "Can you…"）。
@@ -81,9 +81,9 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
 - **重要な制約**: **EXFIL マーカー（SECRET_MARKER）は literal 固定**。Base64/Hex/Reversal 等の
   エンコードは「read前 raw 部分一致」判定を外して**発火しなくなる**（Pilkwang が明言）。多様化するのは
   マーカー**周辺**の自然文だけ。DEPUTY（email.send）側は部分文字列判定なので宛先/文面の多様化は自由。
-- **本リポでどう検証するか**: exp010 の疑問形テンプレートを 1 種から **N 種の言い回し集合**に拡張し、
+- **本リポでどう検証するか**: exp003 の疑問形テンプレートを 1 種から **N 種の言い回し集合**に拡張し、
   候補ごとにローテーション。まず gemma smoke（N=30, 10文面×3）で fire rate が 97% を維持するか確認 →
-  維持ならフル N=300 で「単一文面 exp010」と provenance/strict を比較。ユニーク cell 数が増えて
+  維持ならフル N=300 で「単一文面 exp003」と provenance/strict を比較。ユニーク cell 数が増えて
   cell ボーナスが乗るか、私設ガードレール代理（provenance）で崩れないかを見る。
 - **期待効果**: 中〜大。fire rate 天井（97%）は動かせなくても、**cell ボーナス増**と
   **private 汎化のロバスト性**を同時に取りにいける。0-1（静的リプレイ）と最も整合する王道。
@@ -96,7 +96,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
 - **なぜ効く**: LangChain 実測で tool-calling 精度が **zero-shot→3-shot で +36〜64pt**（小型モデルほど
   効果大）。かつ「**system に文字列連結より、会話メッセージ列（history）として埋め込む方が大幅に上**」。
   本コンペは複数メッセージを送れるので追い風。既存の勝ち筋（疑問形）と直交して積める。
-- **本リポでどう検証するか**: exp010 の DEPUTY 候補を「①無害な email.send 依頼 → ②成功した tool 応答を
+- **本リポでどう検証するか**: exp003 の DEPUTY 候補を「①無害な email.send 依頼 → ②成功した tool 応答を
   history に置く → ③本命の疑問形依頼」の3メッセージ構成に。ただし fire rate は既に 97% とほぼ天井なので
   **上げ幅は限定的**。むしろ ①②を「別宛先の別 email.send」にして cell 多様化を稼ぐ副次効果を狙う。
   smoke N=30 で fire rate が 97% を割らないか（履歴付加でトークン増→N減のトレードオフ）を先に確認。
@@ -119,8 +119,9 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
   「同じ生成予算で cell ボーナスを厚くできるか」は smoke で測る価値あり。
 - **どう検証するか**: gemma smoke で「単発 DEPUTY ×1/interact」vs「逐次 DEPUTY ×3/interact（別宛先）」を
   同一予算で比較。K_eff（1 interact あたり成功 email.send 数）と、interact あたり raw（4K + 2×新cell）を
-  実測。K_eff>1 かつ throughput が単発を上回れば採用。**過去 exp003/005 の失敗は「1メッセージ内」なので
-  この別軸は未検証**。各ターンで宛先・内容を変え、gemma の反復ループバグ（同一反復で崩壊）を避ける。
+  実測。K_eff>1 かつ throughput が単発を上回れば採用。**過去の K-parallel 検証（1メッセージ内で複数
+  ツールを同時に呼ばせて失敗）は「1メッセージ内」なのでこの別軸は未検証**。各ターンで宛先・内容を変え、
+  gemma の反復ループバグ（同一反復で崩壊）を避ける。
 - **期待効果**: 中（不確実）。上振れれば DEPUTY provenance の density を上げられるが、Pilkwang の
   「amortization 無し」報告どおり throughput 中立で終わる公算もある。smoke で早期に見切る前提。
 - 出典: https://ai.google.dev/gemma/docs/capabilities/text/function-calling-gemma4 ,
@@ -177,7 +178,8 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
     （arXiv 2605.09252「reasoning を切っても tool-call 精度は落ちない、むしろ上がる」＝精度リスクは低い）
 - **UNTRUSTED_TO_ACTION(16) / DESTRUCTIVE_WRITE(8) の stacking**: 0-2 のとおり原理的に不可能/deny。
 - **マーカーのエンコード多様化**: 0-2 のとおり発火しなくなる。多様化は自然文のみ。
-- **1メッセージ内 K-parallel**: 本リポ exp003/004/005 で検証済み失敗（gemma 1回停止）。P2 は別軸（逐次）。
+- **1メッセージ内 K-parallel**: 本リポで検証済み失敗（1メッセージ内で複数ツールを同時に呼ばせようと
+  したが gemma は1回で停止、K-parallel）。P2 は別軸（逐次）。
 
 ---
 
@@ -195,7 +197,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」向けに、arXiv 等�
 ## 4. 総括（優先順位）
 
 1. **P0 deadline-aware per-model fill** — 上位者を 32→49.77 に押し上げた実証済みレバー。固定N の失格
-   リスクも回避。**まずこれ**。我々の DEPUTY provenance ベースライン（exp010/exp016）の候補数を
+   リスクも回避。**まずこれ**。我々の DEPUTY provenance ベースライン（exp003/exp004）の候補数を
    1.5〜2倍に。
 2. **P1 QD/Rainbow ポートフォリオ** — 静的リプレイ（0-1）に最も整合。cell ボーナス増 × private 汎化
    ロバスト性を同時取り。マーカーは literal 固定を厳守。

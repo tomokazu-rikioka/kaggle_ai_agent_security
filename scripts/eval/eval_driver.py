@@ -5,8 +5,8 @@
   2) 同じ候補リストを各ガードレールへ **リプレイ** → eval_predicates → summarize_attack_findings
 生成とリプレイを分離するのは、複数ガードレール比較で生成（モデル実行）を繰り返さないため。
 
-旧 `validation/` パッケージ（run_validation / agents_local / guardrails_local /
-provenance_guardrail）の頭脳を、**兄弟 import なしの単一ファイル**へ集約したもの。
+run_validation / agents_local / guardrails_local / provenance_guardrail 相当のロジックを、
+**兄弟 import なしの単一ファイル**に実装したもの。
 Kaggle 評価 Notebook が attack.py と本ファイルを base64 で書き出し、
 
     python eval_driver.py --attack /kaggle/working/attack.py --model gpt_oss \

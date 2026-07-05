@@ -116,3 +116,8 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 - CLI の「キャンセル」（走行中カーネルへ CPU 版を再 push）は**元の GPU 実行を殺さない場合がある**。
   status API は最新版を返すので裏で走る旧版が見えない。**確実な枠解放は Kaggle UI の Stop Session**。
 - **連続 push を避ける**（枠飽和 → id 破損の連鎖）。
+- **scores.json 回収は `--force` 欠落に注意（再現性クリティカル）**。`run_eval.py::_fetch_scores()` は
+  `kaggle kernels output` に `--force` を付けないため、同一 `(exp, model)` で smoke→full を同じ出力先で
+  連続実行すると**古い scores.json が読まれる**（exp011/012 の gpt_oss で誤値混入・手動 `--force` で解決）。
+  回避は出力先を分けるか full 前に `build/eval/<exp>/<model>/output/` を消す。恒久対策は `run_eval.py` に
+  `--force` 追加（TODO）。詳細は `docs/analysis/2026-07-submission-design-risks.md`。

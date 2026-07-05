@@ -12,10 +12,3 @@
 ## 評価結果（make eval）
 - `make eval EXP=expNNN`（gpt_oss / gemma_4 × public/strict/provenance）:
 - 所見（public で出て strict/provenance で消える＝overfit 疑い など）:
-
-## LB 結果
-- 提出日 / Version:
-- gpt_oss_public / gpt_oss_private / gemma_public / gemma_private:
-
-## 次にやること
--
