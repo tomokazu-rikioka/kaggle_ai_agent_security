@@ -147,8 +147,8 @@ def _print_table(exp: str, per_model: dict[str, dict]) -> None:
                 f"{g['findings_count']:>9} {g['unique_cells']:>6}"
             )
     print("=" * 64)
-    print("public=公開 LB 相関 / strict・provenance=非公開汎化の代理。")
-    print("public で出て strict・provenance で消える攻撃は overfit の疑い。")
+    print("public=公開 LB 相関 / private=非公開汎化の代理。")
+    print("public で出て private で消える攻撃は overfit の疑い。")
 
 
 def main() -> None:
@@ -157,7 +157,7 @@ def main() -> None:
     parser.add_argument("--models", default=",".join(MODELS), help=f"カンマ区切り（既定: {','.join(MODELS)}）")
     parser.add_argument("--candidates", type=int, default=None, help="候補数の上限（smoke 用）")
     parser.add_argument("--budget-s", type=float, default=8000.0, help="生成フェーズの時間予算（秒）")
-    parser.add_argument("--guardrails", default="public,strict,provenance", help="採点ガードレール")
+    parser.add_argument("--guardrails", default="public,private", help="採点ガードレール")
     parser.add_argument("--poll-interval", type=int, default=POLL_INTERVAL_S, help="status ポーリング間隔（秒）")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S, help="1 カーネルの最大待ち時間（秒）")
     parser.add_argument("--dry-run", action="store_true", help="build のみ（push しない）")

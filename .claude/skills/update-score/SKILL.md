@@ -16,7 +16,7 @@ description: docs/scores/SCORE.md（実験スコア表）の行を更新する�
 
 ### 1. local スコアを取得
 `experiments/<exp>/scores.json`（`make eval` が回収するマージ済み出力）を読む。複数モデルがあれば
-**gpt_oss > gemma_4** の優先順で 1 つ採用する。次のコマンドで採用モデルと public/provenance/strict
+**gpt_oss > gemma_4** の優先順で 1 つ採用する。次のコマンドで採用モデルと public/private
 スコアを取得する（先頭の `EXP=exp001` だけを対象 exp 名に置き換える）:
 
 ```bash
@@ -37,7 +37,7 @@ else:
         def s(k):
             v = g.get(k, {}).get("score")
             return "-" if v is None else f"{v:.3f}"
-        print(model, s("public"), s("provenance"), s("strict"))
+        print(model, s("public"), s("private"))
 PY
 ```
 
@@ -45,7 +45,7 @@ PY
 
 ### 2. docs/scores/SCORE.md を更新
 - `docs/scores/SCORE.md` を Read し、表のヘッダ列を確認する。
-- 対象 exp の行があれば、`local_agent` と `local_public` / `local_provenance` / `local_strict`
+- 対象 exp の行があれば、`local_agent` と `local_public` / `local_private`
   列を Edit で更新する。無ければ表の末尾に新しい行を追加する
   （LB 列は `-`、`changes` 列は空または指定値）。
 - **`lb_*` 列と `changes` 列は既存値を保持する**。ユーザーが LB スコアや変更内容を提示した
@@ -58,4 +58,4 @@ PY
 ## 注意
 - スコアの単一ソースは `docs/scores/SCORE.md`。yaml の入力ファイルは作らない。
 - 手動列（`lb_*` / `changes`）を勝手に消さない。local 列のみ自動反映する。
-- `local_public` が公開 LB と相関、`local_provenance` / `local_strict` は非公開汎化の代理。
+- `local_public` が公開 LB と相関、`local_private` は非公開汎化の代理。

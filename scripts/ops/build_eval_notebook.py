@@ -139,7 +139,7 @@ def build(
     *,
     candidates: int | None = None,
     budget_s: float = 8000.0,
-    guardrails: str = "public,strict,provenance",
+    guardrails: str = "public,private",
 ) -> Path:
     """build/eval/<exp>/<model>/{eval.ipynb, kernel-metadata.json} を生成し、ディレクトリを返す。"""
     if model not in MODELS:
@@ -224,7 +224,7 @@ def main() -> None:
     parser.add_argument("--model", default="gpt_oss", choices=list(MODELS))
     parser.add_argument("--candidates", type=int, default=None, help="候補数の上限（smoke 用）")
     parser.add_argument("--budget-s", type=float, default=8000.0, help="生成フェーズの時間予算（秒）")
-    parser.add_argument("--guardrails", default="public,strict,provenance", help="採点ガードレール（カンマ区切り）")
+    parser.add_argument("--guardrails", default="public,private", help="採点ガードレール（カンマ区切り）")
     args = parser.parse_args()
     build(
         args.exp,

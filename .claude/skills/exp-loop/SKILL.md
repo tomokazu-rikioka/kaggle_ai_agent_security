@@ -24,22 +24,22 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 
 ## 1 ラウンドの流れ
 
-1. **仮説選定**：現ベストと未探索の穴から、次に試す 2 案を決める（1案=public方向、1案=provenance/strict
+1. **仮説選定**：現ベストと未探索の穴から、次に試す 2 案を決める（1案=public方向、1案=private
    方向、等）。アイデア源は Kaggle 公開 Notebook/Discussion・AI Security/レッドチーム論文・EDA。
 2. **委譲（実装）**：各案につき opus サブエージェントを spawn し、`experiments/expNNN/attack.py` を執筆させ
    `make build EXP=expNNN` で単一ファイル自己完結・構文を確認させる（クラス名 `AttackAlgorithm` 固定・
    兄弟 import 禁止・N_CANDIDATES=300）。
 3. **eval（2並列）**：`make eval EXP=expNNN MODELS=gemma_4` を 2 本並列で実行し、完了を監視。
    `scores.json` の per-guardrail 値・発火述語数・所要時間を回収し、1 候補あたり raw を逆算して理論値と照合。
-4. **記録**：opus に `docs/analysis/2026-07-attack-strategy-evolution.md` へ追記させ、`/update-score expNNN`
+4. **記録**：opus に `docs/analysis/2026-07-attack-findings.md` へ追記させ、`/update-score expNNN`
    で `docs/scores/SCORE.md` を更新。
-5. **意思決定**：結果を踏まえ次ラウンドの 2 案を決める。overfit（public で出て strict/provenance で消える）
+5. **意思決定**：結果を踏まえ次ラウンドの 2 案を決める。overfit（public で出て private で消える）
    に注意。**止めずに次ラウンドへ**（ユーザが止めるまで反復）。
 
 ## 並行調査（ブロッキングしない）
 
 ラウンドと並行して opus に投げてよい非同期タスク：
-- provenance で発火する未利用述語の穴ハント（`vendor/aicomp_sdk_pkg/` の predicates/scoring/guardrail 再精読）。
+- private で発火する未利用述語の穴ハント（`vendor/aicomp_sdk_pkg/` の predicates/scoring/guardrail 再精読）。
 - Kaggle Discussion 最新・AI Security/レッドチーム論文からの fire率/N/新手法アイデア抽出。
 - 完了したサブエージェントは解放（知見は docs に永続化してから）。
 
@@ -52,8 +52,8 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 
 ## 提出フェーズへの移行
 
-比較表（provenance/public/strict の各列が N=300 で揃う）が埋まり最良手法が定まったら、
-`docs/analysis/2026-07-submission-design-risks.md` の提出設計チェックリストを起点に、
+比較表（public/private の各列が N=300 で揃う）が埋まり最良手法が定まったら、
+`docs/analysis/2026-07-attack-findings.md` の live 安全域（§5）を起点に、
 INVALID 安全（両モデル）な構成で `make submit EXP=<best>` する。提出 Notebook は `serve()` セル必須。
 
 ## 状態の起点

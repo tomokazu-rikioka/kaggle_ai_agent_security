@@ -60,8 +60,9 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 - 採点ドライバ `scripts/eval/eval_driver.py` は公式採点（`eval_predicates` /
   `summarize_attack_findings`）を **生成1回・ガードレール別リプレイ多**で再現する自己完結ファイル。
 - モデルは `gpt_oss`（20b）/ `gemma_4`（26B）。GPU 必須なので Kaggle 上で実行（Mac/Metal 非対応）。
-- ガードレール `public`=公開 LB 相関、`strict`/`provenance`=非公開汎化の代理。
-  **public で出て strict/provenance で消える攻撃は overfit 疑い**。
+- ガードレール `public`=公開 LB 相関、`private`=非公開汎化の代理（永続来歴機構 ProvenanceGuardrail。
+  公式ヒント `aicomp_private_guardrails.persistent_provenance` を模す）。
+  **public で出て private で消える攻撃は overfit 疑い**。
 - SDK は `make sdk-dataset` で作る Kaggle dataset（`rikitomo0526/aiagent-security-sdk`）を Add Input で
   添付（vendor 更新時のみアップロード）。GGUF は Internet ON で HF hub から取得。
 
@@ -105,7 +106,7 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 - **遅い `gpt_oss`（~24s/候補）が律速**。N=300・K(=1メッセージ)なら 300×24=7200s<9000s で
   **無測定でも両モデル INVALID 安全**。N=300・K=2 は gpt_oss で 14400s>9000s → **INVALID（提出丸ごと失格）**。
 - 従って **fill(高 N) や M/K-stacking のローカル高スコアは提出に使えない**（local 限定アーティファクト）。
-  提出設計の詳細リスクは `docs/analysis/2026-07-submission-design-risks.md`。
+  提出設計の詳細リスクは `docs/analysis/2026-07-attack-findings.md`。
 
 ### Kaggle eval 運用の落とし穴（`make eval`）
 - **同時 GPU バッチ枠 = 2**。3 本以上同時に push しない。テスト用/他/提出カーネルの実行も枠を数える。
@@ -118,6 +119,6 @@ Notebook 自体は採点に関与しない（学習コンペの推論 Notebook �
 - **連続 push を避ける**（枠飽和 → id 破損の連鎖）。
 - **scores.json 回収は `--force` 欠落に注意（再現性クリティカル）**。`run_eval.py::_fetch_scores()` は
   `kaggle kernels output` に `--force` を付けないため、同一 `(exp, model)` で smoke→full を同じ出力先で
-  連続実行すると**古い scores.json が読まれる**（exp011/012 の gpt_oss で誤値混入・手動 `--force` で解決）。
+  連続実行すると**古い scores.json が読まれる**（過去に gpt_oss eval で誤値混入・手動 `--force` で解決）。
   回避は出力先を分けるか full 前に `build/eval/<exp>/<model>/output/` を消す。恒久対策は `run_eval.py` に
-  `--force` 追加（TODO）。詳細は `docs/analysis/2026-07-submission-design-risks.md`。
+  `--force` 追加（TODO）。詳細は `docs/analysis/2026-07-attack-findings.md`。

@@ -72,7 +72,7 @@ kaggle datasets create -p build/sdk_dataset      # 2 回目以降は kaggle data
 # 1. 実験を作成（_template を複製）
 make new-exp NAME=exp001
 
-# 2. Kaggle GPU で採点（build→push→wait→fetch）— 実モデル gpt_oss/gemma_4 × public/strict/provenance
+# 2. Kaggle GPU で採点（build→push→wait→fetch）— 実モデル gpt_oss/gemma_4 × public/private
 make eval EXP=exp001 CANDIDATES=30     # smoke。本番は CANDIDATES を外す
 /update-score exp001                   # experiments/exp001/scores.json を SCORE.md へ反映
 
@@ -92,7 +92,7 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 
 - **ローカル列** (`local_public` 等): `make eval` が Kaggle から回収する
   `experiments/<exp>/scores.json` を、`/update-score <exp>` スキルがその exp の行へ反映
-  （`gpt_oss > gemma_4` の優先順で採用）。`public` が公開 LB 相関、`provenance`/`strict` は非公開汎化の代理。
+  （`gpt_oss > gemma_4` の優先順で採用）。`public` が公開 LB 相関、`private` は非公開汎化の代理。
 - **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/scores/SCORE.md` に直接記入する
   （または Claude に依頼）。1 提出で 4 スコアが返るので、確認して転記する。
 
@@ -100,7 +100,7 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 
 `make eval` がローカルから Kaggle API で攻撃を採点する一本道。`scripts/eval/eval_driver.py` が公式採点
 （`eval_predicates` / `summarize_attack_findings`）を **生成1回・ガードレール別リプレイ多**で再現し、
-`public`（公開 LB 相関）/ `strict` / `provenance`（非公開汎化の代理）の 3 ガードレールで採点する。
+`public`（公開 LB 相関）/ `private`（非公開汎化の代理）の 2 ガードレールで採点する。
 実モデル（gpt_oss 20b / gemma_4 26B）は GPU 必須のため **Kaggle 上で実行**（Mac/Metal 非対応）。
 `make eval` が eval.ipynb の build → `kaggle kernels push` → status ポーリング → `kaggle kernels output`
 までを 1 コマンドで回し、`experiments/<exp>/scores.json` を回収する。
