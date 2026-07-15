@@ -196,9 +196,9 @@ def _write_kernel_metadata(exp: str, model: str, out_dir: Path) -> None:
     # 新しい id に切り替えるための任意サフィックス。既定は空（通常運用では id を変えない）。
     id_suffix = os.environ.get("EVAL_ID_SUFFIX", "")
     km = {
-        "id": f"{KAGGLE_USER}/ai-agent-security-eval-{exp.replace('_', '-')}-{slug_model}{id_suffix}",
+        "id": f"{KAGGLE_USER}/ai-agent-security-eval-script-{exp.replace('_', '-')}-{slug_model}{id_suffix}",
         # title も suffix を含める（title→slug が id に解決しないと 409 Conflict になるため）
-        "title": f"AI Agent Security - Eval {exp} {model}{id_suffix}",
+        "title": f"AI Agent Security - Eval script {exp} {model}{id_suffix}",
         "code_file": "eval.ipynb",
         "language": "python",
         "kernel_type": "notebook",

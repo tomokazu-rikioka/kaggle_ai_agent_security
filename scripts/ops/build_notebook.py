@@ -109,11 +109,11 @@ def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
     if not km_path.is_file():
         raise FileNotFoundError(f"{km_path} が存在しません")
     km = json.loads(km_path.read_text())
-    default_id = f"{KAGGLE_USER}/ai-agent-security-attack-{exp.replace('_', '-')}"
+    default_id = f"{KAGGLE_USER}/ai-agent-security-attack-script-{exp.replace('_', '-')}"
     existing = km.get("id", "")
     if existing != default_id and not existing.startswith(default_id + "-"):
         km["id"] = default_id
-        km["title"] = f"AI Agent Security - Attack {exp}"
+        km["title"] = f"AI Agent Security - Attack script {exp}"
     km["code_file"] = "submission.ipynb"
     km_path.write_text(json.dumps(km, indent=2) + "\n")
     print(f"[build] {km_path} を同期（id={km['id']}）")
