@@ -1,0 +1,26 @@
+"""kernels.db のスキーマ定義（冪等 DDL）。"""
+
+from __future__ import annotations
+
+KERNELS_DDL: str = """
+CREATE TABLE IF NOT EXISTS kernels (
+    competition_id TEXT    NOT NULL,
+    kernel_ref     TEXT    NOT NULL,          -- "owner/kernel-slug"
+    title          TEXT,
+    author         TEXT,
+    total_votes    INTEGER NOT NULL DEFAULT 0,
+    last_run_time  TEXT,
+    is_private     INTEGER NOT NULL DEFAULT 0,
+    ingested_at    TEXT    NOT NULL,
+    PRIMARY KEY (competition_id, kernel_ref)
+);
+
+CREATE TABLE IF NOT EXISTS competition_info (
+    competition_id TEXT PRIMARY KEY,
+    title          TEXT NOT NULL DEFAULT '',
+    updated_at     TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_kernels_votes
+    ON kernels (competition_id, total_votes DESC);
+"""

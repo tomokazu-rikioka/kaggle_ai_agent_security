@@ -16,12 +16,15 @@ dependencies = [
     # 運用（Kaggle CLI / 設定読み込み）
     "kaggle>=1.6",
     "pyyaml>=6.0",
+
+    # 研究データ収集（scripts/research: ディスカッション/カーネル収集）
+    "requests>=2.31", # 内部 API（discussions）への HTTP。uv.lock に推移解決済み
+    "nbformat>=5.10", # build_notebook.py / kernel_read.py が .ipynb を読み書き
 ]
 
 [dependency-groups]
 dev = [
     "ruff>=0.9",
-    "nbformat>=5.10",  # build_notebook.py が submission.ipynb を組み立てる
     "ipykernel>=7",    # ローカルで Notebook を確認する場合
 ]
 

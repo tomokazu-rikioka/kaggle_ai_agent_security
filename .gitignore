@@ -229,6 +229,11 @@ experiments/**/scores.json
 # Playwright MCP のブラウザログ（一時成果物）
 .playwright-mcp/
 
+# 研究データ収集キャッシュ（make research-* で再生成可能。他人の .ipynb を誤コミットしない）
+# docs/discussions/*.md と Bookmarks.json はコミット対象なので無視しない。
+data/
+*.db
+
 # vendored 公式 SDK（MIT・private repo なので git 管理）
 # aicomp_sdk/core/env/ は仮想環境ではなく SDK の正規パッケージ。
 # 上の「# Environments」の env//ENV/ ルールに巻き添えで無視されるのを解除する。
