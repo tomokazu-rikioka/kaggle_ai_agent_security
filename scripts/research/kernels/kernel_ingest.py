@@ -61,7 +61,7 @@ def _to_int(value: str | None) -> int:
 
 
 def ingest(comp: str, *, sort_by: str, page_size: int, max_pages: int) -> int:
-    """一覧を取得して kernels テーブルへ upsert する。取り込み件数を返す。"""
+    """一覧を取得して kernels テーブルへ追加または更新（upsert）する。取り込み件数を返す。"""
     rows = list_kernels(comp, sort_by=sort_by, page_size=page_size, max_pages=max_pages)
     now = datetime.now(UTC).isoformat()
     conn = connect(KERNELS_DB)

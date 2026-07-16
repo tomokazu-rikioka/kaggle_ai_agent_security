@@ -16,7 +16,7 @@ class NotebookCell:
 
 
 def read_notebook(path: Path) -> list[NotebookCell]:
-    """`.ipynb` を読み、セル列を返す。解析に失敗したら生テキスト 1 セルへ fallback する。"""
+    """`.ipynb` を読み、セル列を返す。解析に失敗したら生テキスト 1 セルに切り替える（代替＝fallback）。"""
     try:
         import nbformat
 

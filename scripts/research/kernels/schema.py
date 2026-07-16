@@ -1,4 +1,4 @@
-"""kernels.db のスキーマ定義（冪等 DDL）。"""
+"""kernels.db のテーブル定義（DDL）。何度実行しても安全（冪等）に作れる。"""
 
 from __future__ import annotations
 

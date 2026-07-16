@@ -1,14 +1,14 @@
-"""experiments/<exp>/attack.py を提出用 submission.ipynb に焼き込む。
+"""experiments/<exp>/attack.py を提出用 submission.ipynb に埋め込む。
 
 評価器は提出された Notebook を実行し、その結果 `/kaggle/working/attack.py` が存在することを
-期待する（vendor/.../jed_attack_inference_server.py が同パスを単一ファイルロードする）。
-そこで本スクリプトは attack.py の中身を **base64 で 1 セルに埋め込み**、実行時に
+前提にする（vendor/.../jed_attack_inference_server.py が同じパスを単一ファイルとしてロードする）。
+そこで本スクリプトは attack.py の中身を **base64 で符号化して 1 セルに埋め込み**、実行時に
 `/kaggle/working/attack.py` へ復元するだけの薄い Notebook を生成する。
 
-base64 を使う理由: attack.py に `'''` や任意のバイト列が含まれても壊れない（文字列リテラル
-埋め込みのエスケープ事故を避ける）。
+base64 を使う理由: attack.py に `'''` や任意のバイト列が入っても壊れない（文字列リテラルに
+直接埋め込むときのエスケープ事故を避ける）。
 
-併せて kernel-metadata.json の id / title / code_file を exp 名に同期する。
+あわせて kernel-metadata.json の id / title / code_file を exp 名にそろえる。
 
 使い方:
     uv run python scripts/ops/build_notebook.py exp001
@@ -29,7 +29,7 @@ KAGGLE_USER = "rikitomo0526"
 
 
 def _code_cell_source(attack_src: str) -> str:
-    """attack.py を base64 で埋め込み、/kaggle/working/attack.py へ復元するセル本体。"""
+    """attack.py を base64 で符号化して埋め込み、/kaggle/working/attack.py へ復元するセル本体を作る。"""
     b64 = base64.b64encode(attack_src.encode("utf-8")).decode("ascii")
     return (
         "# 自動生成: experiments/<exp>/attack.py を /kaggle/working/attack.py へ復元する。\n"
@@ -46,11 +46,11 @@ def _code_cell_source(attack_src: str) -> str:
 
 
 def _serve_cell_source() -> str:
-    """評価サーバ（JEDAttackInferenceServer）を起動し提出フォーマットを出力するセル。
+    """評価サーバ（JEDAttackInferenceServer）を起動し、提出フォーマットを出力するセルを作る。
 
     公式 getting-started と同じ: competition data の kaggle_evaluation を sys.path に載せ、
-    ``serve()`` で attack.py をロードして採点・submission を出力する。このセルが無いと
-    submission.csv が生成されず「submission.csv が必要」提出エラーになる。
+    ``serve()`` で attack.py をロードして採点し submission を出力する。このセルが無いと
+    submission.csv が作られず「submission.csv が必要」という提出エラーになる。
     """
     return (
         "import sys, glob\n"
@@ -68,7 +68,7 @@ def _serve_cell_source() -> str:
 
 
 def build(exp: str) -> Path:
-    """experiments/<exp>/attack.py から submission.ipynb を生成し、メタを同期する。"""
+    """experiments/<exp>/attack.py から submission.ipynb を生成し、メタ情報をそろえる。"""
     exp_dir = EXPERIMENTS_DIR / exp
     attack_path = exp_dir / "attack.py"
     if not attack_path.is_file():
@@ -98,12 +98,12 @@ def build(exp: str) -> Path:
 
 
 def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
-    """kernel-metadata.json の id / title / code_file を exp 名に揃える。
+    """kernel-metadata.json の id / title / code_file を exp 名にそろえる。
 
-    既存 id がこの exp の既定 slug（ai-agent-security-attack-<exp>）そのもの、またはその派生
-    （末尾にサフィックスを付けた別名、例: -v2）の場合は尊重して上書きしない。Kaggle 側で slug が
-    壊れて別名へ手動リネームした値を次回 build で既定 slug に戻さないため。それ以外（別 exp から
-    複製した id や未設定）は既定 slug に設定する。
+    既存 id がこの exp の既定 slug（URL 識別子。ai-agent-security-attack-<exp>）そのもの、または
+    その派生（末尾にサフィックスを付けた別名、例: -v2）なら、その値を尊重して上書きしない。
+    Kaggle 側で slug が壊れて別名へ手動リネームした値を、次回 build で既定 slug に戻さないため。
+    それ以外（別 exp から複製した id や未設定）は既定 slug に設定する。
     """
     km_path = exp_dir / "kernel-metadata.json"
     if not km_path.is_file():

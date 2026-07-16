@@ -1,15 +1,15 @@
 """Kaggle 評価 Notebook へ公式 SDK を届けるための dataset アセット（assets.zip）を生成する。
 
-評価 Notebook（build_eval_notebook.py 生成）は attack.py をローカル採点するために `aicomp_sdk`
-（vendor/aicomp_sdk_pkg/）を import する。本スクリプトは vendor の SDK を 1 つの `assets.zip` に固め、
-`dataset-metadata.json` と共に `build/sdk_dataset/` へ出力する。Notebook 側でこの zip を展開し
+評価 Notebook（build_eval_notebook.py が生成）は attack.py を手元採点するために `aicomp_sdk`
+（vendor/aicomp_sdk_pkg/）を import する。本スクリプトは vendor の SDK を 1 つの `assets.zip` にまとめ、
+`dataset-metadata.json` と一緒に `build/sdk_dataset/` へ出力する。Notebook 側でこの zip を展開し、
 `--sdk-root` で sys.path に載せる。
 
-SDK は vendor 更新時しか変わらないため、この dataset のアップロードは初回／bump 時のみで足りる。
-GGUF（モデル重み）はサイズが大きいため含めない（Notebook が Internet ON で HF hub から取得する）。
+SDK は vendor 更新時しか変わらないので、この dataset のアップロードは初回とバージョン更新（bump）時だけで足りる。
+GGUF（モデル重み）はサイズが大きいので含めない（Notebook が Internet ON で Hugging Face Hub（HF hub）から取得する）。
 
-zip 1 ファイルにまとめる理由: `kaggle datasets create` のサブディレクトリ扱いに依存せず、ディレクトリ
-階層を確実に保持できる（展開は Notebook 側の責務）。
+zip 1 ファイルにまとめる理由: `kaggle datasets create` のサブディレクトリの扱いに頼らず、ディレクトリ
+階層を確実に保てる（展開は Notebook 側の役目）。
 
 使い方:
     uv run python scripts/ops/build_sdk_dataset.py
@@ -50,7 +50,7 @@ def _add_tree(zf: zipfile.ZipFile, src_dir: Path, arc_prefix: str) -> int:
 
 
 def build() -> Path:
-    """assets.zip と dataset-metadata.json を build/sdk_dataset/ に生成する。"""
+    """assets.zip と dataset-metadata.json を build/sdk_dataset/ に作る。"""
     vendor_dir = Path("vendor/aicomp_sdk_pkg")
     if not vendor_dir.exists():
         raise FileNotFoundError(f"{vendor_dir} が存在しません（リポジトリ直下で実行してください）")

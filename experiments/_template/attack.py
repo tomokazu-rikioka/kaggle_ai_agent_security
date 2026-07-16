@@ -12,7 +12,8 @@
 
 本テンプレートは SDK 同梱の Go-Explore ベースラインをそのまま継承した出発点。
 新しい実験では `make new-exp NAME=expNNN` でこれを複製し、`run()` を改造して
-探索戦略を進化させる（述語 stacking / cell 多様化 / 公開ガードレールの穴を突く 等）。
+探索戦略を進化させる（述語の積み上げ（stacking）／攻撃の型の指紋（cell）の多様化／
+公開ガードレールの検査漏れの穴を突く 等）。
 """
 
 from __future__ import annotations

@@ -1,8 +1,8 @@
-"""内部 API / 事前取得 JSON を正規化する両案共通の層。
+"""内部 API / 事前取得 JSON を共通の形に整える層（案A=内部 API 方式／案B=事前取得 JSON 方式の両方で使う）。
 
 `GetForumTopicById` 相当の JSON（`forumTopic{firstMessage, comments[](replies ネスト), totalMessages}`）を
-平坦な Topic + Comment 群へ変換する。内部 API は非公式でキー名が変わり得るため、候補キーを順に試す
-防御的な抽出にしている（キー欠損はスキップ、例外は投げない方針）。
+入れ子のない Topic + Comment 群へ変換する。内部 API は非公式でキー名が変わり得るため、候補キーを順に試す
+守りの堅い抽出にしている（キーが無ければ飛ばし、例外は投げない方針）。
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ class Topic:
 
 @dataclass
 class Comment:
-    """スレッド内の 1 メッセージ（親投稿・コメント・返信を平坦化したもの）。"""
+    """スレッド内の 1 メッセージ（親投稿・コメント・返信を入れ子なしに並べたもの）。"""
 
     comment_id: int
     parent_id: int | None
@@ -39,7 +39,7 @@ class Comment:
 
 
 def _first(node: dict[str, Any], keys: list[str], default: Any = "") -> Any:
-    """候補キーを順に試し、最初に見つかった非 None 値を返す。"""
+    """候補キーを順に試し、最初に見つかった None でない値を返す。"""
     for k in keys:
         if k in node and node[k] is not None:
             return node[k]
@@ -47,7 +47,7 @@ def _first(node: dict[str, Any], keys: list[str], default: Any = "") -> Any:
 
 
 def _to_int(value: Any) -> int:
-    """安全に int 化する（失敗時 0）。"""
+    """安全に int へ変換する（変換に失敗したら 0）。"""
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -85,7 +85,7 @@ def _replies(node: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _forum_topic(payload: dict[str, Any]) -> dict[str, Any]:
-    """payload が {forumTopic:{...}} でも forumTopic 本体でも受け取れるようにする。"""
+    """payload が {forumTopic:{...}} でも、forumTopic 本体そのものでも受け取れるようにする。"""
     inner = payload.get("forumTopic")
     return inner if isinstance(inner, dict) else payload
 
@@ -124,7 +124,7 @@ def parse_forum_topic(payload: dict[str, Any], *, competition_id: str = "") -> t
                 walk(child, cid, depth + 1)
         return cid
 
-    # firstMessage をルート（depth=0）として取り込む
+    # firstMessage を根（depth=0）として取り込む
     root_id: int | None = None
     if first:
         root_id = walk(first, None, 0)
@@ -133,7 +133,8 @@ def parse_forum_topic(payload: dict[str, Any], *, competition_id: str = "") -> t
         if isinstance(c, dict):
             walk(c, root_id, 1)
 
-    # スレッドのメタ情報は権威的な forumTopic 直下フィールドを優先し、無ければ firstMessage 由来にフォールバック。
+    # スレッドのメタ情報は、正となる forumTopic 直下のフィールドを優先し、
+    # 無ければ firstMessage 由来を代替（fallback）に使う。
     topic_author = str(_first(ft, ["authorUserDisplayName"], "")) or (_author_name(first) if first else "")
     topic_votes = _to_int(_first(ft, ["totalVotes"], None)) if "totalVotes" in ft else (_votes(first) if first else 0)
     topic_date = str(_first(ft, ["postDate"], "")) or (str(_first(first, ["postDate", "date"], "")) if first else "")
@@ -150,7 +151,7 @@ def parse_forum_topic(payload: dict[str, Any], *, competition_id: str = "") -> t
 
 
 def _absolutize(url: str) -> str:
-    """相対 URL（/competitions/...）を絶対 URL にする。"""
+    """相対 URL（/competitions/...）を絶対 URL に直す。"""
     if url.startswith("/"):
         return f"https://www.kaggle.com{url}"
     return url
@@ -163,7 +164,7 @@ def _topic_url(competition_id: str, topic_id: int) -> str:
 
 
 def parse_topic_list(payload: dict[str, Any]) -> list[Topic]:
-    """ListEntities 相当のレスポンスから Topic の見出し群を取り出す（案A の一覧用）。"""
+    """ListEntities 相当のレスポンスから Topic の見出し群を取り出す（案A＝内部 API 方式の一覧取得で使う）。"""
     entities = _first(payload, ["entities", "documents", "results", "items"], [])
     topics: list[Topic] = []
     if not isinstance(entities, list):

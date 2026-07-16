@@ -1,6 +1,6 @@
-"""SQLite の共通ヘルパ（接続・スキーマ初期化・upsert）。
+"""SQLite の共通ヘルパ（接続・スキーマ初期化・追加または更新（upsert））。
 
-kernels.db / discussions.db の双方で使う薄い層。ORM は使わず sqlite3 標準ライブラリのみ。
+kernels.db / discussions.db の双方で使う薄い層。ORM は使わず sqlite3 標準ライブラリだけを使う。
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ def connect(db_path: Path) -> sqlite3.Connection:
 
 
 def init_db(conn: sqlite3.Connection, ddl: str) -> None:
-    """CREATE TABLE IF NOT EXISTS 群（冪等な DDL）を実行する。"""
+    """CREATE TABLE IF NOT EXISTS 群（テーブル定義（DDL）。繰り返し実行しても安全（冪等））を実行する。"""
     conn.executescript(ddl)
     conn.commit()
 
@@ -31,13 +31,13 @@ def upsert(
     row: dict[str, object],
     pk: Sequence[str],
 ) -> None:
-    """1 行を INSERT、主キー衝突時は非キー列を UPDATE する。
+    """1 行を INSERT し、主キーが衝突したら非キー列だけを UPDATE する（追加または更新（upsert））。
 
     Args:
         conn: 接続。
         table: テーブル名。
         row: 列名 → 値の dict。
-        pk: 主キー列名の並び（ON CONFLICT 対象）。
+        pk: 主キー列名の並び（衝突判定に使う ON CONFLICT の対象）。
     """
     cols = list(row.keys())
     placeholders = ", ".join(["?"] * len(cols))

@@ -17,8 +17,8 @@ new-exp:
 sdk-dataset:
 	uv run python scripts/ops/build_sdk_dataset.py
 
-# attack.py を Kaggle GPU 上で実モデル（gpt_oss / gemma_4）採点し scores.json を回収する。
-# 採点は public+private の 2 ガードレール（生成1回・リプレイ多）。MODELS / CANDIDATES で調整可。
+# attack.py を Kaggle GPU 上で実モデル（gpt_oss / gemma_4）で採点し scores.json を取得（回収）する。
+# 採点は public（公開版）+private（非公開版）の 2 つの防御機構（ガードレール）で行う（生成は1回・再実行=リプレイは多数）。MODELS / CANDIDATES で調整できる。
 ## eval: Kaggle で採点（build→push→wait→fetch）。例: make eval EXP=exp001 CANDIDATES=30
 eval:
 	uv run python scripts/ops/run_eval.py $(EXP) \

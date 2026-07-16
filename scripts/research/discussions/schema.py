@@ -1,4 +1,4 @@
-"""discussions.db のスキーマ定義（冪等 DDL）。"""
+"""discussions.db のスキーマ定義（テーブル定義（DDL）。繰り返し実行しても安全（冪等））。"""
 
 from __future__ import annotations
 

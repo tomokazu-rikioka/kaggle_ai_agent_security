@@ -1,9 +1,9 @@
-"""CLI: ディスカッションを収集して discussions.db へ保存する。取得層を --source で切替。
+"""CLI: ディスカッションを収集して discussions.db へ保存する。取得のやり方を --source で切り替える。
 
 使い方:
-    # 案B（既定・新トークン不要）: Bookmarks.json 起点、事前取得 JSON を取り込む
+    # 案B（事前取得 JSON 方式・既定・新トークン不要）: Bookmarks.json 起点、保存済み JSON を取り込む
     uv run python scripts/research/discussions/discussion_ingest.py <comp> --source bookmarks
-    # 案A（要 KAGGLE_API_TOKEN）: 内部 API から自動収集
+    # 案A（内部 API 方式・要 KAGGLE_API_TOKEN）: Kaggle 内部 API から自動収集
     uv run python scripts/research/discussions/discussion_ingest.py <comp> --source internal --max-pages 3
     # 特定スレッドのみ
     uv run python scripts/research/discussions/discussion_ingest.py <comp> --topic-id 708034 --topic-id 708926
@@ -34,7 +34,7 @@ from scripts.research.discussions.schema import DISCUSSIONS_DDL  # noqa: E402
 
 
 def _store(conn: sqlite3.Connection, comp: str, topic: Topic, comments: list[Comment], now: str) -> None:
-    """1 スレッドと配下コメントを upsert する。"""
+    """1 スレッドと、その配下のコメントを DB へ追加または更新（upsert）する。"""
     upsert(
         conn,
         "discussions",
@@ -73,7 +73,7 @@ def _store(conn: sqlite3.Connection, comp: str, topic: Topic, comments: list[Com
 def _save_raw(topic_id: int, payload: dict) -> None:
     """内部 API の生レスポンスを data/discussions_raw/<id>.json に保存する。
 
-    parser のフィールドマッピング検証や、案B（bookmarks）キャッシュとしての再利用に使う。
+    parser のフィールド対応の検証や、案B（事前取得 JSON 方式）のキャッシュとして再利用するために使う。
     """
     DISCUSSIONS_RAW_DIR.mkdir(parents=True, exist_ok=True)
     path = DISCUSSIONS_RAW_DIR / f"{topic_id}.json"
@@ -82,7 +82,7 @@ def _save_raw(topic_id: int, payload: dict) -> None:
 
 
 def ingest(comp: str, *, source: str, max_pages: int, topic_ids: list[int] | None, save_raw: bool = False) -> int:
-    """指定ソースから収集して DB に保存する。取り込んだスレッド数を返す。"""
+    """指定した取得のやり方で収集して DB に保存する。取り込んだスレッド数を返す。"""
     conn = connect(DISCUSSIONS_DB)
     stored = 0
     now = datetime.now(UTC).isoformat()
@@ -122,7 +122,7 @@ def _ingest_internal(
                 topic.topic_id = tid
             _store(conn, comp, topic, comments, now)
             stored += 1
-        except Exception as exc:  # noqa: BLE001 - 1 スレッドの失敗で全体を止めない
+        except Exception as exc:  # noqa: BLE001 - 1 スレッドの取得が失敗しても全体は止めない
             print(f"[research] topic {tid} の取得に失敗（skip）: {exc}")
         time.sleep(0.6)
     return stored

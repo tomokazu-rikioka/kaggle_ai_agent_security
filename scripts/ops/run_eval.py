@@ -1,15 +1,15 @@
-"""ローカルから Kaggle API で attack.py を評価する 1 コマンド入口。
+"""手元から Kaggle API で attack.py を評価する 1 コマンドの入口。
 
 各モデルについて:
   1) build_eval_notebook.build(exp, model) で build/eval/<exp>/<model>/ を生成
   2) kaggle kernels push -p build/eval/<exp>/<model>
-  3) kaggle kernels status <id> を complete/error までポーリング
-  4) kaggle kernels output <id> -p .../output で scores.json を回収
+  3) kaggle kernels status <id> を complete/error まで定期確認（ポーリング）
+  4) kaggle kernels output <id> -p .../output で scores.json を取得（回収）
 最後に全モデルを experiments/<exp>/scores.json にマージし、サマリ表を表示する。
 
-モデルごとに別カーネルにするのは T4 メモリの OOM 回避（gpt_oss 12GB / gemma_4 16GB を
-同一カーネルで連続ロードしない）と、片方の失敗が他方を巻き込まないため。Kaggle の同時 GPU
-枠次第で逐次実行され得るが、push は全モデル先に出してから一括ポーリングする。
+モデルごとに別カーネルにするのは、T4 メモリのメモリ不足（OOM）回避（gpt_oss 12GB / gemma_4 16GB を
+同じカーネルで続けてロードしない）と、片方の失敗が他方を巻き込まないため。Kaggle の同時 GPU
+枠しだいで順番に実行され得るが、push は全モデルを先に出してから一括で定期確認する。
 
 使い方:
     uv run python scripts/ops/run_eval.py exp001                       # gpt_oss,gemma_4 両方
@@ -31,7 +31,7 @@ from build_eval_notebook import EXPERIMENTS_DIR, MODELS, build
 
 POLL_INTERVAL_S = 60
 DEFAULT_TIMEOUT_S = 6 * 3600  # 1 カーネルあたりの最大待ち時間
-RETRY_ATTEMPTS = 2  # error 終了時の再 push リトライ回数（Kaggle の一時的な入力マウント失敗対策）
+RETRY_ATTEMPTS = 2  # error で終わったときの再 push 再試行（リトライ）回数（Kaggle の一時的な入力マウント失敗対策）
 
 
 def _kernel_id(out_dir: Path) -> str:
@@ -52,7 +52,7 @@ def _push(out_dir: Path) -> None:
 
 
 def _poll_status(kernel_id: str) -> str:
-    """status 文字列を返す: 'complete' | 'error' | 'running'（その他は running 扱い）。"""
+    """status の文字列を返す: 'complete' | 'error' | 'running'（それ以外は running 扱い）。"""
     res = _run(["kaggle", "kernels", "status", kernel_id])
     text = (res.stdout + res.stderr).lower()
     if "complete" in text:
@@ -63,7 +63,7 @@ def _poll_status(kernel_id: str) -> str:
 
 
 def _wait_for(kernel_id: str, *, timeout_s: int, interval_s: int) -> str:
-    """complete/error まで待つ。タイムアウトで 'timeout' を返す。"""
+    """complete/error になるまで待つ。時間切れなら 'timeout' を返す。"""
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         status = _poll_status(kernel_id)
@@ -77,11 +77,11 @@ def _wait_for(kernel_id: str, *, timeout_s: int, interval_s: int) -> str:
 def _wait_fetch_with_retry(
     model: str, out_dir: Path, *, timeout_s: int, interval_s: int, max_attempts: int
 ) -> dict | None:
-    """1 モデルを wait→fetch。error 終了なら再 push してリトライする。
+    """1 モデルについて待機→取得（回収）する。error で終わったら再 push して再試行（リトライ）する。
 
-    Kaggle 側の一時的な入力マウント失敗（競技データが添付されず assert で落ちる等）は
-    再実行で解消することが多いため、error のときだけ再 push して待ち直す。timeout は
-    コストが大きいのでリトライしない。complete で scores を回収できたら返す。
+    Kaggle 側の一時的な入力マウント失敗（競技データが添付されず assert で落ちる等）は、
+    再実行で直ることが多いので、error のときだけ再 push して待ち直す。timeout は
+    コストが大きいので再試行しない。complete になって scores を取得（回収）できたら返す。
     """
     kid = _kernel_id(out_dir)
     for attempt in range(1, max_attempts + 1):
@@ -100,7 +100,7 @@ def _wait_fetch_with_retry(
 
 
 def _fetch_scores(kernel_id: str, out_dir: Path) -> dict | None:
-    """kernels output で scores.json を回収して dict を返す。"""
+    """kernels output で scores.json を取得（回収）して dict を返す。"""
     output_dir = out_dir / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
     res = _run(["kaggle", "kernels", "output", kernel_id, "-p", str(output_dir)])
@@ -113,10 +113,10 @@ def _fetch_scores(kernel_id: str, out_dir: Path) -> dict | None:
 
 
 def _merge_and_save(exp: str, per_model: dict[str, dict]) -> Path:
-    """今回採点したモデルの scores を experiments/<exp>/scores.json にマージ保存。
+    """今回採点したモデルの scores を experiments/<exp>/scores.json にマージして保存する。
 
-    既存 scores.json のモデル結果を保持し、今回採点したモデルだけを上書き更新する。
-    これにより 1 モデルだけ再 eval しても他モデルの結果が消えない（例: gpt_oss だけ
+    既存 scores.json のモデル結果は残したまま、今回採点したモデルだけを上書きする。
+    こうすると 1 モデルだけ再 eval しても他モデルの結果が消えない（例: gpt_oss だけ
     再 eval しても既存の gemma_4 結果が残る）。
     """
     out_path = EXPERIMENTS_DIR / exp / "scores.json"

@@ -1,11 +1,13 @@
-"""案A: 非公式の内部 API でディスカッションを取得する（requests + KGAT bearer + XSRF）。
+"""案A（内部 API 方式）: 非公式の Kaggle 内部 API でディスカッションを取得する。
 
-Kaggle の公開 API はディスカッションを提供しないため、Web が使う内部エンドポイントを叩く。
+requests + Kaggle 内部認証トークン（KGAT bearer）+ CSRF 対策トークン（XSRF）を使う。
+
+Kaggle の公開 API はディスカッションを提供しないため、Web 画面が内部で使うエンドポイントを直接叩く。
 - 一覧: POST {KAGGLE_API}/v1/search.SearchApiService/ListEntities
 - 本文: POST {KAGGLE_WEB}/api/i/discussions.DiscussionsService/GetForumTopicById
 
 認証は環境変数 KAGGLE_API_TOKEN（KGAT）を Bearer に載せ、加えて www.kaggle.com を GET して
-得た Cookie の XSRF-TOKEN を X-XSRF-TOKEN ヘッダに付ける。**非公式なので無告知で壊れ得る**。
+得た Cookie の XSRF-TOKEN を X-XSRF-TOKEN ヘッダに付ける。**非公式なので予告なく壊れ得る**。
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ from scripts.research.common.config import (  # noqa: E402
 
 
 def get_token() -> str:
-    """KAGGLE_API_TOKEN（KGAT）を返す。未設定なら明示エラー。"""
+    """KAGGLE_API_TOKEN（KGAT）を返す。未設定ならはっきりエラーを出す。"""
     token = os.environ.get(TOKEN_ENV)
     if not token:
         raise RuntimeError(
@@ -40,13 +42,13 @@ def get_token() -> str:
 
 
 def make_session() -> Any:
-    """Bearer + XSRF を設定した requests.Session を作る。"""
+    """Bearer と XSRF ヘッダを設定した requests.Session を作る。"""
     import requests
 
     session = requests.Session()
     token = get_token()
     session.headers.update({"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
-    # XSRF-TOKEN Cookie を取得してヘッダに反映
+    # XSRF-TOKEN Cookie を取得してヘッダに写す
     try:
         session.get(KAGGLE_WEB, timeout=HTTP_TIMEOUT_S)
         xsrf = session.cookies.get("XSRF-TOKEN", "")
@@ -74,7 +76,7 @@ def _post(session: Any, url: str, body: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_entities(session: Any, *, query: str, page_token: str | None, page_size: int = 20) -> dict[str, Any]:
-    """ディスカッション一覧を検索する（1 ページ）。"""
+    """ディスカッション一覧を検索する（1 ページ分）。"""
     body: dict[str, Any] = {
         "filters": {
             "query": query,
@@ -96,7 +98,7 @@ def get_forum_topic(session: Any, topic_id: int) -> dict[str, Any]:
 
 
 def iter_topics(session: Any, *, query: str = COMPETITION_TITLE, max_pages: int = 3) -> Iterator[dict[str, Any]]:
-    """ListEntities をページングして生レスポンスを順に yield する。"""
+    """ListEntities をページ送りしながら、生レスポンスを順に yield する。"""
     page_token: str | None = None
     for _ in range(max_pages):
         payload = list_entities(session, query=query, page_token=page_token)
