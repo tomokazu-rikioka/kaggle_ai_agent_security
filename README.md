@@ -41,7 +41,8 @@ kaggle_ai_agent_security/
 │   ├── ops/build_sdk_dataset.py                 #   評価用 SDK dataset を生成
 │   └── eval/eval_driver.py                      #   自己完結の採点ドライバ（Kaggle GPU で実行）
 ├── docs/                                        # ドキュメント
-│   ├── scores/SCORE.md                          #   スコア表（直接編集 / update-score スキル）
+│   ├── SCORE.md                                 #   スコア表（直接編集 / update-score スキル）
+│   ├── スコア分析と改善方針.md                  #   スコア分析・レバー台帳（SCORE.md と対のlivingノート）
 │   ├── competition-research/                    #   調査・戦略ノート
 │   └── discussions/                             #   Discussion 要約（テーマ別索引）
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
@@ -88,12 +89,12 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 
 ## スコア管理
 
-スコアは [`docs/scores/SCORE.md`](docs/scores/SCORE.md) を**直接編集**して管理する（単一ソース）。
+スコアは [`docs/SCORE.md`](docs/SCORE.md) を**直接編集**して管理する（単一ソース）。
 
 - **ローカル列** (`local_public` 等): `make eval` が Kaggle から回収する
   `experiments/<exp>/scores.json` を、`/update-score <exp>` スキルがその exp の行へ反映
   （`gpt_oss > gemma_4` の優先順で採用）。`public` が公開 LB 相関、`private` は非公開汎化の代理。
-- **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/scores/SCORE.md` に直接記入する
+- **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/SCORE.md` に直接記入する
   （または Claude に依頼）。1 提出で 4 スコアが返るので、確認して転記する。
 
 ## 評価（Kaggle GPU でローカル採点）

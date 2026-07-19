@@ -27,7 +27,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 | `make sdk-dataset` | 評価用 SDK dataset を生成（vendor 更新時のみ。要 `kaggle datasets create`） |
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push` |
-| `/update-score exp001` | `docs/scores/SCORE.md` の行を更新（スキル） |
+| `/update-score exp001` | `docs/SCORE.md` の行を更新（スキル） |
 
 ## アーキテクチャ
 
@@ -72,9 +72,9 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 
 ### スコア管理
 
-`docs/scores/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
+`docs/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
 ローカル列は `make eval` が回収する `experiments/<exp>/scores.json` を元に `/update-score <exp>` スキルが
-反映、LB 列・changes 列は `docs/scores/SCORE.md` に直接記入する。
+反映、LB 列・changes 列は `docs/SCORE.md` に直接記入する。
 
 ## このコンペの要点
 

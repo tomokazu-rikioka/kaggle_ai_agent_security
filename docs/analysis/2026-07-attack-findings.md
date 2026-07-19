@@ -6,7 +6,7 @@
 **実験番号によらず使える恒久知見**と、現行 3 実験（exp001〜exp003）の位置づけを整理したもの。
 過去の exp004〜exp012 を含む詳細な変遷記録は 2026-07-16 の再編で本ドキュメントに蒸留・集約した
 （旧 exp 番号キーの分析 doc は誤読源になるため削除）。個々の実験詳細は
-`experiments/<exp>/notes.md`、スコアは `docs/scores/SCORE.md` を参照。
+`experiments/<exp>/notes.md`、スコアは `docs/SCORE.md` を参照。
 
 ## TL;DR
 
@@ -110,7 +110,7 @@ severity_weight = {1:1, 2:2, 3:4, 4:8, 5:16}
   古い scores.json の混入）は `CLAUDE.md` の「運用上の教訓」に集約した。
 
 ## 関連ファイル
-- `docs/scores/SCORE.md` — 現行 3 実験のスコア表（単一ソース）
+- `docs/SCORE.md` — 現行 3 実験のスコア表（単一ソース）
 - `experiments/exp00N/notes.md` — 各実験の設計意図・実測
 - `vendor/aicomp_sdk_pkg/aicomp_sdk/core/predicates.py` — 述語判定ロジック
 - `vendor/aicomp_sdk_pkg/aicomp_sdk/guardrails/optimal.py` — public ガードレール

@@ -1,11 +1,11 @@
 ---
 name: update-score
-description: docs/scores/SCORE.md（実験スコア表）の行を更新する。make eval の scores.json から local スコアを反映、LB スコアや変更内容の記入に使う。トリガー: "スコア更新", "SCORE.md 更新", "スコアを記入", "/update-score"
+description: docs/SCORE.md（実験スコア表）の行を更新する。make eval の scores.json から local スコアを反映、LB スコアや変更内容の記入に使う。トリガー: "スコア更新", "SCORE.md 更新", "スコアを記入", "/update-score"
 ---
 
 # update-score
 
-`docs/scores/SCORE.md` は実験スコアの**単一ソース**で、直接編集して運用する
+`docs/SCORE.md` は実験スコアの**単一ソース**で、直接編集して運用する
 （`changes.yaml` / `lb_scores.yaml` のような入力ファイルは使わない）。
 本スキルは指定された exp の行を upsert（無ければ追加・有れば更新）する。
 
@@ -43,8 +43,8 @@ PY
 
 `NO_SCORES` が出たら、「先に `make eval EXP=<exp>`（Kaggle GPU で採点）を実行してください」と案内して終了する。
 
-### 2. docs/scores/SCORE.md を更新
-- `docs/scores/SCORE.md` を Read し、表のヘッダ列を確認する。
+### 2. docs/SCORE.md を更新
+- `docs/SCORE.md` を Read し、表のヘッダ列を確認する。
 - 対象 exp の行があれば、`local_agent` と `local_public` / `local_private`
   列を Edit で更新する。無ければ表の末尾に新しい行を追加する
   （LB 列は `-`、`changes` 列は空または指定値）。
@@ -56,6 +56,6 @@ PY
 どの行をどう変えたか（before → after）を簡潔に伝える。
 
 ## 注意
-- スコアの単一ソースは `docs/scores/SCORE.md`。yaml の入力ファイルは作らない。
+- スコアの単一ソースは `docs/SCORE.md`。yaml の入力ファイルは作らない。
 - 手動列（`lb_*` / `changes`）を勝手に消さない。local 列のみ自動反映する。
 - `local_public` が公開 LB と相関、`local_private` は非公開汎化の代理。

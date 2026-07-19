@@ -32,7 +32,7 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 3. **eval（2並列）**：`make eval EXP=expNNN MODELS=gemma_4` を 2 本並列で実行し、完了を監視。
    `scores.json` の per-guardrail 値・発火述語数・所要時間を回収し、1 候補あたり raw を逆算して理論値と照合。
 4. **記録**：opus に `docs/analysis/2026-07-attack-findings.md` へ追記させ、`/update-score expNNN`
-   で `docs/scores/SCORE.md` を更新。
+   で `docs/SCORE.md` を更新。
 5. **意思決定**：結果を踏まえ次ラウンドの 2 案を決める。overfit（public で出て private で消える）
    に注意。**止めずに次ラウンドへ**（ユーザが止めるまで反復）。
 
@@ -57,5 +57,5 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 INVALID 安全（両モデル）な構成で `make submit EXP=<best>` する。提出 Notebook は `serve()` セル必須。
 
 ## 状態の起点
-- 現在の到達点は `docs/scores/SCORE.md` と `docs/analysis/` の最新セクションを読んで把握する。
+- 現在の到達点は `docs/SCORE.md`（スコア表）と `docs/スコア分析と改善方針.md`（コンペ全体の分析・レバー台帳・事前判定ルーブリック）を読んで把握する。個別の深掘りは `docs/analysis/` を参照。
 - 実験制約・方針でユーザ指示があればそれを最優先（本スキルの既定より上位）。

@@ -362,7 +362,7 @@ make eval EXP=exp001 CANDIDATES=30   # smoke。本番は CANDIDATES を外す
 ```
 
 - `score` は正規化済み（÷200000×1000、≤1000）、`score_raw` は生（深刻度の重み合計 + 2×cell）。
-- `/update-score <exp>` スキルがこの JSON を読んで `docs/scores/SCORE.md` のローカル列を更新する（`gpt_oss > gemma_4` 優先）。
+- `/update-score <exp>` スキルがこの JSON を読んで `docs/SCORE.md` のローカル列を更新する（`gpt_oss > gemma_4` 優先）。
 - **public で出て private で消える攻撃は過学習の疑い**。
 
 ---
@@ -388,4 +388,4 @@ make eval EXP=exp001 CANDIDATES=30   # smoke。本番は CANDIDATES を外す
 
 - [01-competition-overview.md](01-competition-overview.md) — コンペ仕様の静的チートシート
 - [02-sdk-analysis.md](02-sdk-analysis.md) — SDK ソースの部品別 ground truth 解析
-- [../scores/SCORE.md](../scores/SCORE.md) — 実験スコア表（ローカル / LB）
+- [../SCORE.md](../SCORE.md) — 実験スコア表（ローカル / LB）
