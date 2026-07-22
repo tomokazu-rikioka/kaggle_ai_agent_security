@@ -1,4 +1,4 @@
-.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-discussions research-discussion-read lint format help
+.PHONY: new-exp sdk-dataset eval build submit submit-lb status research-kernels research-kernel-read research-discussions research-discussion-read lint format help
 .DEFAULT_GOAL := help
 
 KAGGLE := kaggle
@@ -31,9 +31,13 @@ eval:
 build:
 	uv run python scripts/ops/build_notebook.py $(EXP)
 
-## submit: build して Kaggle へ push
+## submit: build して Kaggle へ push（LB へは提出しない）
 submit:
 	uv run python scripts/ops/submit.py $(EXP)
+
+## submit-lb: push 済みカーネルを LB へ提出（★ユーザ明示指示時のみ／日次上限を消費）
+submit-lb:
+	uv run python scripts/ops/submit_lb.py $(EXP) $(if $(MESSAGE),--message "$(MESSAGE)",) $(if $(YES),--yes,)
 
 ## status: カーネル実行状態を確認
 status:
@@ -82,7 +86,8 @@ help:
 	@echo "make sdk-dataset              — 評価用 SDK dataset を生成（vendor 更新時のみ・要 kaggle datasets create）"
 	@echo "make eval EXP=exp001          — Kaggle で採点（build→push→wait→fetch）[MODELS=.. CANDIDATES=..]"
 	@echo "make build EXP=exp001         — 提出用 submission.ipynb を生成"
-	@echo "make submit EXP=exp001        — build して kaggle kernels push"
+	@echo "make submit EXP=exp001        — build して kaggle kernels push（LB へは提出しない）"
+	@echo "make submit-lb EXP=exp001     — push 済みカーネルを LB へ提出（★ユーザ明示指示時のみ）[MESSAGE=.. YES=1]"
 	@echo "make status EXP=exp001        — 提出カーネルの実行状態を確認"
 	@echo "make research-kernels         — 公開カーネル一覧を収集（kernels.db）[MAXPAGES=.. SORT=..]"
 	@echo "make research-kernel-read REF=owner/slug — カーネル本文を取得して表示"
