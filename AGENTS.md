@@ -27,7 +27,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 | `make sdk-dataset` | 評価用 SDK dataset を生成（vendor 更新時のみ。要 `kaggle datasets create`） |
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push`（デプロイ・実行のみ。LB へは提出しない） |
-| `make submit-lb EXP=exp001` | push 済みカーネルを LB へ提出（★**ユーザ明示指示時のみ**／日次上限を消費） |
+| `make submit-lb EXP=exp001` | （現状 **403 で不可**）API 経由の LB 提出。LB 提出は Kaggle の **Edit 画面「Submit to competition」からのみ通る**（★**ユーザ明示指示時のみ**／日次上限を消費）。→ 下記「LB 提出までの流れ」 |
 | `/update-score exp001` | `docs/SCORE.md` の行を更新（スキル） |
 
 ## アーキテクチャ
@@ -48,17 +48,38 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 `scripts/ops/build_notebook.py` が attack.py を **base64 で符号化して 1 セルに埋め込む**
 （`'''` の混入に強い）。Notebook 自体は採点に関与しない（学習コンペの推論 Notebook とは別物）。
 
-#### LB 提出は「push」と「submit」の2段階（重要ルール）
+#### LB 提出までの流れ（push → Edit 画面から Submit）
 
 `make submit`（`kaggle kernels push`）は**カーネルをデプロイ・実行するだけ**で、
-リーダーボード（LB）への提出は行わない。LB へ載せるには code competition の提出
-API（`kaggle competitions submit -k <owner/slug> -f submission.csv`。実装は
-`scripts/ops/submit_lb.py` = `make submit-lb`）を別途叩く必要がある。
+リーダーボード（LB）への提出は行わない。**LB 提出は Kaggle の Edit（ノートブック編集）画面の
+「Submit to competition」からのみ通る**（2026-07-22 exp021 で確定）。
 
-> ★**LB 提出（`make submit-lb`）は、ユーザから明示的に指示された場合のみ実行する。**
-> エージェントは自動で提出してはいけない。理由: LB 提出は**日次上限（5/日・最終2件）を
-> 消費する不可逆な外部アクション**で、どの実験をいつ提出するかはユーザの判断事項だから。
-> `make submit`（push）や `make eval`（採点）は従来どおり自由に実行してよい。
+具体的な手順:
+
+1. `make submit EXP=expNNN`（build + `kaggle kernels push`）でカーネルを push。実行が完了し
+   status が COMPLETE になるまで待つ。状態確認は正しい full id で直接:
+   `uv run kaggle kernels status rikitomo0526/ai-agent-security-attack-script-expNNN`
+   （`make status` の slug は `-script-` 欠落で不一致なので使わない）。
+2. ブラウザで Notebook ページ
+   `https://www.kaggle.com/code/rikitomo0526/ai-agent-security-attack-script-expNNN` を開く。
+3. **Edit** を押してエディタを開く → 右パネル下部の **「Submit to competition」** を展開 →
+   **Submit** → ダイアログで **Submit**。DAILY SUBMISSIONS が `n/5` に増え、アクティビティに
+   「Competition submission … Scoring…」が出れば受理。採点はキュー込みで概ね ~800–1000 分。
+
+**通らない2経路（注意）**:
+- `make submit-lb`（`scripts/ops/submit_lb.py` = `competition_submit_code` API）は **403 Forbidden**。
+- ビューアの「Submit to Competition」ダイアログは
+  **「requires submission.csv and the selected Notebook Version does not output this file」で Submit 無効**。
+
+理由: push（Save&Run All）した version は submission.csv を出力しない（`serve()` は競技リラン時のみ
+生成）ため、**commit 済み version を事前チェックする上記2経路は弾かれる**。Edit 画面の Submit は
+**新 version を保存＋実行して提出**するので、競技リランで submission.csv が生成されて通る。
+
+> ★**LB 提出は、ユーザから明示的に指示された場合のみ実行する。** エージェントは自動で提出しては
+> いけない。理由: LB 提出は**日次上限（5/日・最終2件）を消費する不可逆な外部アクション**で、
+> どの実験をいつ提出するかはユーザの判断事項だから。`make submit`（push）や `make eval`（採点）は
+> 従来どおり自由に実行してよい。ブラウザ操作での提出も、明示指示時のみ・提出前に対象/バージョンを
+> 目視確認してから最後の Submit を押す。
 
 ### 実験構成
 
