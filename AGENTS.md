@@ -62,6 +62,9 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
    （`make status` の slug は `-script-` 欠落で不一致なので使わない）。
 2. ブラウザで Notebook ページ
    `https://www.kaggle.com/code/rikitomo0526/ai-agent-security-attack-script-expNNN` を開く。
+   **このデプロイ（LB 提出）のブラウザ操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**。
+   理由: ユーザの Chrome セッション（Kaggle ログイン済み）をそのまま使えるため。Playwright MCP は
+   別プロファイルでログインが通らず、Edit 画面まで到達できない。
 3. **Edit** を押してエディタを開く → 右パネル下部の **「Submit to competition」** を展開 →
    **Submit** → ダイアログで **Submit**。DAILY SUBMISSIONS が `n/5` に増え、アクティビティに
    「Competition submission … Scoring…」が出れば受理。採点はキュー込みで概ね ~800–1000 分。
@@ -129,7 +132,10 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 - `attack.py` と `scripts/eval/eval_driver.py` は **単一ファイル自己完結**（Notebook へ base64 で
   焼くため兄弟 import 禁止）。
 - コミットは Conventional Commits（`feat:` / `fix:` / `docs:` など）。
-- Kaggle ページ（discussion/overview）の確認は Playwright MCP を使う（WebFetch は JS ページで失敗）。
+- Kaggle ページ（discussion/overview）の**閲覧・調査**は Playwright MCP を使う（WebFetch は JS ページで失敗）。
+- **デプロイ（LB 提出）のブラウザ操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**。
+  ログイン済みの Chrome セッションが必要なため。手順は「LB 提出までの流れ」を参照
+  （★ユーザ明示指示時のみ）。
 
 ## 文章・コメントの書き方（平易化ルール）
 
@@ -164,7 +170,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
   N=300・K=2 は gpt_oss で 14400s>9000s → **INVALID（提出が丸ごと失格）**。
 - 従って **fill(高 N) や M/K の積み上げ(stacking)で出た手元の高スコアは提出に使えない**
   （手元だけで出る見かけの産物）。提出設計の詳細リスクは
-  `docs/analysis/2026-07-attack-findings.md`。
+  `docs/スコア分析と改善方針.md`（§2-2 VOID=時間切れ・§4 ローカル評価）。
 
 ### Kaggle eval 運用の落とし穴（`make eval`）
 - **同時 GPU バッチ枠 = 2**。3 本以上同時に push しない。テスト用/他/提出カーネルの実行も枠を数える。
@@ -180,4 +186,4 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
   同じ出力先で連続実行すると**古い scores.json が読まれる**（過去に gpt_oss eval で誤値混入・手動
   `--force` で解決）。
   回避は出力先を分けるか full 前に `build/eval/<exp>/<model>/output/` を消す。恒久対策は `run_eval.py` に
-  `--force` 追加（TODO）。詳細は `docs/analysis/2026-07-attack-findings.md`。
+  `--force` 追加（TODO）。詳細は `docs/スコア分析と改善方針.md`（§4 ローカル評価の使い方）。
