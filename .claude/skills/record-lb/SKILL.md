@@ -44,6 +44,9 @@ Kaggle へ LB 提出（Edit 画面の Submit）した exp について、**採�
 
 ### 2. docs/SCORE.md を更新
 - `docs/SCORE.md` を Read し、対象 exp の行を確認する。
+  **行が無ければ表の末尾に新しい行を追加する**（列は `exp | local_agent | local_public |
+  local_private | lb_public | lb_time | changes`。未取得の列は `-`）。
+  exp001–080 の過去実測は `docs/knowledges/08-実験アーカイブ.md` にあり、SCORE.md には無い。
 - `status=COMPLETE` の exp について、`lb_public` 列に `public`（小数3桁、例 `88.560`）、
   `lb_time` 列に `time_min` に「分」を付けた値（例 `812分`）を Edit で記入する。
 - **`local_*` 列・`changes` 列は既存値を保持する**（この skill は LB 列のみ触る）。

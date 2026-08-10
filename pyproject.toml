@@ -45,6 +45,8 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM"]
 # attack.py は /kaggle/working/attack.py として単一ファイルでロードされる自己完結スクリプト。
 # ベースライン継承の再エクスポート（F401）やトップレベル副作用（E402）を許容する。
 "experiments/**/attack.py" = ["E402", "F401"]
+# docs/knowledges/reference/*.py は実績のある attack.py の退避コピー（同じ契約に従う）。
+"docs/knowledges/reference/*.py" = ["E402", "F401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["scripts"]

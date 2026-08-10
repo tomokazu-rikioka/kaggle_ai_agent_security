@@ -94,4 +94,4 @@ help:
 	@echo "make research-discussions     — ディスカッション収集 [SRC=bookmarks|internal]"
 	@echo "make research-discussion-read TID=708034 — スレッド本文を表示"
 	@echo "make lint / make format       — ruff チェック / フォーマット"
-	@echo "（スコア表 docs/scores/SCORE.md の更新は /update-score スキル）"
+	@echo "（スコア表 docs/SCORE.md の更新は /update-score スキル・知見は docs/knowledges/）"

@@ -1,13 +1,13 @@
 ---
 name: exp-loop
-description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を増やしながら再帰的に反復して最良スコアを目指す自律実験ループ。仮説→2並列eval(N=300 gemma)→docs/analysis記録→改善、を繰り返す。実装・調査は opus サブエージェントに委譲しオーケストレーションに徹する。トリガー: "実験ループ", "再帰的に実験", "expを増やして試行錯誤", "/exp-loop"
+description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を増やしながら再帰的に反復して最良スコアを目指す自律実験ループ。仮説→2並列eval(N=300 gemma)→docs/knowledges記録→改善、を繰り返す。実装・調査は opus サブエージェントに委譲しオーケストレーションに徹する。トリガー: "実験ループ", "再帰的に実験", "expを増やして試行錯誤", "/exp-loop"
 ---
 
 # exp-loop — 再帰的・自律実験ループ
 
 `experiments/expNNN` を増やしながら、仮説→検証→改善を**止めずに反復**して最良スコアを探索する。
 学習は無く `attack.py` の `run()` がコア。詳細な採点構造は CLAUDE.md「このコンペの要点」と
-`docs/analysis/` を参照。
+`docs/knowledges/`（特に 01-採点機構・02-ガードレールと到達可能面）を参照。
 
 ## 大原則（過去の失敗から確定）
 
@@ -20,7 +20,8 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 3. **常に 2 並列**（Kaggle 同時 GPU 枠=2）。3 本以上同時に push しない。
 4. **local≠live**。ローカルは replay 締切が無く高 N/高 K で高スコアが出るが提出非再現。
    提出可否は「N×K×t_cand<9000秒/モデル、遅い gpt_oss 律速」で判断（CLAUDE.md 教訓）。
-5. **やったこと全てを `docs/analysis/` に集約**（時系列の単一の物語として維持。負の結果も残す）。
+5. **やったこと全てを `docs/knowledges/` に集約**（観点別に維持。負の結果も残す。
+   レバーの当否は `04-レバー台帳.md`、ラウンド履歴は `08-実験アーカイブ.md` へ追記）。
 
 ## 1 ラウンドの流れ
 
@@ -31,7 +32,8 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
    兄弟 import 禁止・N_CANDIDATES=300）。
 3. **eval（2並列）**：`make eval EXP=expNNN MODELS=gemma_4` を 2 本並列で実行し、完了を監視。
    `scores.json` の per-guardrail 値・発火述語数・所要時間を回収し、1 候補あたり raw を逆算して理論値と照合。
-4. **記録**：opus に `docs/analysis/2026-07-attack-findings.md` へ追記させ、`/update-score expNNN`
+4. **記録**：opus に `docs/knowledges/04-レバー台帳.md`（レバーの当否）と
+   `docs/knowledges/08-実験アーカイブ.md`（ラウンド履歴）へ追記させ、`/update-score expNNN`
    で `docs/SCORE.md` を更新。
 5. **意思決定**：結果を踏まえ次ラウンドの 2 案を決める。overfit（public で出て private で消える）
    に注意。**止めずに次ラウンドへ**（ユーザが止めるまで反復）。
@@ -53,9 +55,10 @@ description: AI Agent Security コンペの攻撃探索を、実験No(expNNN)を
 ## 提出フェーズへの移行
 
 比較表（public/private の各列が N=300 で揃う）が埋まり最良手法が定まったら、
-`docs/analysis/2026-07-attack-findings.md` の live 安全域（§5）を起点に、
+`docs/knowledges/05-VOIDと提出運用.md` の live 安全域を起点に、
 INVALID 安全（両モデル）な構成で `make submit EXP=<best>` する。提出 Notebook は `serve()` セル必須。
 
 ## 状態の起点
-- 現在の到達点は `docs/SCORE.md`（スコア表）と `docs/スコア分析と改善方針.md`（コンペ全体の分析・レバー台帳・事前判定ルーブリック）を読んで把握する。個別の深掘りは `docs/analysis/` を参照。
+- 現在の到達点は `docs/knowledges/README.md`（30秒で現在地・索引）を読んで把握する。exp001–080 の実測値は `docs/knowledges/08-実験アーカイブ.md`、exp081 以降のスコアは `docs/SCORE.md`。
+- **新しい施策は回す前に `docs/knowledges/04-レバー台帳.md` の事前判定ルーブリックで赤／緑を確認する**（確認済みの退行を繰り返さない）。
 - 実験制約・方針でユーザ指示があればそれを最優先（本スキルの既定より上位）。

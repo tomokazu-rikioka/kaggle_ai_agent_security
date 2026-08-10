@@ -107,11 +107,16 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 - SDK は `make sdk-dataset` で作る Kaggle dataset（`rikitomo0526/aiagent-security-sdk`）を Add Input で
   添付（vendor 更新時のみアップロード）。GGUF は Internet ON で HF hub から取得。
 
-### スコア管理
+### スコア管理と知見
 
-`docs/SCORE.md` が**単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
+`docs/SCORE.md` が**スコアの単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
 ローカル列は `make eval` が回収する `experiments/<exp>/scores.json` を元に `/update-score <exp>` スキルが
 反映、LB 列・changes 列は `docs/SCORE.md` に直接記入する。
+
+**知見の入口は `docs/knowledges/`**（採点機構・到達可能面・レバー台帳・VOID 運用・private 汎化・
+参照実装・実験アーカイブ）。**新しい施策を試す前に `docs/knowledges/04-レバー台帳.md` の
+事前判定ルーブリックで赤／緑を確認する**（確認済みの退行を繰り返さないため）。
+exp001–080 の実測値は `docs/knowledges/08-実験アーカイブ.md` にある。
 
 ## このコンペの要点
 
@@ -170,7 +175,8 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
   N=300・K=2 は gpt_oss で 14400s>9000s → **INVALID（提出が丸ごと失格）**。
 - 従って **fill(高 N) や M/K の積み上げ(stacking)で出た手元の高スコアは提出に使えない**
   （手元だけで出る見かけの産物）。提出設計の詳細リスクは
-  `docs/スコア分析と改善方針.md`（§2-2 VOID=時間切れ・§4 ローカル評価）。
+  `docs/knowledges/05-VOIDと提出運用.md`（VOID=時間切れ・cap では防げない）と
+  `docs/knowledges/03-スループット原理.md`（§3-6 手元評価と live の乖離）。
 
 ### Kaggle eval 運用の落とし穴（`make eval`）
 - **同時 GPU バッチ枠 = 2**。3 本以上同時に push しない。テスト用/他/提出カーネルの実行も枠を数える。
@@ -186,4 +192,4 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
   同じ出力先で連続実行すると**古い scores.json が読まれる**（過去に gpt_oss eval で誤値混入・手動
   `--force` で解決）。
   回避は出力先を分けるか full 前に `build/eval/<exp>/<model>/output/` を消す。恒久対策は `run_eval.py` に
-  `--force` 追加（TODO）。詳細は `docs/スコア分析と改善方針.md`（§4 ローカル評価の使い方）。
+  `--force` 追加（TODO）。詳細は `docs/knowledges/03-スループット原理.md`（§3-6 手元評価の使い方）。

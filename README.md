@@ -41,10 +41,11 @@ kaggle_ai_agent_security/
 │   ├── ops/build_sdk_dataset.py                 #   評価用 SDK dataset を生成
 │   └── eval/eval_driver.py                      #   自己完結の採点ドライバ（Kaggle GPU で実行）
 ├── docs/                                        # ドキュメント
+│   ├── knowledges/                              #   ★知見集（観点別・まずここを読む）
+│   │   └── reference/                           #     実績のある attack.py（exp028/073/040）
 │   ├── SCORE.md                                 #   スコア表（直接編集 / update-score スキル）
-│   ├── スコア分析と改善方針.md                  #   スコア分析・レバー台帳（SCORE.md と対のlivingノート）
-│   ├── competition-research/                    #   調査・戦略ノート
-│   └── discussions/                             #   Discussion 要約（テーマ別索引）
+│   ├── 用語集.md                                #   語彙の統一先
+│   └── competition-research/                    #   コンペ仕様と SDK の一次解析
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
 ```
 
