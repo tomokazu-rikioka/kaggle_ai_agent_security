@@ -10,15 +10,19 @@ from __future__ import annotations
 import argparse
 import sqlite3
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.research.common.config import COMPETITION_SLUG, KERNELS_DB  # noqa: E402
-from scripts.research.common.db import connect, init_db, upsert  # noqa: E402
+from scripts.research.common.db import connect, ensure_columns, init_db, upsert  # noqa: E402
 from scripts.research.common.kaggle_cli import kaggle_list_csv  # noqa: E402
-from scripts.research.kernels.schema import KERNELS_DDL  # noqa: E402
+from scripts.research.kernels.kernel_scores import fetch_score_map, make_session  # noqa: E402
+from scripts.research.kernels.schema import KERNELS_ADDED_COLUMNS, KERNELS_DDL  # noqa: E402
+
+PAGE_INTERVAL_S = 2.0
 
 
 def list_kernels(comp: str, *, sort_by: str, page_size: int, max_pages: int) -> list[dict[str, str]]:
@@ -49,6 +53,7 @@ def list_kernels(comp: str, *, sort_by: str, page_size: int, max_pages: int) -> 
         rows.extend(new)
         if len(page_rows) < page_size:
             break
+        time.sleep(PAGE_INTERVAL_S)  # 連続で叩くと CLI が散発的に exit 1 を返すため間を置く
     return rows
 
 
@@ -60,31 +65,43 @@ def _to_int(value: str | None) -> int:
         return 0
 
 
-def ingest(comp: str, *, sort_by: str, page_size: int, max_pages: int) -> int:
-    """一覧を取得して kernels テーブルへ追加または更新（upsert）する。取り込み件数を返す。"""
+def ingest(comp: str, *, sort_by: str, page_size: int, max_pages: int, with_scores: bool = True) -> int:
+    """一覧を取得して kernels テーブルへ追加または更新（upsert）する。取り込み件数を返す。
+
+    コンペ所属は公式 CLI の `--competition` 一覧で担保し、スコアだけを内部検索 API から補う。
+    検索はコンペ横断なので、この 2 段構えでないと他コンペのカーネルが紛れる。
+    """
     rows = list_kernels(comp, sort_by=sort_by, page_size=page_size, max_pages=max_pages)
+    print(f"[research] コンペのカーネル {len(rows)} 件を一覧取得した")
+
+    score_map = {}
+    if with_scores:
+        score_map = fetch_score_map(make_session(), comp)
+        matched = sum(1 for r in rows if r.get("ref") in score_map)
+        print(f"[research] スコア表 {len(score_map)} 件を取得（一覧との突合 {matched}/{len(rows)} 件）")
+
     now = datetime.now(UTC).isoformat()
     conn = connect(KERNELS_DB)
     try:
         init_db(conn, KERNELS_DDL)
+        ensure_columns(conn, "kernels", KERNELS_ADDED_COLUMNS)
         for r in rows:
             ref = r.get("ref", "")
             author = ref.split("/", 1)[0] if "/" in ref else r.get("author", "")
-            upsert(
-                conn,
-                "kernels",
-                {
-                    "competition_id": comp,
-                    "kernel_ref": ref,
-                    "title": r.get("title", ""),
-                    "author": author,
-                    "total_votes": _to_int(r.get("totalVotes")),
-                    "last_run_time": r.get("lastRunTime", ""),
-                    "is_private": 0,
-                    "ingested_at": now,
-                },
-                pk=("competition_id", "kernel_ref"),
-            )
+            found = score_map.get(ref)
+            row: dict[str, object] = {
+                "competition_id": comp,
+                "kernel_ref": ref,
+                "title": r.get("title", ""),
+                "author": author,
+                "total_votes": _to_int(r.get("totalVotes")),
+                "last_run_time": r.get("lastRunTime", ""),
+                "is_private": 0,
+                "ingested_at": now,
+            }
+            if found is not None:
+                row["best_public_score"] = found.score
+            upsert(conn, "kernels", row, pk=("competition_id", "kernel_ref"))
         _upsert_competition(conn, comp, now)
         conn.commit()
     finally:
@@ -108,6 +125,7 @@ def main() -> None:
     ap.add_argument("--sort-by", default="voteCount", help="kaggle kernels list --sort-by の値")
     ap.add_argument("--page-size", type=int, default=100, help="1 ページの件数（~100 上限）")
     ap.add_argument("--max-pages", type=int, default=5, help="最大ページ数")
+    ap.add_argument("--no-scores", action="store_true", help="LB スコアの取得を省く（一覧だけ更新）")
     args = ap.parse_args()
 
     count = ingest(
@@ -115,6 +133,7 @@ def main() -> None:
         sort_by=args.sort_by,
         page_size=args.page_size,
         max_pages=args.max_pages,
+        with_scores=not args.no_scores,
     )
     print(f"[research] {count} 件のカーネルを {KERNELS_DB} に保存した。")
 

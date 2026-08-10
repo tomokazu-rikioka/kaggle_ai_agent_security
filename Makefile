@@ -1,4 +1,4 @@
-.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-discussions research-discussion-read lint format help
+.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-kernel-top research-discussions research-discussion-read lint format help
 .DEFAULT_GOAL := help
 
 KAGGLE := kaggle
@@ -60,6 +60,12 @@ research-kernel-read:
 	@test -n "$(REF)" || (echo "Usage: make research-kernel-read REF=owner/slug" && exit 1)
 	uv run python scripts/research/kernels/kernel_read.py $(REF)
 
+# スコアは kernels.db の best_public_score（research-kernels が内部検索 API から補う列）を使う。
+## research-kernel-top: LB スコア上位 N 件の本文を取得してキャッシュ（[TOP=30]）
+research-kernel-top:
+	uv run python scripts/research/kernels/kernel_fetch_top.py \
+	  $(or $(COMP),ai-agent-security-multi-step-tool-attacks) --top $(or $(TOP),30)
+
 # 既定は internal（内部 API から新規取得。要 KAGGLE_API_TOKEN）。取得した生 JSON は --save-raw で
 # data/discussions_raw/ に貯める。bookmarks はその貯めた JSON を読み直すだけなので、raw が無いと 0 件になる。
 ## research-discussions: ディスカッションを収集（SRC=internal|bookmarks, 既定 internal）
@@ -97,6 +103,7 @@ help:
 	@echo "/lb-submit exp001             — LB へ提出して結果を SCORE.md に記録（スキル・★ユーザ明示指示時のみ）"
 	@echo "make research-kernels         — 公開カーネル一覧を収集（kernels.db）[MAXPAGES=.. SORT=..]"
 	@echo "make research-kernel-read REF=owner/slug — カーネル本文を取得して表示"
+	@echo "make research-kernel-top [TOP=30]  — LB スコア上位 N 件の本文を取得"
 	@echo "make research-discussions     — ディスカッション収集 [SRC=internal|bookmarks]（internal は要 KAGGLE_API_TOKEN）"
 	@echo "make research-discussion-read TID=708034 — スレッド本文を表示"
 	@echo "make lint / make format       — ruff チェック / フォーマット"

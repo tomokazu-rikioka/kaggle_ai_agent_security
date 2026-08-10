@@ -25,6 +25,19 @@ def init_db(conn: sqlite3.Connection, ddl: str) -> None:
     conn.commit()
 
 
+def ensure_columns(conn: sqlite3.Connection, table: str, columns: dict[str, str]) -> None:
+    """既存テーブルに足りない列を ALTER TABLE で足す。
+
+    `CREATE TABLE IF NOT EXISTS` は既にあるテーブルの列を増やさないので、
+    DDL に列を追加しただけでは古い DB に反映されない。その差分をここで埋める。
+    """
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    for name, decl in columns.items():
+        if name not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+    conn.commit()
+
+
 def upsert(
     conn: sqlite3.Connection,
     table: str,

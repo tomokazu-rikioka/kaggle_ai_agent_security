@@ -209,9 +209,7 @@ def _discover_internal_ids(session: object, comp: str, *, max_pages: int) -> lis
         for order in DISCOVERY_ORDERS:
             before = len(seen)
             try:
-                for payload in fetcher_internal.iter_topics(
-                    session, query=query, max_pages=max_pages, order_by=order
-                ):
+                for payload in fetcher_internal.iter_topics(session, query=query, max_pages=max_pages, order_by=order):
                     for topic in parse_topic_list(payload):
                         if topic.topic_id not in seen:
                             seen.add(topic.topic_id)
