@@ -111,19 +111,22 @@ cap 0.98 では probe=4 が上（86.940 > 86.310）と**符号が逆転する**�
 
 > ★ **LB 提出はユーザから明示的に指示された場合のみ実行する。**
 > 日次上限（5/日・最終 2 件）を消費する不可逆な外部アクションのため。
+> **手順の正典は `/lb-submit` スキル**（`.claude/skills/lb-submit/SKILL.md`）。
+> 提出から `docs/SCORE.md` への記録までを一本で持つ。ここは要約。
 
 `make submit`（`kaggle kernels push`）は**カーネルをデプロイして実行するだけ**で、
 LB への提出は行わない。
 
-1. `make submit EXP=expNNN` で push。status が COMPLETE になるまで待つ。
-   状態確認は full id を直接指定する:
+1. `make submit EXP=expNNN` で push。status が COMPLETE になるまで待つ:
    `uv run kaggle kernels status rikitomo0526/ai-agent-security-attack-script-expNNN`
-   （`make status` の slug は `-script-` が欠落していて一致しない）
-2. ブラウザで Notebook ページを開く。
+   （`make status EXP=expNNN` も同じ id を叩く）
+2. ブラウザで Notebook のエディタ（`.../ai-agent-security-attack-script-expNNN/edit`）を開く。
    **この操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**
    — ログイン済みの Chrome セッションが必要なため。Playwright MCP は別プロファイルで通らない。
-3. **Edit** を押す → 右パネル下部の **「Submit to competition」** → **Submit**。
+3. 右パネル下部の **「Submit to competition」** を展開 → **Submit** → ダイアログで **Submit**。
    DAILY SUBMISSIONS が `n/5` に増えれば受理。採点はキュー込みで ~800–1000 分。
+4. 採点監視は `uv run scripts/ops/time_manager.py --exps expNNN`（1 行ずつ状況を出す。既定 1 時間おき）。
+   後追いの回収は `uv run scripts/ops/check_submissions.py --max 10`。
 
 ### 通らない 2 経路
 

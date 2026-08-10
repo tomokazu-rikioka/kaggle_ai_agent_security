@@ -42,11 +42,13 @@ def main() -> None:
     print(f"Files: {created}")
     print()
     print("次のステップ:")
-    print(f"  1. {new_dir}/attack.py の run() を編集（兄弟 import 不可・単一ファイル自己完結）")
-    print(f"  2. {new_dir}/notes.md に狙いを記録")
+    print("  1. docs/knowledges/04-レバー台帳.md の事前判定ルーブリックで施策の赤/緑を確認")
+    print(f"  2. {new_dir}/attack.py を編集（兄弟 import 不可・単一ファイル自己完結）")
+    print(f"     - kernel-metadata.json の id/title を {args.name} へ書き換える")
     print(f"  3. make eval EXP={args.name} CANDIDATES=30   # Kaggle で smoke 採点（build→push→wait→fetch）")
-    print(f"  4. /update-score {args.name}                 # scores.json を SCORE.md へ反映")
+    print(f"  4. experiments/{args.name}/scores.json を docs/SCORE.md の local 列へ記入")
     print(f"  5. make build EXP={args.name} && make submit EXP={args.name}")
+    print(f"  6. /lb-submit {args.name}                    # LB 提出＋結果記録（★ユーザ明示指示時のみ）")
 
 
 if __name__ == "__main__":

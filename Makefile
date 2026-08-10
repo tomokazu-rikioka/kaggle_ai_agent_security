@@ -41,7 +41,7 @@ submit-lb:
 
 ## status: カーネル実行状態を確認
 status:
-	$(KAGGLE) kernels status rikitomo0526/ai-agent-security-attack-$(EXP)
+	$(KAGGLE) kernels status rikitomo0526/ai-agent-security-attack-script-$(EXP)
 
 # === 研究データ収集（ディスカッション / 公開カーネル） ===
 
@@ -89,9 +89,10 @@ help:
 	@echo "make submit EXP=exp001        — build して kaggle kernels push（LB へは提出しない）"
 	@echo "make submit-lb EXP=exp001     — push 済みカーネルを LB へ提出（★ユーザ明示指示時のみ）[MESSAGE=.. YES=1]"
 	@echo "make status EXP=exp001        — 提出カーネルの実行状態を確認"
+	@echo "/lb-submit exp001             — LB へ提出して結果を SCORE.md に記録（スキル・★ユーザ明示指示時のみ）"
 	@echo "make research-kernels         — 公開カーネル一覧を収集（kernels.db）[MAXPAGES=.. SORT=..]"
 	@echo "make research-kernel-read REF=owner/slug — カーネル本文を取得して表示"
 	@echo "make research-discussions     — ディスカッション収集 [SRC=bookmarks|internal]"
 	@echo "make research-discussion-read TID=708034 — スレッド本文を表示"
 	@echo "make lint / make format       — ruff チェック / フォーマット"
-	@echo "（スコア表 docs/SCORE.md の更新は /update-score スキル・知見は docs/knowledges/）"
+	@echo "（スコア表 docs/SCORE.md は直接編集・知見は docs/knowledges/）"

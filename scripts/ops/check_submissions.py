@@ -1,8 +1,9 @@
 """提出（submission）の採点状況を1回だけ確認するスナップショット出力。
 
-`time_manager.py` はブロッキングのポーリングだが、これは1回問い合わせて
+`time_manager.py` は完了まで居座るポーリング（Monitor から背景で張る）だが、これは1回問い合わせて
 現在の PENDING / COMPLETE と public/private スコア・経過分を出すだけの非ブロッキング版。
-1時間おきの定期確認から呼ぶ想定。
+セッションが切れて監視が途切れたあと、日をまたいで結果を回収するときに使う（`/lb-submit` 手順6）。
+日次提出枠（5/日）の残りを数えるのにも使う。
 
 使い方:
     uv run scripts/ops/check_submissions.py            # 最新10件を表示
@@ -11,7 +12,6 @@
 
 import argparse
 import datetime
-from datetime import timezone
 
 from kaggle.api.kaggle_api_extended import KaggleApi
 
@@ -26,16 +26,13 @@ def main() -> None:
     api = KaggleApi()
     api.authenticate()
     subs = api.competition_submissions(COMPETITION)
-    now = datetime.datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
 
     for s in subs[: args.max]:
         mins = int((now - s.date).total_seconds() / 60) + 1
         status = str(s.status).replace("SubmissionStatus.", "")
         desc = s.description or "No title"
-        print(
-            f"{s.ref} | {status} | pub={s.public_score} priv={s.private_score} "
-            f"| {mins}min | {desc}"
-        )
+        print(f"{s.ref} | {status} | pub={s.public_score} priv={s.private_score} | {mins}min | {desc}")
 
 
 if __name__ == "__main__":

@@ -25,12 +25,11 @@ Kaggle コンペ
 kaggle_ai_agent_security/
 ├── pyproject.toml / uv.lock / .python-version   # uv パッケージ管理（Python 3.12）
 ├── Makefile                                     # ワークフロー集約（make help）
-├── .claude/skills/update-score/                 # スコア表更新スキル（/update-score）
+├── .claude/skills/lb-submit/                    # LB 提出＋採点結果の記録スキル（/lb-submit）
 ├── experiments/                                 # 攻撃アルゴリズムの実験単位
-│   ├── _template/                               #   new-exp のコピー元（動くベースライン）
-│   │   ├── attack.py                            #     自己完結 AttackAlgorithm
-│   │   ├── kernel-metadata.json                 #     提出 Notebook メタ
-│   │   └── notes.md                             #     実験メモ
+│   ├── _template/                               #   new-exp のコピー元（champion エンジン = 歴代最高 LB 90.99）
+│   │   ├── attack.py                            #     自己完結 AttackAlgorithm（EXFIL 単発 throughput fill）
+│   │   └── kernel-metadata.json                 #     提出 Notebook メタ
 │   └── expNNN/                                  #   各実験（_template から生成）
 ├── scripts/                                     # 運用スクリプト
 │   ├── ops/new_experiment.py                    #   実験ディレクトリ生成
@@ -43,7 +42,7 @@ kaggle_ai_agent_security/
 ├── docs/                                        # ドキュメント
 │   ├── knowledges/                              #   ★知見集（観点別・まずここを読む）
 │   │   └── reference/                           #     実績のある attack.py（exp028/073/040）
-│   ├── SCORE.md                                 #   スコア表（直接編集 / update-score スキル）
+│   ├── SCORE.md                                 #   スコア表（直接編集。LB 列は /lb-submit が記入）
 │   ├── 用語集.md                                #   語彙の統一先
 │   └── competition-research/                    #   コンペ仕様と SDK の一次解析
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
@@ -76,12 +75,14 @@ make new-exp NAME=exp001
 
 # 2. Kaggle GPU で採点（build→push→wait→fetch）— 実モデル gpt_oss/gemma_4 × public/private
 make eval EXP=exp001 CANDIDATES=30     # smoke。本番は CANDIDATES を外す
-/update-score exp001                   # experiments/exp001/scores.json を SCORE.md へ反映
+                                       # experiments/exp001/scores.json を見て SCORE.md の local 列へ記入
 
 # 3. 提出 Notebook を生成して push
 make build EXP=exp001          # experiments/exp001/submission.ipynb を生成
-make submit EXP=exp001         # kaggle kernels push
-make status EXP=exp001         # 提出カーネルの実行状態を確認
+make submit EXP=exp001         # kaggle kernels push（LB へは提出しない）
+
+# 4. LB へ提出して結果を記録（★ユーザ明示指示時のみ・日次上限 5/日を消費）
+/lb-submit exp001              # push → Edit 画面から Submit → 採点監視 → SCORE.md 記録
 ```
 
 attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make submit` を回す。
@@ -93,10 +94,11 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 スコアは [`docs/SCORE.md`](docs/SCORE.md) を**直接編集**して管理する（単一ソース）。
 
 - **ローカル列** (`local_public` 等): `make eval` が Kaggle から回収する
-  `experiments/<exp>/scores.json` を、`/update-score <exp>` スキルがその exp の行へ反映
+  `experiments/<exp>/scores.json` を読んで、その exp の行へ手で記入する
   （`gpt_oss > gemma_4` の優先順で採用）。`public` が公開 LB 相関、`private` は非公開汎化の代理。
-- **LB 列** (`lb_gpt_oss_public` 等) / **changes 列**: `docs/SCORE.md` に直接記入する
-  （または Claude に依頼）。1 提出で 4 スコアが返るので、確認して転記する。
+- **LB 列** (`lb_public` / `lb_time`): `/lb-submit` スキルが提出から採点完了までを追い、
+  `scripts/ops/time_manager.py` の出力を元に記入する。
+- **changes 列**: `docs/SCORE.md` に直接記入する（または Claude に依頼）。
 
 ## 評価（Kaggle GPU でローカル採点）
 

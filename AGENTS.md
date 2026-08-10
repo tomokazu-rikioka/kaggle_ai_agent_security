@@ -28,7 +28,7 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 | `make build EXP=exp001` | `attack.py` → `submission.ipynb` を生成 |
 | `make submit EXP=exp001` | build して `kaggle kernels push`（デプロイ・実行のみ。LB へは提出しない） |
 | `make submit-lb EXP=exp001` | （現状 **403 で不可**）API 経由の LB 提出。LB 提出は Kaggle の **Edit 画面「Submit to competition」からのみ通る**（★**ユーザ明示指示時のみ**／日次上限を消費）。→ 下記「LB 提出までの流れ」 |
-| `/update-score exp001` | `docs/SCORE.md` の行を更新（スキル） |
+| `/lb-submit exp076` | LB へ提出して採点結果を `docs/SCORE.md` に記録するまでを一本で行う（スキル。★**ユーザ明示指示時のみ**） |
 
 ## アーキテクチャ
 
@@ -50,24 +50,14 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 
 #### LB 提出までの流れ（push → Edit 画面から Submit）
 
+**手順の正典は `/lb-submit` スキル**（`.claude/skills/lb-submit/SKILL.md`）。提出から
+`docs/SCORE.md` への記録までを一本で持つ。ここには背景と硬い制約だけ置く。
+
 `make submit`（`kaggle kernels push`）は**カーネルをデプロイ・実行するだけ**で、
 リーダーボード（LB）への提出は行わない。**LB 提出は Kaggle の Edit（ノートブック編集）画面の
-「Submit to competition」からのみ通る**（2026-07-22 exp021 で確定）。
-
-具体的な手順:
-
-1. `make submit EXP=expNNN`（build + `kaggle kernels push`）でカーネルを push。実行が完了し
-   status が COMPLETE になるまで待つ。状態確認は正しい full id で直接:
-   `uv run kaggle kernels status rikitomo0526/ai-agent-security-attack-script-expNNN`
-   （`make status` の slug は `-script-` 欠落で不一致なので使わない）。
-2. ブラウザで Notebook ページ
-   `https://www.kaggle.com/code/rikitomo0526/ai-agent-security-attack-script-expNNN` を開く。
-   **このデプロイ（LB 提出）のブラウザ操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**。
-   理由: ユーザの Chrome セッション（Kaggle ログイン済み）をそのまま使えるため。Playwright MCP は
-   別プロファイルでログインが通らず、Edit 画面まで到達できない。
-3. **Edit** を押してエディタを開く → 右パネル下部の **「Submit to competition」** を展開 →
-   **Submit** → ダイアログで **Submit**。DAILY SUBMISSIONS が `n/5` に増え、アクティビティに
-   「Competition submission … Scoring…」が出れば受理。採点はキュー込みで概ね ~800–1000 分。
+「Submit to competition」からのみ通る**（2026-07-22 exp021 で確定）。おおまかには
+push → COMPLETE を待つ → Notebook の Edit 画面 → 右パネル「Submit to competition」→ Submit、で
+DAILY SUBMISSIONS が `n/5` に増えれば受理。採点はキュー込みで概ね ~800–1000 分。
 
 **通らない2経路（注意）**:
 - `make submit-lb`（`scripts/ops/submit_lb.py` = `competition_submit_code` API）は **403 Forbidden**。
@@ -78,17 +68,27 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 生成）ため、**commit 済み version を事前チェックする上記2経路は弾かれる**。Edit 画面の Submit は
 **新 version を保存＋実行して提出**するので、競技リランで submission.csv が生成されて通る。
 
-> ★**LB 提出は、ユーザから明示的に指示された場合のみ実行する。** エージェントは自動で提出しては
-> いけない。理由: LB 提出は**日次上限（5/日・最終2件）を消費する不可逆な外部アクション**で、
+**このデプロイ（LB 提出）のブラウザ操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**。
+理由: ユーザの Chrome セッション（Kaggle ログイン済み）をそのまま使えるため。Playwright MCP は
+別プロファイルでログインが通らず、Edit 画面まで到達できない。
+
+> ★**LB 提出は、ユーザから明示的に指示された場合のみ実行する。** エージェントが自分の判断で
+> 提出を始めてはいけない。理由: LB 提出は**日次上限（5/日・最終2件）を消費する不可逆な外部アクション**で、
 > どの実験をいつ提出するかはユーザの判断事項だから。`make submit`（push）や `make eval`（採点）は
-> 従来どおり自由に実行してよい。ブラウザ操作での提出も、明示指示時のみ・提出前に対象/バージョンを
-> 目視確認してから最後の Submit を押す。
+> 従来どおり自由に実行してよい。
+> **`/lb-submit` の起動がその「明示的な指示」にあたる**。起動後は都度確認を取らずに Submit まで
+> 進めてよいが、各 Submit の直前にスクリーンショットで対象 exp / Version / 残枠を目視し、
+> 食い違ったら押さずに止める。
 
 ### 実験構成
 
-`experiments/expNNN/{attack.py, kernel-metadata.json, notes.md}` のフラット構成。
+`experiments/expNNN/{attack.py, kernel-metadata.json}` のフラット構成。
 探索アルゴリズムの構造そのものを差し替えるため、child-exp（YAML 差分）は採用しない。
 **同じ attack.py が評価でも提出でも使われる**ので、評価した実体がそのまま提出される。
+実験メモ（notes.md）は持たない。狙い・結果・知見は `docs/knowledges/`（観点別）と
+`docs/SCORE.md`（changes 列）に集約する。
+`_template/attack.py` は歴代最高 exp028（LB 90.99）と同じ champion エンジン
+（EXFIL 単発 throughput fill）を出発点として持ち、`make new-exp` はこれを複製する。
 
 ### 評価（Kaggle GPU でローカル採点）
 
@@ -110,8 +110,9 @@ Kaggle「AI Agent Security – Multi-Step Tool Attacks」のソリューショ�
 ### スコア管理と知見
 
 `docs/SCORE.md` が**スコアの単一ソース**（直接編集して運用、yaml 入力ファイルは使わない）。
-ローカル列は `make eval` が回収する `experiments/<exp>/scores.json` を元に `/update-score <exp>` スキルが
-反映、LB 列・changes 列は `docs/SCORE.md` に直接記入する。
+ローカル列（`local_*`）は `make eval` が回収する `experiments/<exp>/scores.json` を読んで手で記入する
+（`gpt_oss > gemma_4` 優先）。LB 列（`lb_public` / `lb_time`）は `/lb-submit` が
+`scripts/ops/time_manager.py` の出力から記入する。changes 列は直接記入する。
 
 **知見の入口は `docs/knowledges/`**（採点機構・到達可能面・レバー台帳・VOID 運用・private 汎化・
 参照実装・実験アーカイブ）。**新しい施策を試す前に `docs/knowledges/04-レバー台帳.md` の
@@ -139,7 +140,7 @@ exp001–080 の実測値は `docs/knowledges/08-実験アーカイブ.md` に�
 - コミットは Conventional Commits（`feat:` / `fix:` / `docs:` など）。
 - Kaggle ページ（discussion/overview）の**閲覧・調査**は Playwright MCP を使う（WebFetch は JS ページで失敗）。
 - **デプロイ（LB 提出）のブラウザ操作は Claude in Chrome（`mcp__claude-in-chrome__*`）を使う**。
-  ログイン済みの Chrome セッションが必要なため。手順は「LB 提出までの流れ」を参照
+  ログイン済みの Chrome セッションが必要なため。手順は `/lb-submit` スキル
   （★ユーザ明示指示時のみ）。
 
 ## 文章・コメントの書き方（平易化ルール）

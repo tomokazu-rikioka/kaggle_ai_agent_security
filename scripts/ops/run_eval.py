@@ -211,7 +211,7 @@ def main() -> None:
 
     _merge_and_save(args.exp, per_model)
     _print_table(args.exp, per_model)
-    print(f"\n[run-eval] 完了。`/update-score {args.exp}` で SCORE.md に反映できます。")
+    print(f"\n[run-eval] 完了。experiments/{args.exp}/scores.json を docs/SCORE.md の local 列へ反映してください。")
 
 
 if __name__ == "__main__":

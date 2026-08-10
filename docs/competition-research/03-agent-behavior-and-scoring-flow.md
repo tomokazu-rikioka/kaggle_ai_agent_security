@@ -362,7 +362,7 @@ make eval EXP=exp001 CANDIDATES=30   # smoke。本番は CANDIDATES を外す
 ```
 
 - `score` は正規化済み（÷200000×1000、≤1000）、`score_raw` は生（深刻度の重み合計 + 2×cell）。
-- `/update-score <exp>` スキルがこの JSON を読んで `docs/SCORE.md` のローカル列を更新する（`gpt_oss > gemma_4` 優先）。
+- この JSON を読んで `docs/SCORE.md` のローカル列を手で更新する（`gpt_oss > gemma_4` 優先）。
 - **public で出て private で消える攻撃は過学習の疑い**。
 
 ---
