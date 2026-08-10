@@ -4,6 +4,11 @@
 KAGGLE := kaggle
 EXP ?= exp001
 
+# 認証情報は .env（.gitignore 済み）から読む。無ければ黙って読み飛ばす（`-` の意味）。
+# make は行をそのまま変数定義として解釈するので、値はクォートで囲まず `KEY=value` と書くこと。
+-include .env
+export KAGGLE_API_TOKEN
+
 # === 実験管理 ===
 
 ## new-exp: 新しい実験を作成（Usage: make new-exp NAME=exp001 [BASE=_template]）
