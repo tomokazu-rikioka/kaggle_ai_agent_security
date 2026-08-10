@@ -1,6 +1,6 @@
 ---
 name: lb-submit
-description: 実験(expNNN)を Kaggle のリーダーボード(LB)へ提出する。push → Claude in Chrome で Edit 画面から Submit → time_manager をバックグラウンド監視（1時間おき）→ docs/SCORE.md の lb_public / lb_time へ記録、までを一本で行う。日次上限5/日を消費する不可逆操作。トリガー: "LB提出", "リーダーボードに提出", "expNNNを提出", "LBへ出して", "/lb-submit"
+description: '実験(expNNN)を Kaggle のリーダーボード(LB)へ提出する。push → Claude in Chrome で Edit 画面から Submit → time_manager をバックグラウンド監視（1時間おき）→ docs/SCORE.md の lb_public / lb_time へ記録、までを一本で行う。日次上限5/日を消費する不可逆操作。トリガー: "LB提出", "リーダーボードに提出", "expNNNを提出", "LBへ出して", "/lb-submit"'
 ---
 
 # lb-submit — LB 提出と採点結果の記録
