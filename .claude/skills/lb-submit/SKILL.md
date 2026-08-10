@@ -17,7 +17,7 @@ description: '実験(expNNN)を Kaggle のリーダーボード(LB)へ提出す�
    **食い違ったら押さずに止めて報告する**。枠が足りないときも提出せず報告して止める。
 2. **提出は Kaggle の Edit（ノートブック編集）画面の「Submit to competition」からのみ通る**
    （2026-07-22 exp021 で確定）。通らない2経路:
-   - `make submit-lb`（`scripts/ops/submit_lb.py` = `competition_submit_code` API）は **403 Forbidden**。
+   - `competition_submit_code` API は **403 Forbidden**（叩いていた `scripts/ops/submit_lb.py` は撤去済み）。
    - ビューアの「Submit to Competition」ダイアログは
      「requires submission.csv and the selected Notebook Version does not output this file」で **Submit 無効**。
 
@@ -177,7 +177,8 @@ Monitor({
 
 ## 落とし穴
 
-- `make submit-lb` / `scripts/ops/submit_lb.py` は **403**。使わない（残してあるのは記録のため）。
+- `competition_submit_code` API は **403**。これを叩く `make submit-lb` / `scripts/ops/submit_lb.py` は
+  撤去済みで、**API 経由の提出経路は存在しない**。作り直しても通らない。
 - ビューアの「Submit to Competition」は `submission.csv` 未出力で**ボタンが無効**。必ず Edit 画面から。
 - ビューアの Edit ボタンは読み込み中のクリックが空振りする → **`/edit` 直リンク**を使う。
 - **座標クリックはセッションをまたいで再利用できない** → `find` の ref を優先。

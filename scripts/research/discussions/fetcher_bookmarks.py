@@ -1,6 +1,6 @@
 """案B（事前取得 JSON 方式）: Bookmarks.json の URL 群を対象に、保存済みの JSON を読み込む（新トークン不要）。
 
-対象スレッドの集合は docs/discussions/Bookmarks.json（`.../discussion/<id>` の配列）から取る。
+対象スレッドの集合は data/bookmarks.json（`.../discussion/<id>` の配列）から取る。
 各スレッドの本文 JSON（GetForumTopicById 相当）は、あらかじめ data/discussions_raw/<topic_id>.json へ
 保存しておく前提。保存は案A（内部 API 方式）の取得（`discussion_ingest.py --source internal --save-raw`）で
 生成される。JSON の形は案A と同じなので、parser.py 以降の処理はどちらの案でも共通で使える。

@@ -132,7 +132,7 @@ LB への提出は行わない。
 
 | 経路 | 症状 | 理由 |
 |---|---|---|
-| `make submit-lb`（`competition_submit_code` API） | **403 Forbidden** | — |
+| `competition_submit_code` API（旧 `make submit-lb`。撤去済み） | **403 Forbidden** | — |
 | ビューアの「Submit to Competition」ダイアログ | 「requires submission.csv…」で Submit が無効 | push した version は `submission.csv` を出力しない |
 
 Edit 画面の Submit だけが**新しい version を保存＋実行して提出**するので、

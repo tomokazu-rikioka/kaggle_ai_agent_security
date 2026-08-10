@@ -36,7 +36,10 @@ def get_token() -> str:
     if not token:
         raise RuntimeError(
             f"{TOKEN_ENV} が未設定。内部 API（--source internal）には KGAT トークンが必要。"
-            f" 用意できない場合は --source bookmarks を使うこと。"
+            f" Kaggle にログインしたブラウザの DevTools で discussion ページの XHR を開き、"
+            f" Authorization ヘッダの Bearer 値を `export {TOKEN_ENV}=...` で渡すこと。"
+            f"（--source bookmarks は過去に --save-raw で貯めた JSON の読み直し専用なので、"
+            f" data/discussions_raw/ が空なら代替にならない）"
         )
     return token
 
@@ -66,7 +69,7 @@ def _post(session: Any, url: str, body: dict[str, Any]) -> dict[str, Any]:
     if resp.status_code in (401, 403):
         raise RuntimeError(
             f"認証エラー {resp.status_code}: KGAT トークンが失効/不正の可能性。"
-            f" 再発行するか --source bookmarks にフォールバックすること。"
+            f" ブラウザから取り直して {TOKEN_ENV} を更新すること。"
         )
     resp.raise_for_status()
     try:

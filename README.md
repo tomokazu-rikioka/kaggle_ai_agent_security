@@ -27,8 +27,8 @@ kaggle_ai_agent_security/
 ├── Makefile                                     # ワークフロー集約（make help）
 ├── .claude/skills/lb-submit/                    # LB 提出＋採点結果の記録スキル（/lb-submit）
 ├── experiments/                                 # 攻撃アルゴリズムの実験単位
-│   ├── _template/                               #   new-exp のコピー元（champion エンジン = 歴代最高 LB 90.99）
-│   │   ├── attack.py                            #     自己完結 AttackAlgorithm（EXFIL 単発 throughput fill）
+│   ├── _template/                               #   new-exp のコピー元（提出フォーマットの最小骨組み）
+│   │   ├── attack.py                            #     自己完結 AttackAlgorithm（run() を実装する雛形）
 │   │   └── kernel-metadata.json                 #     提出 Notebook メタ
 │   └── expNNN/                                  #   各実験（_template から生成）
 ├── scripts/                                     # 運用スクリプト
@@ -38,7 +38,12 @@ kaggle_ai_agent_security/
 │   ├── ops/build_eval_notebook.py               #   attack.py + eval_driver → eval.ipynb（評価）
 │   ├── ops/run_eval.py                          #   build→push→wait→fetch（make eval）
 │   ├── ops/build_sdk_dataset.py                 #   評価用 SDK dataset を生成
-│   └── eval/eval_driver.py                      #   自己完結の採点ドライバ（Kaggle GPU で実行）
+│   ├── ops/time_manager.py                      #   LB 採点の完了監視（/lb-submit が背景で使う）
+│   ├── ops/check_submissions.py                 #   提出状況の1回スナップショット（残枠確認・後日回収）
+│   ├── eval/eval_driver.py                      #   自己完結の採点ドライバ（Kaggle GPU で実行）
+│   └── research/                                #   Kaggle 調査（make research-*）
+│       ├── kernels/                             #     公開カーネルの一覧収集・本文取得
+│       └── discussions/                         #     ディスカッションの収集・閲覧
 ├── docs/                                        # ドキュメント
 │   ├── knowledges/                              #   ★知見集（観点別・まずここを読む）
 │   │   └── reference/                           #     実績のある attack.py（exp028/073/040）

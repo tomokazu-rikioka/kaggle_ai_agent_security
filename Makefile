@@ -1,4 +1,4 @@
-.PHONY: new-exp sdk-dataset eval build submit submit-lb status research-kernels research-kernel-read research-discussions research-discussion-read lint format help
+.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-discussions research-discussion-read lint format help
 .DEFAULT_GOAL := help
 
 KAGGLE := kaggle
@@ -35,9 +35,8 @@ build:
 submit:
 	uv run python scripts/ops/submit.py $(EXP)
 
-## submit-lb: push 済みカーネルを LB へ提出（★ユーザ明示指示時のみ／日次上限を消費）
-submit-lb:
-	uv run python scripts/ops/submit_lb.py $(EXP) $(if $(MESSAGE),--message "$(MESSAGE)",) $(if $(YES),--yes,)
+# LB（リーダーボード）への提出は make では行えない。API 経由（competition_submit_code）は 403 で
+# 弾かれるため、Kaggle の Edit 画面「Submit to competition」からしか通らない。手順は /lb-submit スキル。
 
 ## status: カーネル実行状態を確認
 status:
@@ -56,10 +55,12 @@ research-kernel-read:
 	@test -n "$(REF)" || (echo "Usage: make research-kernel-read REF=owner/slug" && exit 1)
 	uv run python scripts/research/kernels/kernel_read.py $(REF)
 
-## research-discussions: ディスカッションを収集（SRC=bookmarks|internal, 既定 bookmarks）
+# 既定は internal（内部 API から新規取得。要 KAGGLE_API_TOKEN）。取得した生 JSON は --save-raw で
+# data/discussions_raw/ に貯める。bookmarks はその貯めた JSON を読み直すだけなので、raw が無いと 0 件になる。
+## research-discussions: ディスカッションを収集（SRC=internal|bookmarks, 既定 internal）
 research-discussions:
 	uv run python scripts/research/discussions/discussion_ingest.py \
-	  $(or $(COMP),ai-agent-security-multi-step-tool-attacks) --source $(or $(SRC),bookmarks) \
+	  $(or $(COMP),ai-agent-security-multi-step-tool-attacks) --source $(or $(SRC),internal) --save-raw \
 	  $(if $(MAXPAGES),--max-pages $(MAXPAGES),)
 
 ## research-discussion-read: スレッド本文を表示（Usage: make research-discussion-read TID=708034）
@@ -87,12 +88,11 @@ help:
 	@echo "make eval EXP=exp001          — Kaggle で採点（build→push→wait→fetch）[MODELS=.. CANDIDATES=..]"
 	@echo "make build EXP=exp001         — 提出用 submission.ipynb を生成"
 	@echo "make submit EXP=exp001        — build して kaggle kernels push（LB へは提出しない）"
-	@echo "make submit-lb EXP=exp001     — push 済みカーネルを LB へ提出（★ユーザ明示指示時のみ）[MESSAGE=.. YES=1]"
 	@echo "make status EXP=exp001        — 提出カーネルの実行状態を確認"
 	@echo "/lb-submit exp001             — LB へ提出して結果を SCORE.md に記録（スキル・★ユーザ明示指示時のみ）"
 	@echo "make research-kernels         — 公開カーネル一覧を収集（kernels.db）[MAXPAGES=.. SORT=..]"
 	@echo "make research-kernel-read REF=owner/slug — カーネル本文を取得して表示"
-	@echo "make research-discussions     — ディスカッション収集 [SRC=bookmarks|internal]"
+	@echo "make research-discussions     — ディスカッション収集 [SRC=internal|bookmarks]（internal は要 KAGGLE_API_TOKEN）"
 	@echo "make research-discussion-read TID=708034 — スレッド本文を表示"
 	@echo "make lint / make format       — ruff チェック / フォーマット"
 	@echo "（スコア表 docs/SCORE.md は直接編集・知見は docs/knowledges/）"
