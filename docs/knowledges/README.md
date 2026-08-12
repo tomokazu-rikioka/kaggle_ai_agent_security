@@ -4,7 +4,7 @@ exp001–080（Round1–14）で得た知見を観点別にまとめたもの。
 実験ディレクトリは 2026-08-10 に削除し、**この 9 本＋参照実装が唯一の知識の入口**になった。
 
 > 用語は [../用語集.md](../用語集.md)。仕様の一次解析は
-> [../competition-research/](../competition-research/)。スコアの記録先は [../SCORE.md](../SCORE.md)。
+> [../competition-overview/](../competition-overview/)。スコアの記録先は [../SCORE.md](../SCORE.md)。
 
 ---
 

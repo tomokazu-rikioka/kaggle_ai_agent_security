@@ -17,7 +17,7 @@ Kaggle コンペ
   メッセージ連鎖 ≤32・各 ≤2000 文字・ツールホップ ≤8。
 - **採点する述語**: EXFILTRATION / UNTRUSTED_TO_ACTION / DESTRUCTIVE_WRITE / CONFUSED_DEPUTY。
 
-詳細は [`docs/competition-research/`](docs/competition-research/01-competition-overview.md)（コンペ仕様・SDK 解析）。
+詳細は [`docs/competition-overview/`](docs/competition-overview/01-competition-overview.md)（コンペ仕様・SDK 解析）。
 
 ## プロジェクト構成
 
@@ -49,7 +49,7 @@ kaggle_ai_agent_security/
 │   │   └── reference/                           #     実績のある attack.py（exp028/073/040）
 │   ├── SCORE.md                                 #   スコア表（直接編集。LB 列は /lb-submit が記入）
 │   ├── 用語集.md                                #   語彙の統一先
-│   └── competition-research/                    #   コンペ仕様と SDK の一次解析
+│   └── competition-overview/                    #   コンペ仕様と SDK の一次解析
 └── vendor/aicomp_sdk_pkg/                      # 公式 SDK（MIT・git 管理・展開済み）
 ```
 
@@ -118,6 +118,6 @@ attack.py を編集 → `make eval`（Kaggle で採点）→ `make build`/`make 
 
 | ファイル | 内容 |
 |---|---|
-| [`docs/competition-research/01-competition-overview.md`](docs/competition-research/01-competition-overview.md) | 公式仕様（述語・採点式・提出形式・制約） |
-| [`docs/competition-research/02-sdk-analysis.md`](docs/competition-research/02-sdk-analysis.md) | SDK ソース解析（ground truth） |
-| [`docs/competition-research/03-agent-behavior-and-scoring-flow.md`](docs/competition-research/03-agent-behavior-and-scoring-flow.md) | エージェント挙動と採点フロー（動的解説） |
+| [`docs/competition-overview/01-competition-overview.md`](docs/competition-overview/01-competition-overview.md) | 公式仕様（述語・採点式・提出形式・制約） |
+| [`docs/competition-overview/02-sdk-analysis.md`](docs/competition-overview/02-sdk-analysis.md) | SDK ソース解析（ground truth） |
+| [`docs/competition-overview/03-agent-behavior-and-scoring-flow.md`](docs/competition-overview/03-agent-behavior-and-scoring-flow.md) | エージェント挙動と採点フロー（動的解説） |

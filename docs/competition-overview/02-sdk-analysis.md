@@ -1,13 +1,5 @@
 # 02 — SDK ソース解析（ground truth）
 
-> 用語は [用語集](../用語集.md) を参照。
-
-SDK は `vendor/aicomp_sdk_pkg/`（MIT・git 管理）に手元展開済みで、`eval_predicates`・`cell_signature`・`score_attack`・`ReplayHarness` を直接実行して検証できる。**手元展開した SDK はライブ Kaggle 評価器と同一**なので、手元の採点がそのまま ground truth（＝正しい基準）になる。
-
-## 0. 中核メカニズム（1 段落で）
-
-`AttackCandidate` は、文字どおりユーザーメッセージのタプル（`contracts.py`）。アルゴリズムは `env.interact(user_message)` でターゲットエージェントにメッセージを与え、エージェントは 1 メッセージあたり最大 `max_tool_hops` 回のツール呼び出しを行って `Trace`（`ToolEvent` の列）を生成する。評価器はあとで、各候補のメッセージタプルを新しい `SandboxEnv`（場合により別の agent + guardrail）に対して再実行して採点（リプレイ）し（`replay.py`）、トレースを作り直し、`eval_predicates` を実行し、`score_attack` で採点する。すべて決定論的（seed で結果が決まる）。攻撃できる面はユーザーメッセージのテキストだけ（各 ≤ 2,000 文字）。
-
 ## 1. Contracts — `aicomp_sdk/attacks/contracts.py`
 
 ```python
@@ -91,7 +83,7 @@ class Trace:
 
 ツールは決定論的で、固定データ（fixture）で動く（`tools/suite.py`）: `web_corpus.json`・`mail_seed.json`・`file_seed/` ディレクトリ（`isolate_fs=True` で動くため write/delete は一時コピーに当たる）。`snapshot_state()`/`restore_state()` は `egress`・`mail`・`last_source` を保存点として記録する。
 
-## 5. 述語 — `aicomp_sdk/core/predicates.py`  
+## 5. 述語 — `aicomp_sdk/core/predicates.py`
 
 `eval_predicates(trace)` は `tool_events`（`ok is True` のみ）と最後のユーザーメッセージを調べる。2 つの経験則による「意図」フラグが、複数の述語の発火をゲート（＝許可/抑制の関門に）する:
 

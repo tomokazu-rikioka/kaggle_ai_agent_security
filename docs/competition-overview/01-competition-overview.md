@@ -1,7 +1,5 @@
 # 01 — コンペ概要
 
-> 用語は [用語集](../用語集.md) を参照。
-
 ## 基本情報
 
 | 項目 | 内容 |
@@ -59,20 +57,19 @@ severity 重み: {1→1, 2→2, 3→4, 4→8, 5→16}
   - 非公開リーダーボード → より厳格な非公開ガードレール（参加者はアクセスできない）。
 - 最終スコアはモデル別×ガードレール別で算出する: `gpt_oss_public` / `gpt_oss_private` / `gemma_public` / `gemma_private`。
 
-正規化の分母は 200,000。「完璧な」 EXFILTRATION の finding 1 件は `16（severity）+ 2（unique cell）= 18` の raw を生む。正規化スコアが 1000 に近づくのは非現実的で、実運用のスコアは分母に対してごく小さい値にとどまる。
-
 ## 評価パイプライン
 
 評価はモデル別（GPT-OSS / Gemma 4）×フェーズ別に進み、各組に独立した時間予算が与えられる。フェーズ構造:
 
 ```
-[attack]           GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒
-[reply on public]  GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒
-[reply on private] GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒   ← 最後にホストが実行
+[attack]            GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒
+[replay on public]  GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒
+[replay on private] GPT-OSS に 9,000 秒  +  Gemma 4 に 9,000 秒
 ```
 
 - 9,000 秒/モデル/フェーズは、使い切る目標ではなく上限。探索が終わったらすぐ `AttackCandidate` のリストを返し、進行中のやりとりが上限を超えないよう経過時間を追って余裕を残す。
-- 公開 LB の提出は最初の 4 フェーズだけ（attack + public replay × 2 モデル → 最大 ≈ 4 × 9,000 秒）。private replay（残り 2 フェーズ）は、最終 private リーダーボード向けにホストが実行する。これが Notebook の「10 時間」上限と一致する。
+- **6 フェーズすべてが、あなたの 1 回の提出ジョブの中で走る**。`jed_attack_gateway.py:700-815` の `get_all_predictions()` は「モデルごとに生成 1 回 → そのモデルの候補を public / private の両ガードレールでリプレイ」という二重ループで、`write_submission()`（同 `:817-838`）が 4 行すべてを 1 本の `submission.csv` に書き出す。private 行はコンペ終了まで Kaggle 側で伏せられるだけで、**採点はこの時点で終わっている**（ホストが後日 private だけを走らせるのではない。候補プロンプト列はどこにも永続化されないので、後から private だけを再現する材料が残らない）。運営 FAQ も stage 2 を "replayed in fresh environments against **both** the Public Guardrail and the Private Guardrail" と説明している（disc/712642 → [`../private-lb/01-運営発言まとめ.md`](../private-lb/01-運営発言まとめ.md) 1-4）。
+- 帰結として、**時間の見積もりは 4 フェーズではなく 6 フェーズで立てる**。public replay を 9,000 秒近くまで詰めると private replay もほぼ同じ負荷で続くので、生成 2 本と合わせてジョブ全体の 15 時間上限に張り付く。
 - 候補は public の固定データ（fixture）/ガードレールに対して生成され、その候補リストが private の固定データ＋ガードレールに対して、中身を見ないまま再実行される。アルゴリズム（`run()`）は private 上では再実行も適応もしない。したがって private のスコアは「候補がどれだけ汎化（＝別環境へ転移）するか」で決まる。
 - private ＝ ホールドアウト（取り分けた）評価セット（hidden fixtures〔＝非公開の固定データ〕＋ 非公開ガードレール）。公開の固定データ/ガードレールへの過学習（＝公開版だけに最適化し非公開で通用しない）は、他の ML コンペの過学習と同じく private では振るわない。採点関数の穴を突く戦略は private へ転移しない。public と private のリーダーボードはほとんど重ならない。
 
@@ -90,7 +87,8 @@ severity 重み: {1→1, 2→2, 3→4, 4→8, 5→16}
   ```
 
 ### コード要件
-- GPU Notebook の実行時間 ≤ 10 時間。
+- 競技リラン（submit 後の本採点）のランタイム上限は 15 時間。6 フェーズ × 9,000 秒 = 54,000 秒 = ちょうど 15 時間で、上の 6 フェーズ構成と一致する。
+- 2 つの数字が併存するのは**適用先が違う**ため。`jed_attack_gateway.py:841-846` が `KAGGLE_IS_COMPETITION_RERUN` の有無で分岐し、環境変数が立っているとき（＝リラン時）だけ `gateway.run()` が 6 フェーズを回す。Save & Run All では `"Skipping run — not a competition rerun."` を出して即終了するので、`submission.csv` もそこでは生成されない。実測 `lb_time` も 964〜1,146 分（キュー込み）で、10 時間の枠には収まらない。
 - インターネットアクセス無効。
 - 公開されている外部データ（学習済みモデル含む）は使用可。
 
@@ -117,8 +115,6 @@ severity 重み: {1→1, 2→2, 3→4, 4→8, 5→16}
 | Max messages per candidate（候補あたり最大メッセージ数） | 32 |
 | Max message length（メッセージ最大長） | 2,000 文字（SDK 実装 `MAX_USER_MESSAGE_CHARS`） |
 | Seed（乱数シード） | 123（固定） |
-
-表記のくい違いの解決: 時間予算は「モデルあたり・フェーズあたり 9,000 秒」が正しい（公式ページ間で 18,000 / 1,800 秒の表記揺れがあるが、1,800 秒は SDK の既定値 `DEFAULT_ATTACK_BUDGET_S` であって評価で使う値ではない）。メッセージ最大長も、公式表記の 10,000 文字に対し SDK 実装は `MAX_USER_MESSAGE_CHARS = 2,000`（2,000 超で `ValueError`）で、手元実行・移植性の観点ではコードが正しい。各メッセージは 2,000 文字以内に収めるのが安全。
 
 ## タイムライン（すべて 23:59 UTC）
 
@@ -150,8 +146,6 @@ Working Note 審査（任意、リーダーボード順位とは別枠）: 技�
 | `kaggle_evaluation/jed_attack_134815/` | コンペ固有の gateway, inference server, model servers, remote environment proxy |
 | `aicomp_sdk` 3.1.2 | 環境 API・predicates・agents・scoring・guardrail 実装を含む SDK（ライブ評価器と同一版。`vendor/aicomp_sdk_pkg/` に展開済み） |
 | `aicomp_sdk/fixtures/` | 事前シードされた環境データ（`file_seed/`, `web_corpus.json`, `mail_seed.json`） |
-
-ライセンスは MIT。
 
 ## ルール要点
 
