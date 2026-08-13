@@ -109,6 +109,7 @@ def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
     if not km_path.is_file():
         raise FileNotFoundError(f"{km_path} が存在しません")
     km = json.loads(km_path.read_text())
+    # 稼働規約: id/title とも "-script-"/"script" を含む（Makefile status・time_manager の回収キーと一致）。
     default_id = f"{KAGGLE_USER}/ai-agent-security-attack-script-{exp.replace('_', '-')}"
     existing = km.get("id", "")
     if existing != default_id and not existing.startswith(default_id + "-"):

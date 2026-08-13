@@ -195,4 +195,4 @@ Monitor({
 - `scripts/ops/time_manager.py`（採点監視）/ `check_submissions.py`（1回きりのスナップショット）/
   `submit.py`（build + push）
 - `docs/SCORE.md`（スコアの単一ソース。スクリプトでは書かず Edit で反映する）
-- `docs/スコア分析と改善方針.md`（VOID = 時間切れ・live 予算の考え方）
+- `docs/knowledges/02-実測台帳.md`（VOID = 時間切れ・live 予算の考え方・cap 別の全実測）

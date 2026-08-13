@@ -39,8 +39,8 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 COMPETITION = "ai-agent-security-multi-step-tool-attacks"
 # 提出 description から exp 名を拾う（例: "AI Agent Security - Attack script exp076 | Version 2"）。
-# 提出時の description を変えるとここが一致しなくなるので、既定文のまま出すこと。
-EXP_RE = re.compile(r"script\s+(exp\d{3})", re.IGNORECASE)
+# 実提出の既定文は "Attack script expNNN"。"script" 有無どちらも拾えるようにしておく。
+EXP_RE = re.compile(r"Attack\s+(?:script\s+)?(exp\d{3})", re.IGNORECASE)
 
 
 def emit(line: str) -> None:
