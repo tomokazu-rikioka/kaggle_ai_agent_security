@@ -43,7 +43,9 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM"]
 "*.ipynb" = ["E402", "I001"]
 # attack.py は /kaggle/working/attack.py として単一ファイルでロードされる自己完結スクリプト。
 # ベースライン継承の再エクスポート（F401）やトップレベル副作用（E402）を許容する。
-"experiments/**/attack.py" = ["E402", "F401"]
+# 実績カーネル移植の自己完結スクリプトでは、事前トークン化した長い host bank や日本語注釈の長行（E501）、
+# SDK 呼び出しの防御的 try/except（SIM105）も許容する。
+"experiments/**/attack.py" = ["E402", "F401", "E501", "SIM105"]
 # docs/knowledges/reference/*.py は実績のある attack.py の退避コピー（同じ契約に従う）。
 "docs/knowledges/reference/*.py" = ["E402", "F401"]
 
