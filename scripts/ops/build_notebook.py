@@ -26,6 +26,7 @@ import nbformat as nbf
 
 EXPERIMENTS_DIR = Path("experiments")
 KAGGLE_USER = "rikitomo0526"
+MACHINE_SHAPE = "NvidiaTeslaT4"
 
 
 def _code_cell_source(attack_src: str) -> str:
@@ -111,11 +112,17 @@ def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
     km = json.loads(km_path.read_text())
     # 稼働規約: id/title とも "-script-"/"script" を含む（Makefile status・time_manager の回収キーと一致）。
     default_id = f"{KAGGLE_USER}/ai-agent-security-attack-script-{exp.replace('_', '-')}"
+    default_title = f"AI Agent Security - Attack script {exp}"
+    if len(default_title) > 50:
+        default_title = f"AI Agent Security Attack script {exp.replace('_', ' ')}"
     existing = km.get("id", "")
     if existing != default_id and not existing.startswith(default_id + "-"):
         km["id"] = default_id
-        km["title"] = f"AI Agent Security - Attack script {exp}"
+        km["title"] = default_title
+    elif len(km.get("title", "")) > 50:
+        km["title"] = default_title
     km["code_file"] = "submission.ipynb"
+    km.setdefault("machine_shape", MACHINE_SHAPE)
     km_path.write_text(json.dumps(km, indent=2) + "\n")
     print(f"[build] {km_path} を同期（id={km['id']}）")
 

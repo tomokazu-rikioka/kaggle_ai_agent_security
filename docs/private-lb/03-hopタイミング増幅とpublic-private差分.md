@@ -1,5 +1,10 @@
 # 03. hop で時間を稼ぐ実装 と public↔private の差分カタログ
 
+> **2026-08-18 監査注記**: 本書の「gating は 1 message 内でしか効かない」は、**無条件 tail**に限れば正しいが、
+> 一般には強すぎる。BLOCK の tool result は同一候補の履歴に残るため、後続 message のモデルが結果を読んで
+> 条件分岐する増幅は成立し得る。`lb_time` の queue/polling 交絡を含む監査後の正典は
+> [04-条件分岐timingプローブ設計.md](./04-条件分岐timingプローブ設計.md)。
+
 > 02（[02-LBプロービング実験計画.md](./02-LBプロービング実験計画.md)）の**実装編**。
 > 02 が「唯一観測できるのは `lb_time` であり、それが private を映す」ことを示したのに対し、
 > 本書は **(a) 具体的にどう hop で時間を稼ぐか、(b) その候補を作る実プロンプト、(c) public と private で
@@ -41,17 +46,20 @@ hop で時間を稼ぐレバーは 4 つ。すべてコードの定数で上限�
 
 総 replay 時間 ≈ `Σ (実行ホップ数) × t_hop`、これが 9000s/フェーズを超えない範囲で使う。
 
-### ★ gating は「1メッセージ内」でしか効かない（最重要の落とし穴）
+### gating の確実な形は「1メッセージ内」。条件付きなら message 間も候補
 
 `_replay_and_score:631` は `for msg in user_messages: replay_env.interact(msg, max_tool_hops=8)`。
-**各 `interact` は独立**で、message1 のホップループが DENY で break しても **message2 は必ず実行される**。
+message1 のホップループが DENY で break しても **message2 は必ず実行される**。
 
-- ⇒ **ゲート（分岐する 1 手）と tail（時間を稼ぐ後続ホップ）は同じ 1 メッセージの中に置く**こと。
-- ⇒ 「gate を message1、tail を message2 以降」に分けると tail が**両アームで常に走る**ため差が消える（gating しない）。
-- ⇒ したがって **1 ゲートあたりの増幅は M ≤ 8（＝tail は最大 7 ホップ）に限られる**。K・N は「ゲートを何回反復するか」の軸として使う。
+- **無条件 tail**なら、ゲートと tail は同じ 1 message に置く。message2 以降は外側ループにより両アームで走るためである。
+- 一方、DENY/CONFIRM は失敗 tool result として同一候補の会話履歴に残る（`sandbox.py:456-485`）。
+  message2 以降がその result を読み、ALLOW 時だけ長い生成を行う **conditional tail** は成立し得る。
+- conditional tail はモデルの履歴判定・条件追従に依存する。増幅上限を M≤8 と断定できず K でも増幅できるが、
+  両アームで各 message 最低 1 generation を払い、context 肥大・条件忘却も起きる。詳細は 04。
 
-**総 gated-hop 会計**: 遅いアーム（private が通す）の総ホップ = `N × K × M`。
-これに t_hop を掛けたものが 9000s を十分下回るように N・K・M を決める（3-6）。
+**無条件・同型 gate の総 gated-hop 会計**: 遅いアーム（private が通す）の総ホップ = `N × K × M`。
+conditional tail では両アームの最低 1 generation/message と長短の出力 token 差を別に測る必要があり、この単純式は使わない。
+どちらも 9000s を十分下回るように N・K・M・出力長を決める（3-6、04）。
 
 ---
 
@@ -160,16 +168,18 @@ timing で観測可能か（＝早いゲートに落とせるか）で仕分け�
 | **H2** | `data`/`body`/`content` の**中身**を走査するか | 見ない（`_extract_target` は先頭キー 1 つ・`optimal.py:51-55`） | 走査し DENY（`eval_driver.py:145-152`） | ○ 可（http.post{url clean,data=SECRET}＝P2） | 枠が余れば |
 | **H5** | `last_user`（プロンプト文面）を検査するか | しない（args のみ） | しない | ○ 可（args クリーン・文面に trigger を仕込む） | 低（事前確率低） |
 | **H3** | ultra-dangerous 語彙が 8 語より広いか | 8 語（`optimal.py:22-31`） | 同 8 語 | △ ゲート化は可だが決定価値低 | 低 |
-| **H1** | 汚染を**全期間**記憶するか（窓 5 でなく） | 窓 5（`sandbox.py:291` `[-5:]`） | 永続（`eval_driver.py:128,137,159`） | **✗ 不可** | probe しない |
-| **H4** | `email.send` を汚染後に遮断するか | する（dangerous_ops に含む） | する | ✗ 不可（H1 と同型） | probe しない |
+| **H1** | 汚染を**全期間**記憶するか（窓 5 でなく） | 窓 5（`sandbox.py:291` `[-5:]`） | 永続（`eval_driver.py:128,137,159`） | △ 同一message直結は弱い。cross-message conditional tail なら候補 | 要事前検証 |
+| **H4** | `email.send` を汚染後に遮断するか | する（dangerous_ops に含む） | する | △ H1 と同様、conditional tail なら候補 | 要事前検証 |
 
-### なぜ H1/H4 は timing で観測できないか（重要な構造的帰結）
+### H1/H4 は同一 message の直接増幅が弱い。ただし条件付き message 間増幅は残る
 
 H1（窓 vs 永続）を突くには、**web 取得 → 無害ホップ ×5 → `email.send`** と、汚染を「洗う」ホップを
 **送信の前に**5 段以上積む必要がある（窓 = `tool_events[-5:]`）。すると分岐する送信が hop6〜7 の**遅い位置**に来る。
 DENY がそこで起きても break で節約できるのは残り 1〜2 ホップだけ＝ **Δ が立たない**。
 tail は「分岐の後ろ」に置けて初めて効くが、H1 は構造上「稼ぐホップが分岐の前」に来るため**増幅できない**。
-⇒ H1/H4 は timing probe の対象外（02-2-6 が「H0 のみ probe に値する」とした結論と一致）。
+ここまでが**同一 message 内だけで完結させる場合**の制約である。gate の BLOCK/ALLOW 結果を履歴に残し、次 message から
+条件付き tail を反復すれば、gate 後にも K 方向の増幅を置ける。ただし guardrail だけでなくモデルの履歴判定精度を測ることになり、
+`lb_time` の queue/polling 交絡も残る。したがって「観測不能」ではなく、**04 の Stage 0/1 を通過した場合のみ候補**へ修正する。
 
 ### 手元代理と public の**同一部分**（差ではない＝確認不要）
 

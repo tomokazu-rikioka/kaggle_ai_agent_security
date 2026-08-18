@@ -194,14 +194,20 @@ def build(
 
 def _write_kernel_metadata(exp: str, model: str, out_dir: Path) -> None:
     """評価カーネルの kernel-metadata.json を生成する（GPU/Internet ON・SDK dataset 添付）。"""
+    slug_exp = exp.replace("_", "-")
     slug_model = model.replace("_", "-")  # Kaggle の URL 識別子（slug）は underscore が使えない
     # EVAL_ID_SUFFIX: 作成失敗で壊れたカーネル id（"Notebook not found" が恒久化する）を避けるため、
     # 新しい id に切り替えるための任意のサフィックス。既定は空（通常運用では id を変えない）。
     id_suffix = os.environ.get("EVAL_ID_SUFFIX", "")
+    title = f"AI Agent Security - Eval script {exp} {model}{id_suffix}"
+    kernel_slug = f"ai-agent-security-eval-script-{slug_exp}-{slug_model}{id_suffix}"
+    if len(title) > 50:
+        title = f"AAS eval {exp} {model}{id_suffix}"
+        kernel_slug = f"aas-eval-{slug_exp}-{slug_model}{id_suffix}"
     km = {
-        "id": f"{KAGGLE_USER}/ai-agent-security-eval-script-{exp.replace('_', '-')}-{slug_model}{id_suffix}",
+        "id": f"{KAGGLE_USER}/{kernel_slug}",
         # title にも suffix を含める（title→slug（URL 識別子）が id に解決しないと 409 Conflict になるため）
-        "title": f"AI Agent Security - Eval script {exp} {model}{id_suffix}",
+        "title": title,
         "code_file": "eval.ipynb",
         "language": "python",
         "kernel_type": "notebook",

@@ -38,9 +38,9 @@ from typing import Any
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 COMPETITION = "ai-agent-security-multi-step-tool-attacks"
-# 提出 description から exp 名を拾う（例: "AI Agent Security - Attack script exp076 | Version 2"）。
-# 実提出の既定文は "Attack script expNNN"。"script" 有無どちらも拾えるようにしておく。
-EXP_RE = re.compile(r"Attack\s+(?:script\s+)?(exp\d{3})", re.IGNORECASE)
+# 提出 description から実験名を拾う（例: "AI Agent Security - Attack script exp076 | Version 2"）。
+# probe 系の検証提出も監視できるよう、prob001_fwd / prob001-fwd も同じキーへ正規化する。
+EXP_RE = re.compile(r"Attack\s+(?:script\s+)?((?:exp\d{3}|prob\d{3}(?:[-_][a-z0-9]+)*))", re.IGNORECASE)
 
 
 def emit(line: str) -> None:
@@ -69,7 +69,7 @@ def parse_exps(spec: str) -> list[str]:
             lo, hi = int(m.group(1)), int(m.group(2))
             out.extend(f"exp{n:03d}" for n in range(lo, hi + 1))
         else:
-            out.append(token.lower())
+            out.append(token.lower().replace("-", "_"))
     seen: set[str] = set()
     return [e for e in out if not (e in seen or seen.add(e))]
 
@@ -82,7 +82,7 @@ def status_of(sub: Any) -> str:
 def exp_of(sub: Any) -> str | None:
     """提出 description から exp 名を取り出す（取れなければ None）。"""
     m = EXP_RE.search(sub.description or "")
-    return m.group(1).lower() if m else None
+    return m.group(1).lower().replace("-", "_") if m else None
 
 
 def fetch(api: KaggleApi) -> list[Any]:

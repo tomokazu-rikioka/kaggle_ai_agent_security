@@ -45,7 +45,7 @@ submit:
 
 ## status: カーネル実行状態を確認
 status:
-	$(KAGGLE) kernels status rikitomo0526/ai-agent-security-attack-script-$(EXP)
+	$(KAGGLE) kernels status rikitomo0526/ai-agent-security-attack-script-$(subst _,-,$(EXP))
 
 # === 研究データ収集（ディスカッション / 公開カーネル） ===
 
