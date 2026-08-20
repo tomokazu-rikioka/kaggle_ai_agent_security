@@ -220,14 +220,14 @@ private guardrail を「強い/弱い」で見ると誤る。`decide(tool_name, 
 
 優先順位は、最終提出の配分を変える順に置く。
 
-| 優先 | 問い | ALLOW なら | BLOCK なら |
-|---:|---|---|---|
-| 1 | exact EXFIL gate は通るか | public 高密度 exfil を final 候補に残す | exfil 依存を下げ、deputy/provenance 非依存へ寄せる |
-| 1 | clean DEPUTY gate は通るか | private ヘッジ枠の価値が上がる | clean share も閉じる仮説。public best か別面へ寄せる |
-| 2 | payload 全キー走査か | data hole の private 転移に期待 | data/body/content を使う exfil は落ちやすい |
-| 2 | persistent taint か | file-wash 系は private で弱い | public と同じ window 系が残る可能性 |
-| 3 | last_user/intent を見るか | 文面の無害化が必要 | args 設計を優先 |
-| 4 | encoding 正規化か | encoded bypass は低期待 | scorer/guardrail 非対称がない限り低優先 |
+| 優先 | 問い | ALLOW なら | BLOCK なら | 実測結果 |
+|---:|---|---|---|---|
+| 1 | exact EXFIL gate は通るか | public 高密度 exfil を final 候補に残す | exfil 依存を下げ、deputy/provenance 非依存へ寄せる | **BLOCK示唆** prob001(2026-08-18): local private 0/20発火・LB `T_FWD386≈T_REV403` で成功系(A/E)棄却。public LB には残す価値あり(発火100%)だが private 無得点。詳細→`docs/probing/prob001.md` |
+| 1 | clean DEPUTY gate は通るか | private ヘッジ枠の価値が上がる | clean share も閉じる仮説。public best か別面へ寄せる | **ALLOW示唆** prob002(2026-08-20): LB `T_REV111 ≪ T_FWD309 ≈ T_CLOCK308`（REV が BLOCK予測 B+C≈210 より約99分速い＝REV private 分岐が STOP＝private ALLOW）。public 発火 fwd8/rev30/clock0。**本物 private の CONFUSED_DEPUTY 得点路は開通**。exp040 系 deputy ヘッジの価値が裏づけ。詳細→`docs/probing/prob002.md` |
+| 2 | payload 全キー走査か | data hole の private 転移に期待 | data/body/content を使う exfil は落ちやすい | 未 |
+| 2 | persistent taint か | file-wash 系は private で弱い | public と同じ window 系が残る可能性 | 未 |
+| 3 | last_user/intent を見るか | 文面の無害化が必要 | args 設計を優先 | 未 |
+| 4 | encoding 正規化か | encoded bypass は低期待 | scorer/guardrail 非対称がない限り低優先 | 未 |
 
 ### provenance は 2x2 を崩さない
 
