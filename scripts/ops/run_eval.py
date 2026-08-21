@@ -158,6 +158,9 @@ def main() -> None:
     parser.add_argument("--candidates", type=int, default=None, help="候補数の上限（smoke 用）")
     parser.add_argument("--budget-s", type=float, default=8000.0, help="生成フェーズの時間予算（秒）")
     parser.add_argument("--guardrails", default="public,private", help="採点ガードレール")
+    parser.add_argument(
+        "--dump-events", type=int, default=0, help="先頭 N 候補のツールイベント要約を出す（probe 診断用・既定 0）"
+    )
     parser.add_argument("--poll-interval", type=int, default=POLL_INTERVAL_S, help="status ポーリング間隔（秒）")
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S, help="1 カーネルの最大待ち時間（秒）")
     parser.add_argument("--dry-run", action="store_true", help="build のみ（push しない）")
@@ -178,6 +181,7 @@ def main() -> None:
             candidates=args.candidates,
             budget_s=args.budget_s,
             guardrails=args.guardrails,
+            dump_events=args.dump_events,
         )
 
     if args.dry_run:

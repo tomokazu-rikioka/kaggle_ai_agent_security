@@ -190,6 +190,9 @@ prob001 より遥かに強く queue から分離できている。
   が timing 両面から確定。
 - 併せて、REV 型（gate + 安価 STOP tail）は public/private とも 30/30 発火しうる＝deputy を高 N で詰める設計が
   private でも打切られにくいことを示唆（fill は LONG でなく STOP 相当の安価な継続にすべき）。
+- ただし「private 得点は EXFIL ではなく DEPUTY」は **EXFIL の SECRET_MARKER 直挿しが塞がれている**という
+  prob001 の範囲での結論。`secret.txt` を `fs.read` して難読化 `http.post` する EXFIL(sev5=18点/cell)経路は
+  read が通るか未検証。この read 可否を次に測るのが **prob003**（→ `docs/probing/prob003.md`）。
 
 ## 限界
 

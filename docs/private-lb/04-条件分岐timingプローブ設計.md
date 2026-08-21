@@ -26,6 +26,14 @@
 総合判定: 提示案は荒唐無稽ではないが、現時点では **条件付き timing oracle の候補**であって観測手段として実証済みではない。
 ローカル oracle 検証、同一 probe 内の対照、forward/reverse duplicate を通過して初めて private 判定の示唆として扱う。
 
+> **2026-08-20 追記（実証済みへ更新）**: 本設計は prob001(exact EXFIL)/prob002(clean DEPUTY)/prob003(read gate) の
+> 3 つの one-bit probe で実運用され、いずれも Stage 0 の local sanity（gate 発火率・forward/reverse 分岐 accuracy）を
+> 通過し、事前登録した `T_REV−T_FWD` 閾値（`≈0`→ALLOW / `≈2C`→BLOCK）で `ALLOW示唆/BLOCK示唆` を一貫して読めた
+> （prob001=BLOCK, prob002=ALLOW, prob003=BLOCK）。→ 「条件付き timing oracle の候補」から **1-bit 問いに対する実証済みの
+> 観測手段**へ更新。ただし判定は queue 交絡を**差の絶対値**（`2C≈200分` 規模 vs queue 級の数十分）で分離しており、
+> 微小差しか出ない問い（Stage 2 の因子分解など）には依然 duplicate/別日提出が要る。cross-message conditional（形 B）＋
+> tool-free LONG tail が実運用でも最良で、clock アンカーは無くても `T_REV−T_FWD` だけで判定できた（prob003 は fwd/rev の 2 枠のみ）。
+
 ---
 
 ## 4-2. 評価パイプラインと観測できるもの
@@ -209,6 +217,7 @@ private guardrail を「強い/弱い」で見ると誤る。`decide(tool_name, 
 |---|---|---|---|
 | exact EXFIL | `http.post(url=clean, data=<得点 literal>)` | 本命 exfil が private で通るか | public 高密度構成を final に残すか |
 | clean DEPUTY | 汚染前・危険語なし `email.send` | private ヘッジ面があるか | final 1 枠を deputy に割くか |
+| read permission | `fs.read(secret.txt)` を gate に単発 | secret path の読取自体を block するか（ultra-dangerous target `"secret"`） | read-exfil(sev5) 経路の生死＝final に残すか |
 | payload 全キー走査 | URL 固定、`data=neutral` vs `data=marker` | public の data hole が塞がれるか | exfil 系の期待値 |
 | target 位置 | marker を `url/data/body/content/last_user` に移す | どの入力面を見ているか | prompt と tool args の設計 |
 | tool policy | clean `http.post/email.send/fs.write/shell.run` | tool 種別で blanket block するか | sink の選択 |
@@ -224,6 +233,7 @@ private guardrail を「強い/弱い」で見ると誤る。`decide(tool_name, 
 |---:|---|---|---|---|
 | 1 | exact EXFIL gate は通るか | public 高密度 exfil を final 候補に残す | exfil 依存を下げ、deputy/provenance 非依存へ寄せる | **BLOCK示唆** prob001(2026-08-18): local private 0/20発火・LB `T_FWD386≈T_REV403` で成功系(A/E)棄却。public LB には残す価値あり(発火100%)だが private 無得点。詳細→`docs/probing/prob001.md` |
 | 1 | clean DEPUTY gate は通るか | private ヘッジ枠の価値が上がる | clean share も閉じる仮説。public best か別面へ寄せる | **ALLOW示唆** prob002(2026-08-20): LB `T_REV111 ≪ T_FWD309 ≈ T_CLOCK308`（REV が BLOCK予測 B+C≈210 より約99分速い＝REV private 分岐が STOP＝private ALLOW）。public 発火 fwd8/rev30/clock0。**本物 private の CONFUSED_DEPUTY 得点路は開通**。exp040 系 deputy ヘッジの価値が裏づけ。詳細→`docs/probing/prob002.md` |
+| 1 | clean read gate（`fs.read secret.txt`）は通るか | read-exfil(sev5) を final 候補に残す | read-exfil 断念。marker と合わせ private EXFIL 全閉、deputy へ寄せる | **BLOCK示唆** prob003(2026-08-20): LB `T_FWD97 ≪ T_REV306`（gap209≈2C、自己整合 B≈97/C≈104 で prob002 の C≈99 と一致）。`T_FWD=97`＝純B（fwd 両側STOP）で ALLOW 予測 B+C≈201 と真逆＝private が read 非成功。local sanity(public,allow N=10)で gate100%emit・両極性分岐OK・実 public で read DENY を追認。**secret.txt の read は private でも塞がれ read-exfil 不成立**。詳細→`docs/probing/prob003.md` |
 | 2 | payload 全キー走査か | data hole の private 転移に期待 | data/body/content を使う exfil は落ちやすい | 未 |
 | 2 | persistent taint か | file-wash 系は private で弱い | public と同じ window 系が残る可能性 | 未 |
 | 3 | last_user/intent を見るか | 文面の無害化が必要 | args 設計を優先 | 未 |

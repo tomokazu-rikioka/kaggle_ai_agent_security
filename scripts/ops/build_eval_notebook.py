@@ -116,9 +116,12 @@ def _sdk_cell() -> str:
     )
 
 
-def _run_cell(exp: str, model: str, candidates: int | None, budget_s: float, guardrails: str) -> str:
+def _run_cell(
+    exp: str, model: str, candidates: int | None, budget_s: float, guardrails: str, dump_events: int = 0
+) -> str:
     """eval_driver.py を実行して scores.json を書き出すセル。"""
     cand = f" --candidates {candidates}" if candidates is not None else ""
+    dump = f" --dump-events {dump_events}" if dump_events else ""
     gguf_path = GGUF_PATHS[model]
     path_env = GGUF_PATH_ENVS[model]
     return (
@@ -129,7 +132,7 @@ def _run_cell(exp: str, model: str, candidates: int | None, budget_s: float, gua
         "!python /kaggle/working/eval_driver.py \\\n"
         "    --attack /kaggle/working/attack.py \\\n"
         f"    --model {model} --guardrails {guardrails} \\\n"
-        f"    --exp {exp}{cand} --budget-s {int(budget_s)} \\\n"
+        f"    --exp {exp}{cand}{dump} --budget-s {int(budget_s)} \\\n"
         "    --out /kaggle/working/scores.json\n"
         "print('--- scores.json ---')\n"
         "print(json.dumps(json.load(open('/kaggle/working/scores.json')), ensure_ascii=False, indent=2))\n"
@@ -143,6 +146,7 @@ def build(
     candidates: int | None = None,
     budget_s: float = 8000.0,
     guardrails: str = "public,private",
+    dump_events: int = 0,
 ) -> Path:
     """build/eval/<exp>/<model>/ に {eval.ipynb, kernel-metadata.json} を生成し、そのディレクトリを返す。"""
     if model not in MODELS:
@@ -179,7 +183,7 @@ def build(
             _b64_write_cell("eval_driver.py を /kaggle/working へ復元", driver_src, "/kaggle/working/eval_driver.py")
         ),
         nbf.v4.new_markdown_cell(f"## ④ 採点実行（{model}）→ /kaggle/working/scores.json"),
-        nbf.v4.new_code_cell(_run_cell(exp, model, candidates, budget_s, guardrails)),
+        nbf.v4.new_code_cell(_run_cell(exp, model, candidates, budget_s, guardrails, dump_events)),
     ]
     nb.metadata["kernelspec"] = {"name": "python3", "language": "python", "display_name": "Python 3"}
     nb.metadata["language_info"] = {"name": "python"}

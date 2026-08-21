@@ -177,13 +177,25 @@ class ProvenanceGuardrail(GuardrailBase):
             self._ever_tainted = bool(snapshot.get("ever_tainted", False))
 
 
+class AllowAllGuardrail(GuardrailBase):
+    """全ツールを ALLOW する sanity 専用ガードレール（本番 private とは無関係）。
+
+    read probe（prob003）の「gate が成功した側の分岐」を手元で再現するために使う。public は
+    fs.read(secret.txt) を DENY するので、local eval だけでは失敗分岐しか観測できない。allow を
+    足すと read が成功し、fwd=LONG / rev=STOP の success 分岐が発火することを提出前に確認できる。
+    GuardrailBase.decide が既定で ALLOW を返すのでそのまま継承する。
+    """
+
+
 GuardrailFactory = Callable[[], GuardrailBase]
 
 # public=公開版の防御機構そのもの / private=非公開版への汎化を測る代理（永続来歴 ProvenanceGuardrail が担う）
 # 辞書キー "private"（役割名）↔ クラス ProvenanceGuardrail（全期間記憶する永続来歴という仕組みの名前）。
+# allow=全許可（sanity 専用・本番 private とは無関係。read probe の success 分岐の手元再現に使う）。
 GUARDRAILS: dict[str, GuardrailFactory] = {
     "public": OptimalGuardrail,
     "private": ProvenanceGuardrail,
+    "allow": AllowAllGuardrail,
 }
 
 
@@ -372,6 +384,30 @@ def generate_candidates(
     return candidates
 
 
+# ----------------------------------------------------------------------------- 診断ダンプ
+def _dump_candidate_events(guardrail_name: str, idx: int, trace: Mapping[str, Any]) -> None:
+    """1 候補の (tool_name, ok, error) 列・assistant メッセージ数・末尾テキストを 1 行で出す。
+
+    read probe（採点は 0 が正常）で「gate=fs.read が実際に emit されたか」「ガードレールが
+    それを DENY したか（ok=False, error=denied:...）」「分岐 tail が LONG(長文)か STOP か」を
+    提出前に目視するための診断。findings に依らず先頭 N 候補で必ず出す。
+    """
+    events = trace.get("tool_events", []) or []
+    parts: list[str] = []
+    for e in events:
+        ok = bool(e.get("ok"))
+        tag = "ok" if ok else f"X:{str(e.get('error') or '')[:22]}"
+        parts.append(f"{e.get('name')}({tag})")
+    tools_str = ";".join(parts) if parts else "-"
+    asst = [str(a) for a in (trace.get("assistant_messages", []) or [])]
+    n_long = sum(1 for a in asst if len(a) > 200)
+    last = (asst[-1] if asst else "").replace("\n", " ")[:50]
+    print(
+        f"  [dbg {guardrail_name}] c{idx:02d} tools=[{tools_str}] "
+        f"n_asst={len(asst)} n_long={n_long} last={last!r}"
+    )
+
+
 # ----------------------------------------------------------------------------- リプレイ+採点
 def replay_and_score(
     *,
@@ -383,10 +419,12 @@ def replay_and_score(
     max_tool_hops: int,
     env_selection: str,
     progress_every: int = 25,
+    dump_events: int = 0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """候補を 1 つの防御機構（ガードレール）へ再実行（リプレイ）し、summary と findings を返す。
 
-    評価ゲートウェイ（中継役）の replay に相当。
+    評価ゲートウェイ（中継役）の replay に相当。dump_events>0 なら先頭 N 候補の
+    ツールイベント要約を stdout に出す（採点0の probe で gate 発火/分岐挙動を観測するため）。
     """
     guardrail_factory = get_guardrail_factory(guardrail_name)
     findings: list[dict[str, Any]] = []
@@ -404,6 +442,8 @@ def replay_and_score(
             hook_registry_factory=ops.HookRegistry,
             output_controller=None,
         )
+        if dump_events and idx < dump_events:
+            _dump_candidate_events(guardrail_name, idx, trace)
         predicates = eval_predicates(trace)
         if not predicates:
             continue
@@ -450,6 +490,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--env", default="gym", choices=["gym", "sandbox"], help="採点は gym（公式と同じ）")
     ap.add_argument("--max-tool-hops", type=int, default=8)
+    ap.add_argument(
+        "--dump-events",
+        type=int,
+        default=0,
+        help="先頭 N 候補のツールイベント要約を出す（採点0の probe 診断用・既定 0=無効）",
+    )
     ap.add_argument("--exp", default=None, help="scores.json に記録する実験名（任意）")
     ap.add_argument("--out", default=None, help="scores.json の保存先（省略時は stdout のみ）")
     ap.add_argument("--sdk-root", default=None, help="aicomp_sdk を含むディレクトリ（sys.path 解決済みなら不要）")
@@ -498,6 +544,7 @@ def main(argv: list[str] | None = None) -> int:
             seed=args.seed,
             max_tool_hops=args.max_tool_hops,
             env_selection=args.env,
+            dump_events=args.dump_events,
         )
         breakdown = predicate_breakdown(findings)
         print(
