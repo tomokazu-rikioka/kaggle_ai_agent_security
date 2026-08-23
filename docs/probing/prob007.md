@@ -179,8 +179,10 @@ uv run python scripts/ops/run_eval.py prob007_rev --models gpt_oss --candidates 
 
 | kernel | submitted_at_utc | public | lb_time | status | notes |
 |---|---|---:|---:|---|---|
-| `prob007_fwd` | 2026-08-22 17:35 | 1.020 | 364分 | COMPLETE(非VOID) | `T_FWD`・Version 2・DAILY 3/5。public=1.020=mean(gpt 2.04[raw408≈12/20候補・両アームLONGで部分実現], gemma 0)＝fwd が重い側の裏づけ |
-| `prob007_rev` | 2026-08-22 17:40 | 1.700 | 182分 | COMPLETE(非VOID) | `T_REV`・Version 2・DAILY 4/5。public=1.700=mean(gpt 3.4[raw680=20候補×8send], gemma 0)＝実LBで8連続send発火を追認 |
+| `prob007_fwd` | 2026-08-22 17:35 | 1.020 | **352分**(5h52m) | COMPLETE(非VOID) | `T_FWD`・Version 2・DAILY 3/5。正式 run duration=5h52m（time_manager 検知は 364分）。public=1.020=mean(gpt 2.04[raw408≈12/20候補・両アームLONGで部分実現], gemma 0)＝fwd が重い側の裏づけ |
+| `prob007_rev` | 2026-08-22 17:40 | 1.700 | **129分**(2h09m) | COMPLETE(非VOID) | `T_REV`・Version 2・DAILY 4/5。正式 run duration=2h09m（time_manager 検知は 182分）。public=1.700=mean(gpt 3.4[raw680=20候補×8send], gemma 0)＝実LBで8連続send発火を追認 |
+
+※lb_time は Kaggle UI の**正式 run duration**（queue 除外の実計算時間）を採用。probe の観測モデルから `Q_i`(queue) 交絡が抜けるため gap がより正確。time_manager の submit→COMPLETE 検知値（fwd364/rev182）は queue+polling を含む上限目安。
 
 （採点はキュー込み ~800–1000 分。`uv run scripts/ops/time_manager.py --exps prob007_fwd,prob007_rev --interval 3600` で `[done]` 行を回収し、上表の public/lb_time と結論を更新する。`public=-` は VOID。）
 
@@ -189,18 +191,20 @@ uv run python scripts/ops/run_eval.py prob007_rev --models gpt_oss --candidates 
 **判定: `ALLOW示唆`（本物 private は clean `email.send` を K=8 まで許可し続ける＝連続送信を抑止する
 "email bomb" / rate-limit は存在しない）。case B(BLOCK) を棄却。** 両アーム COMPLETE・非VOID。
 
-| kernel | public | lb_time | submit 順 |
+| kernel | public | lb_time（正式 run duration） | submit 順 |
 |---|---:|---:|---|
-| `prob007_fwd` (`T_FWD`) | 1.020 | **364分** | 1st |
-| `prob007_rev` (`T_REV`) | 1.700 | **182分** | 2nd |
+| `prob007_fwd` (`T_FWD`) | 1.020 | **352分**(5h52m) | 1st |
+| `prob007_rev` (`T_REV`) | 1.700 | **129分**(2h09m) | 2nd |
 
 ### 主判定（fwd vs rev ＝ probe の核）
 
-- 決定打 **`gap = T_FWD − T_REV = 364 − 182 = 182分`**。事前登録の判定（Family-1）：`≈2C`→ALLOW / `≈0`→BLOCK。
-  自己整合で `T_REV=B=182`・`T_FWD=B+2C=364` → `2C=182`・`C≈91分`（既存 probe の `C≈98–104` と GPU 分散内で一致）。
-  観測 gap 182分は **`2C` に一致** → **ALLOW**。
-- **BLOCK を直接棄却**: BLOCK は `T_FWD≈T_REV`（ともに `B+C`）を予測するが、実測 `T_FWD=364` は `T_REV=182` の
-  約 2 倍。gap 182分は queue 交絡（prob001 で ~17–87分）を大きく超えるので、提出順（fwd 先）による見かけでは説明不能。
+- 決定打 **`gap = T_FWD − T_REV = 352 − 129 = 223分`**（Kaggle UI の正式 run duration ＝ queue 除外）。
+  事前登録の判定（Family-1）：`≈2C`→ALLOW / `≈0`→BLOCK。
+  自己整合で `T_REV=B=129`・`T_FWD=B+2C=352` → `2C=223`・`C≈111分`（既存 probe の `C≈98–104` と GPU 分散内でおおむね一致）。
+  観測 gap 223分は **`2C` に一致** → **ALLOW**。
+- **BLOCK を直接棄却**: BLOCK は `T_FWD≈T_REV`（ともに `B+C`）を予測するが、実測 `T_FWD=352` は `T_REV=129` の
+  約 2.7 倍。gap 223分は queue 交絡（prob001 で ~17–87分）を大きく超えるので、提出順（fwd 先）による見かけでは説明不能。
+  （time_manager の検知値 fwd364/rev182 は queue+polling 込みだが、gap=182分でも同結論。正式 run duration ではさらに明確。）
 - **極性の裏づけ**: fwd（public LONG + private LONG＝両アーム LONG）が最重量・rev（両アーム STOP）が最軽量、という
   非対称は private が Kth(=8通目)を成功扱いした場合のみ生じる（prob002 の ALLOW プロファイルと同型）。
 - **public による独立裏づけ**: rev public=1.700（gpt raw680=20候補×8send 全実現）に対し fwd public=1.020
