@@ -4,11 +4,11 @@ Kaggle GPU 上で attack.py を実モデル（gpt_oss / gemma_4）で手元採�
 組み立てる。Notebook がやるのは次だけ:
   1) 依存の導入（CUDA 版 llama-cpp-python など）
   2) Add Input した SDK dataset を /tmp へ展開し、sys.path 解決の下準備をする
-  3) attack.py と eval_driver.py を base64 から /kaggle/working へ復元する
+  3) attack.py、eval_driver.py、研究用 private guardrails を base64 から /kaggle/working へ復元する
   4) eval_driver.py を実行して /kaggle/working/scores.json（1 モデル分）を書き出す
 
-採点の処理は scripts/eval/eval_driver.py（単一ファイルで完結）にまとめてある。本スクリプトは attack.py と
-eval_driver.py を **base64 で符号化して 1 セルに埋め込む**（`'''` や任意のバイト列が入っても壊れない）。
+採点の処理は scripts/eval/eval_driver.py と guardrails/ にまとめてある。本スクリプトは各 Python ソースを
+**base64 で符号化してセルに埋め込む**（`'''` や任意のバイト列が入っても壊れない）。
 提出用 build_notebook.py と同じやり方だが、こちらは Internet ON・GPU・SDK dataset 添付の **評価カーネル**で、
 提出カーネルとは別物。
 
@@ -32,6 +32,7 @@ import nbformat as nbf
 EXPERIMENTS_DIR = Path("experiments")
 EVAL_BUILD_DIR = Path("build") / "eval"
 DRIVER_PATH = Path("scripts") / "eval" / "eval_driver.py"
+GUARDRAILS_DIR = Path("guardrails")
 KAGGLE_USER = "rikitomo0526"
 SDK_DATASET = f"{KAGGLE_USER}/aiagent-security-sdk"
 COMPETITION = "ai-agent-security-multi-step-tool-attacks"  # competition_sources（コンペとの紐付け）
@@ -156,9 +157,12 @@ def build(
         raise FileNotFoundError(f"{attack_path} が存在しません")
     if not DRIVER_PATH.is_file():
         raise FileNotFoundError(f"{DRIVER_PATH} が存在しません")
+    if not (GUARDRAILS_DIR / "registry.py").is_file():
+        raise FileNotFoundError(f"{GUARDRAILS_DIR / 'registry.py'} が存在しません")
 
     attack_src = attack_path.read_text()
     driver_src = DRIVER_PATH.read_text()
+    guardrail_sources = {path.name: path.read_text() for path in sorted(GUARDRAILS_DIR.glob("*.py")) if path.is_file()}
 
     out_dir = EVAL_BUILD_DIR / exp / model
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -175,13 +179,23 @@ def build(
         nbf.v4.new_code_cell(_install_cell()),
         nbf.v4.new_markdown_cell("## ② SDK dataset を展開"),
         nbf.v4.new_code_cell(_sdk_cell()),
-        nbf.v4.new_markdown_cell("## ③ attack.py / eval_driver.py を復元"),
+        nbf.v4.new_markdown_cell("## ③ attack.py / eval_driver.py / private guardrails を復元"),
         nbf.v4.new_code_cell(
             _b64_write_cell("attack.py を /kaggle/working へ復元", attack_src, "/kaggle/working/attack.py")
         ),
         nbf.v4.new_code_cell(
             _b64_write_cell("eval_driver.py を /kaggle/working へ復元", driver_src, "/kaggle/working/eval_driver.py")
         ),
+        *[
+            nbf.v4.new_code_cell(
+                _b64_write_cell(
+                    f"研究用 guardrail {name} を復元",
+                    source,
+                    f"/kaggle/working/guardrails/{name}",
+                )
+            )
+            for name, source in guardrail_sources.items()
+        ],
         nbf.v4.new_markdown_cell(f"## ④ 採点実行（{model}）→ /kaggle/working/scores.json"),
         nbf.v4.new_code_cell(_run_cell(exp, model, candidates, budget_s, guardrails, dump_events)),
     ]
@@ -190,7 +204,11 @@ def build(
 
     nb_path = out_dir / "eval.ipynb"
     nbf.write(nb, str(nb_path))
-    print(f"[build-eval] {nb_path} を生成（attack {len(attack_src)}B / driver {len(driver_src)}B）")
+    guardrails_bytes = sum(len(source) for source in guardrail_sources.values())
+    print(
+        f"[build-eval] {nb_path} を生成"
+        f"（attack {len(attack_src)}B / driver {len(driver_src)}B / guardrails {guardrails_bytes}B）"
+    )
 
     _write_kernel_metadata(exp, model, out_dir)
     return out_dir

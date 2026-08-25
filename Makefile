@@ -1,4 +1,4 @@
-.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-kernel-top research-discussions research-discussion-read lint format help
+.PHONY: new-exp sdk-dataset eval build submit status research-kernels research-kernel-read research-kernel-top research-discussions research-discussion-read lint format test-guardrails help
 .DEFAULT_GOAL := help
 
 KAGGLE := kaggle
@@ -28,6 +28,7 @@ sdk-dataset:
 eval:
 	uv run python scripts/ops/run_eval.py $(EXP) \
 	  $(if $(MODELS),--models $(MODELS),) $(if $(CANDIDATES),--candidates $(CANDIDATES),) \
+	  $(if $(GUARDRAILS),--guardrails $(GUARDRAILS),) \
 	  $(if $(TIMEOUT),--timeout $(TIMEOUT),)
 
 # === 提出 ===
@@ -83,12 +84,16 @@ research-discussion-read:
 
 ## lint: ruff チェック（新規コード）
 lint:
-	uv run ruff check experiments scripts
-	uv run ruff format --check experiments scripts
+	uv run ruff check experiments scripts guardrails
+	uv run ruff format --check experiments scripts guardrails
 
 ## format: ruff フォーマット（新規コード）
 format:
-	uv run ruff format experiments scripts
+	uv run ruff format experiments scripts guardrails
+
+## test-guardrails: private guardrail 5種の unit / sandbox integration test
+test-guardrails:
+	PYTHONPATH=vendor/aicomp_sdk_pkg uv run python -m unittest discover -s guardrails/tests -v
 
 # === ヘルプ ===
 
@@ -96,7 +101,7 @@ format:
 help:
 	@echo "make new-exp NAME=exp001      — 新しい実験を作成"
 	@echo "make sdk-dataset              — 評価用 SDK dataset を生成（vendor 更新時のみ・要 kaggle datasets create）"
-	@echo "make eval EXP=exp001          — Kaggle で採点（build→push→wait→fetch）[MODELS=.. CANDIDATES=..]"
+	@echo "make eval EXP=exp001          — Kaggle で採点 [MODELS=.. CANDIDATES=.. GUARDRAILS=..]"
 	@echo "make build EXP=exp001         — 提出用 submission.ipynb を生成"
 	@echo "make submit EXP=exp001        — build して kaggle kernels push（LB へは提出しない）"
 	@echo "make status EXP=exp001        — 提出カーネルの実行状態を確認"
@@ -107,4 +112,5 @@ help:
 	@echo "make research-discussions     — ディスカッション収集 [SRC=internal|bookmarks]（internal は要 KAGGLE_API_TOKEN）"
 	@echo "make research-discussion-read TID=708034 — スレッド本文を表示"
 	@echo "make lint / make format       — ruff チェック / フォーマット"
+	@echo "make test-guardrails          — private guardrail 5種のテスト"
 	@echo "（スコア表 docs/SCORE.md は直接編集・知見は docs/knowledges/）"

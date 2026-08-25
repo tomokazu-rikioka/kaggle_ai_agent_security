@@ -1,4 +1,4 @@
-"""単一ファイルで完結する評価ドライバ（Kaggle GPU 上で手元採点するためのもの）。
+"""Kaggle GPU 上で手元採点するための評価ドライバ。
 
 公式の評価ゲートウェイ（中継役。jed_attack_gateway.py）と同じ手順を 1 ファイルで再現する:
   1) attack.run(env) を **1 回**だけ動かして候補（ユーザーメッセージの連鎖）を作る（public＝公開版で探索）
@@ -6,9 +6,9 @@
      eval_predicates → summarize_attack_findings で採点する
 生成と再実行を分けるのは、複数の防御機構を比べるたびに生成（モデル実行）をやり直さずに済ませるため。
 
-run_validation / agents_local / guardrails_local / private（非公開版）ガードレール相当の処理を、
-**兄弟ファイルへの import を持たない単一ファイル**にまとめたもの。
-Kaggle 評価 Notebook が attack.py と本ファイルを base64 で符号化して書き出し、
+run_validation / agents_local / guardrails_local / private（非公開版）ガードレール相当の処理は
+本ファイルにまとめ、研究用の防御候補は `guardrails` パッケージから読み込む。
+Kaggle 評価 Notebook が attack.py、本ファイル、guardrails を base64 で符号化して書き出し、
 
     python eval_driver.py --attack /kaggle/working/attack.py --model gpt_oss \
         --guardrails public,private --candidates 620 \
@@ -83,6 +83,27 @@ def _bootstrap_sdk_path() -> None:
 
 _bootstrap_sdk_path()
 
+
+def _bootstrap_research_guardrails_path() -> None:
+    """Make the repository/bundled ``guardrails`` package importable.
+
+    Locally the package is at the repository root; generated Kaggle eval notebooks
+    restore it beside this driver under ``/kaggle/working``.
+    """
+    driver_path = Path(__file__).resolve()
+    candidates = [driver_path.parent, Path.cwd()]
+    if len(driver_path.parents) >= 3:
+        candidates.append(driver_path.parents[2])
+    for root in candidates:
+        if (root / "guardrails" / "registry.py").is_file():
+            root_text = str(root)
+            if root_text not in sys.path:
+                sys.path.insert(0, root_text)
+            return
+
+
+_bootstrap_research_guardrails_path()
+
 from aicomp_sdk.attacks.contracts import (  # noqa: E402
     AttackAlgorithmBase,
     AttackCandidate,
@@ -93,6 +114,8 @@ from aicomp_sdk.core.tools.http import PRIVATE_NET_RE  # noqa: E402
 from aicomp_sdk.evaluation import ops  # noqa: E402
 from aicomp_sdk.guardrails.base import Decision, GuardrailBase  # noqa: E402
 from aicomp_sdk.guardrails.optimal import Guardrail as OptimalGuardrail  # noqa: E402
+
+from guardrails.registry import GUARDRAIL_FACTORIES as RESEARCH_GUARDRAILS  # noqa: E402
 
 DEFAULT_SEED = 123  # 公式の乱数の初期値 ATTACK_SEED
 
@@ -232,6 +255,7 @@ GUARDRAILS: dict[str, GuardrailFactory] = {
     "private": ProvenanceGuardrail,
     "allow": AllowAllGuardrail,
     "denyN": DenyAfterNSendsGuardrail,
+    **RESEARCH_GUARDRAILS,
 }
 
 
@@ -472,8 +496,10 @@ def replay_and_score(
     guardrail_factory = get_guardrail_factory(guardrail_name)
     findings: list[dict[str, Any]] = []
     long_counts: list[int] = []
+    replay_seconds: list[float] = []
     n = len(candidates)
     for idx, candidate in enumerate(candidates):
+        replay_started = time.monotonic()
         trace = ops._replay_candidate_trace(
             candidate=candidate,
             index=idx,
@@ -486,6 +512,7 @@ def replay_and_score(
             hook_registry_factory=ops.HookRegistry,
             output_controller=None,
         )
+        replay_seconds.append(time.monotonic() - replay_started)
         if dump_events and idx < dump_events:
             _dump_candidate_events(guardrail_name, idx, trace)
         long_counts.append(_count_long_tails(trace))
@@ -510,6 +537,8 @@ def replay_and_score(
             print(f"  [{guardrail_name}] {idx + 1}/{n} 候補リプレイ済 / findings={len(findings)}")
     summary = ops.summarize_attack_findings(findings)
     summary["tail_long_mean"] = round(sum(long_counts) / len(long_counts), 2) if long_counts else 0.0
+    summary["replay_total_s"] = round(sum(replay_seconds), 3)
+    summary["replay_mean_s"] = round(sum(replay_seconds) / len(replay_seconds), 3) if replay_seconds else 0.0
     return summary, findings
 
 
@@ -524,7 +553,7 @@ def predicate_breakdown(findings: list[dict[str, Any]]) -> dict[str, int]:
 
 # ----------------------------------------------------------------------------- main
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="自己完結の評価ドライバ（AI Agent Security）")
+    ap = argparse.ArgumentParser(description="研究用 guardrails 対応の評価ドライバ（AI Agent Security）")
     ap.add_argument("--attack", required=True, help="attack.py のパス")
     ap.add_argument("--model", default="gpt_oss", choices=["gpt_oss", "gemma_4", "gemma", "deterministic"])
     ap.add_argument("--guardrails", default="public,private", help=f"カンマ区切り: {', '.join(GUARDRAILS)}")
@@ -573,7 +602,8 @@ def main(argv: list[str] | None = None) -> int:
         max_candidates=args.candidates,
         gen_guardrail=args.gen_guardrail,
     )
-    print(f"[eval] {len(candidates)} 候補を生成（{time.time() - t0:.1f}s, gen_guardrail={args.gen_guardrail}）")
+    generation_seconds = time.time() - t0
+    print(f"[eval] {len(candidates)} 候補を生成（{generation_seconds:.1f}s, gen_guardrail={args.gen_guardrail}）")
     if not candidates:
         print("[eval] 候補が 0 件です。budget-s を増やすか attack を確認してください。")
         return 1
@@ -597,6 +627,7 @@ def main(argv: list[str] | None = None) -> int:
             f"[eval]   -> score={summary['score']:.3f} raw={summary['score_raw']:.1f} "
             f"findings={summary['findings_count']} cells={summary['unique_cells']} "
             f"tail_long_mean={summary.get('tail_long_mean', 0.0)} "
+            f"replay_mean_s={summary.get('replay_mean_s', 0.0)} "
             f"predicates={breakdown} （{time.time() - t0:.1f}s）"
         )
         guardrail_results[gname] = {
@@ -605,6 +636,8 @@ def main(argv: list[str] | None = None) -> int:
             "findings_count": summary["findings_count"],
             "unique_cells": summary["unique_cells"],
             "tail_long_mean": summary.get("tail_long_mean", 0.0),
+            "replay_total_s": summary.get("replay_total_s", 0.0),
+            "replay_mean_s": summary.get("replay_mean_s", 0.0),
             "predicates": breakdown,
         }
 
@@ -614,6 +647,7 @@ def main(argv: list[str] | None = None) -> int:
         "seed": args.seed,
         "env": args.env,
         "n_candidates": len(candidates),
+        "generation_seconds": round(generation_seconds, 3),
         "guardrails": guardrail_results,
     }
     print("\n[eval] scores =", json.dumps(payload, ensure_ascii=False, indent=2))
