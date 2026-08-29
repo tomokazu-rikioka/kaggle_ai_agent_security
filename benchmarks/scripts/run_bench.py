@@ -23,6 +23,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import nbformat as nbf
@@ -165,15 +166,18 @@ def fetch(track: str, round_tag: str) -> None:
     kid = _kernel_id(track, round_tag)
     dest = BENCH_DIR / track / "results"
     dest.mkdir(parents=True, exist_ok=True)
-    res = _run(["kaggle", "kernels", "output", kid, "-p", str(dest)])
-    sys.stdout.write(res.stdout)
-    src = dest / "bench_results.json"
-    if not src.is_file():
-        sys.stderr.write(f"[bench] bench_results.json を回収できず（まだ complete でない?）: {dest}\n")
-        raise SystemExit(1)
-    tagged = dest / f"{round_tag}.json"
-    tagged.write_text(src.read_text())
-    src.unlink()  # タグ無しの生成物は消してラウンドタグ付きだけ残す
+    # Kaggle output は /kaggle/working の driver/pycache/log まで返すことがある。
+    # results/ を汚さないよう一時ディレクトリへ全回収し、正典 JSON だけをコピーする。
+    with tempfile.TemporaryDirectory(prefix=f"aas-bench-{track}-{round_tag}-") as tmp:
+        tmp_path = Path(tmp)
+        res = _run(["kaggle", "kernels", "output", kid, "-p", str(tmp_path)])
+        sys.stdout.write(res.stdout)
+        src = tmp_path / "bench_results.json"
+        if not src.is_file():
+            sys.stderr.write(f"[bench] bench_results.json を回収できず（まだ complete でない?）: {kid}\n")
+            raise SystemExit(1)
+        tagged = dest / f"{round_tag}.json"
+        tagged.write_text(src.read_text())
     print(f"[bench] fetched → {tagged}")
     data = json.loads(tagged.read_text())
     _print_table(track, data)
@@ -185,16 +189,18 @@ def _print_table(track: str, data: dict) -> None:
     print("=" * 92)
     print(
         f"{'variant':22} {'guard':8} {'fire':>6} {'emit_ok':>8} {'emit_any':>9} "
-        f"{'mean_s':>7} {'raw':>8} {'cells':>6} {'len':>5}"
+        f"{'mean_s':>7} {'hops':>6} {'raw':>8} {'raw/s':>7} {'cells':>6} {'tok':>5} {'len':>5}"
     )
     print("-" * 92)
     for vname, v in data.get("results", {}).items():
         slen = v.get("sample_len", "")
+        stokens = v.get("sample_tokens", "")
         for gname, g in v.get("guardrails", {}).items():
             print(
                 f"{vname:22} {gname:8} {g['fire_rate']:>6.3f} {g.get('emit_ok_rate', 0):>8.3f} "
                 f"{g.get('emit_any_rate', 0):>9.3f} {g['replay_mean_s']:>7.2f} "
-                f"{g['score_raw']:>8.1f} {g['unique_cells']:>6} {slen:>5}"
+                f"{g.get('tool_events_mean', 0):>6.2f} {g['score_raw']:>8.1f} "
+                f"{g.get('score_raw_per_s', 0):>7.2f} {g['unique_cells']:>6} {stokens:>5} {slen:>5}"
             )
     print("=" * 92)
 

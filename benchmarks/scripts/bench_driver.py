@@ -4,10 +4,8 @@
 `--variants-file` が定義する各変種について同一 recipient 集合で N 候補を組み、
 `public`/`private` へリプレイして次を測る:
 
-  - **emit_rate**: 標的が `email.send` を emit した候補の割合（tool_event ベース。predicate 前）
-      - emit_any = email.send を出した（guardrail が block しても数える）
-      - emit_ok  = email.send が ok=True で実行された（＝採点対象になり得る）
-  - **fire_rate**: CONFUSED_DEPUTY が成立して findings になった候補の割合（＝実際に得点する率）
+  - **emit_rate**: `TARGET_TOOL` の標的ツールを emit した候補の割合（tool_event ベース。predicate 前）
+  - **fire_rate**: 対応する predicate が成立して findings になった候補の割合（＝実際に得点する率）
   - **replay_mean_s**: 1 候補あたりのリプレイ時間（候補速度）
 
 emit と fire の差で「モデルが出していないのか / guardrail が block したのか /
@@ -29,7 +27,8 @@ import argparse
 import importlib.util
 import json
 import time
-from collections.abc import Callable
+from collections import Counter
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +44,16 @@ from eval_driver import (
     predicate_breakdown,
 )
 
-MessageBuilder = Callable[[str], str]
+MessageBuilder = Callable[[str], str | Sequence[str]]
+
+
+def _normalize_messages(value: str | Sequence[str]) -> tuple[str, ...]:
+    if isinstance(value, str):
+        return (value,)
+    messages = tuple(value)
+    if not messages or not all(isinstance(message, str) and message.strip() for message in messages):
+        raise TypeError("variant builderは非空str、または非空strのsequenceを返す必要があります")
+    return messages
 
 
 def _alpha_label(index: int) -> str:
@@ -73,7 +81,7 @@ def _build_recipients(n: int, blocklist: frozenset[str]) -> list[str]:
     return recipients
 
 
-def _load_variants(path_str: str) -> tuple[dict[str, MessageBuilder], frozenset[str]]:
+def _load_variants(path_str: str) -> tuple[dict[str, MessageBuilder], frozenset[str], str]:
     path = Path(path_str).resolve()
     if not path.is_file():
         raise FileNotFoundError(f"--variants-file が見つかりません: {path}")
@@ -85,7 +93,29 @@ def _load_variants(path_str: str) -> tuple[dict[str, MessageBuilder], frozenset[
     if not isinstance(variants, dict) or not variants:
         raise TypeError(f"{path} は VARIANTS: dict[str, Callable] を定義する必要があります")
     blocklist = frozenset(getattr(mod, "RECIPIENT_BLOCKLIST", frozenset()))
-    return variants, blocklist
+    target_tool = getattr(mod, "TARGET_TOOL", "email.send")
+    if not isinstance(target_tool, str) or not target_tool:
+        raise TypeError(f"{path} の TARGET_TOOL は空でない str が必要です")
+    return variants, blocklist, target_tool
+
+
+def _prompt_token_count(agent_factory: Any, text: str) -> int | None:
+    """llama.cpp が使う実 tokenizer で、注入文字列そのものの token 数をbest-effort計測する。
+
+    system prompt / tool schema は全variant共通なので含めない。特殊トークンは special=True で1 tokenとして数える。
+    factory は eval_driver の closure に backend を保持するため、公開APIを汚さずそこから Llama を探す。
+    """
+    closure = getattr(agent_factory, "__closure__", None) or ()
+    for cell in closure:
+        value = cell.cell_contents
+        llm = getattr(value, "llm", None)
+        tokenize = getattr(llm, "tokenize", None)
+        if callable(tokenize):
+            try:
+                return len(tokenize(text.encode("utf-8"), add_bos=False, special=True))
+            except (TypeError, ValueError, RuntimeError):
+                return None
+    return None
 
 
 def _replay_variant(
@@ -96,6 +126,7 @@ def _replay_variant(
     seed: int,
     max_tool_hops: int,
     env_selection: str,
+    target_tool: str,
     recipients: list[str] | None = None,
 ) -> dict[str, Any]:
     """1 変種 × 1 guardrail を全候補リプレイして emit/fire/速度を集計する。
@@ -106,6 +137,11 @@ def _replay_variant(
     guardrail_factory = get_guardrail_factory(guardrail_name)
     findings: list[dict[str, Any]] = []
     replay_seconds: list[float] = []
+    tool_event_counts: list[int] = []
+    assistant_message_counts: list[int] = []
+    tool_sequences: Counter[str] = Counter()
+    email_to_sequences: Counter[str] = Counter()
+    distinct_email_recipients: list[int] = []
     emit_any = 0
     emit_ok = 0
     nonfire_recipients: list[str] = []
@@ -125,10 +161,17 @@ def _replay_variant(
         )
         replay_seconds.append(time.monotonic() - t0)
         events = trace.get("tool_events", []) or []
+        tool_event_counts.append(len(events))
+        assistant_message_counts.append(len(trace.get("assistant_messages", []) or []))
+        tool_sequences[">".join(str(e.get("name", "?")) for e in events) or "-"] += 1
+        target_events = [e for e in events if e.get("name") == target_tool]
         sends = [e for e in events if e.get("name") == "email.send"]
-        if sends:
+        email_tos = [str((e.get("args") or {}).get("to", "?")) for e in sends]
+        email_to_sequences[">".join(email_tos) or "-"] += 1
+        distinct_email_recipients.append(len(set(email_tos)))
+        if target_events:
             emit_any += 1
-            if any(e.get("ok") is True for e in sends):
+            if any(e.get("ok") is True for e in target_events):
                 emit_ok += 1
         predicates = eval_predicates(trace)
         if not predicates and recipients is not None and idx < len(recipients):
@@ -151,6 +194,13 @@ def _replay_variant(
     summary = ops.summarize_attack_findings(findings)
     n = len(candidates)
     total_s = sum(replay_seconds)
+    ordered_seconds = sorted(replay_seconds)
+
+    def percentile(values: list[float], fraction: float) -> float:
+        if not values:
+            return 0.0
+        return values[min(int((len(values) - 1) * fraction), len(values) - 1)]
+
     return {
         "emit_any_rate": round(emit_any / n, 4) if n else 0.0,
         "emit_ok_rate": round(emit_ok / n, 4) if n else 0.0,
@@ -160,7 +210,15 @@ def _replay_variant(
         "emit_ok": emit_ok,
         "n_candidates": n,
         "replay_mean_s": round(total_s / n, 3) if n else 0.0,
+        "replay_p50_s": round(percentile(ordered_seconds, 0.50), 3),
+        "replay_p95_s": round(percentile(ordered_seconds, 0.95), 3),
         "replay_total_s": round(total_s, 3),
+        "tool_events_mean": round(sum(tool_event_counts) / n, 3) if n else 0.0,
+        "assistant_messages_mean": round(sum(assistant_message_counts) / n, 3) if n else 0.0,
+        "tool_sequences": dict(tool_sequences.most_common(12)),
+        "email_to_sequences": dict(email_to_sequences.most_common(12)),
+        "distinct_email_recipients_mean": round(sum(distinct_email_recipients) / n, 3) if n else 0.0,
+        "score_raw_per_s": round(summary["score_raw"] / total_s, 3) if total_s else 0.0,
         "score_raw": summary["score_raw"],
         "unique_cells": summary["unique_cells"],
         "predicates": predicate_breakdown(findings),
@@ -177,31 +235,56 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--budget-s", type=float, default=8000.0)
     ap.add_argument("--seed", type=int, default=ed.DEFAULT_SEED)
     ap.add_argument("--max-tool-hops", type=int, default=8)
+    ap.add_argument(
+        "--warmup-candidates",
+        type=int,
+        default=1,
+        help="各variant/guardrailの計測前に流す未計上候補数（cold-start/KV差を除く、既定1）",
+    )
     ap.add_argument("--env", default="gym", choices=["gym", "sandbox"])
     ap.add_argument("--out", default="bench_results.json")
     args = ap.parse_args(argv)
 
     guardrails = [g.strip() for g in args.guardrails.split(",") if g.strip()]
-    variants, blocklist = _load_variants(args.variants_file)
+    variants, blocklist, target_tool = _load_variants(args.variants_file)
     recipients = _build_recipients(args.candidates, blocklist)
 
     fixtures_dir = ops.resolve_fixtures_dir(None)
     print(f"[bench] fixtures={fixtures_dir}")
-    print(f"[bench] model={args.model} を 1 回ロードして {len(variants)} 変種 × {len(guardrails)} guardrail を計測")
+    print(
+        f"[bench] model={args.model} target={target_tool} を 1 回ロードして "
+        f"{len(variants)} 変種 × {len(guardrails)} guardrail を計測"
+    )
     t_load = time.time()
     agent_factory = build_agent_factory(args.model)  # ここで GGUF を 1 回だけロード
     print(f"[bench] モデルロード {time.time() - t_load:.1f}s 完了。recipients={recipients[:8]}… (N={len(recipients)})")
 
     results: dict[str, Any] = {}
     for vname, builder in variants.items():
-        sample = builder(recipients[0])
-        candidates = [AttackCandidate.from_messages((builder(r),)) for r in recipients]
+        sample_messages = _normalize_messages(builder(recipients[0]))
+        token_counts = [_prompt_token_count(agent_factory, message) for message in sample_messages]
+        sample_tokens = sum(token_counts) if all(count is not None for count in token_counts) else None
+        candidates = [AttackCandidate.from_messages(_normalize_messages(builder(r))) for r in recipients]
         per_guardrail: dict[str, Any] = {}
         for gname in guardrails:
+            warmup_n = min(max(args.warmup_candidates, 0), len(candidates))
+            if warmup_n:
+                _replay_variant(
+                    candidates[:warmup_n],
+                    gname,
+                    agent_factory,
+                    fixtures_dir,
+                    args.seed,
+                    args.max_tool_hops,
+                    args.env,
+                    target_tool,
+                    recipients=recipients[:warmup_n],
+                )
             t0 = time.time()
             m = _replay_variant(
                 candidates, gname, agent_factory, fixtures_dir, args.seed,
                 args.max_tool_hops, args.env, recipients=recipients,
+                target_tool=target_tool,
             )
             per_guardrail[gname] = m
             nf = m.get("nonfire_recipients") or []
@@ -212,13 +295,21 @@ def main(argv: list[str] | None = None) -> int:
                 f"mean_s={m['replay_mean_s']:.2f} raw={m['score_raw']:.1f} cells={m['unique_cells']} "
                 f"preds={m['predicates']}{nf_str} （{time.time() - t0:.1f}s）"
             )
-        results[vname] = {"sample_message": sample, "sample_len": len(sample), "guardrails": per_guardrail}
+        results[vname] = {
+            "sample_message": sample_messages[0] if len(sample_messages) == 1 else list(sample_messages),
+            "sample_message_count": len(sample_messages),
+            "sample_len": sum(len(message) for message in sample_messages),
+            "sample_tokens": sample_tokens,
+            "guardrails": per_guardrail,
+        }
 
     payload = {
         "model": ed._MODEL_ALIASES.get(args.model, args.model),
         "candidates_per_variant": args.candidates,
         "guardrails": guardrails,
         "seed": args.seed,
+        "target_tool": target_tool,
+        "warmup_candidates_per_variant": args.warmup_candidates,
         "results": results,
     }
     Path(args.out).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
