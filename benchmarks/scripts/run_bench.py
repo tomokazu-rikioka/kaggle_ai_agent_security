@@ -20,6 +20,7 @@ GPT と Gemma は別カーネルなので 2 枠並列で同時に走らせられ
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import subprocess
 import sys
@@ -48,11 +49,41 @@ def _kernel_id(track: str, round_tag: str) -> str:
     return f"{bev.KAGGLE_USER}/aas-bench-{track}-{round_tag}"
 
 
+def _extra_variant_sources(variants_path: Path, variants_src: str) -> dict[str, str]:
+    """Bundle explicitly declared sibling modules needed by a variants file."""
+    extra_names: tuple[str, ...] = ()
+    for node in ast.parse(variants_src).body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "EXTRA_VARIANT_FILES" for target in node.targets
+        ):
+            value = ast.literal_eval(node.value)
+            if not isinstance(value, tuple) or not all(isinstance(name, str) for name in value):
+                raise TypeError("EXTRA_VARIANT_FILES must be a tuple of file names")
+            extra_names = value
+            break
+
+    sources: dict[str, str] = {}
+    for name in extra_names:
+        if Path(name).name != name or not name.endswith(".py"):
+            raise ValueError(f"invalid EXTRA_VARIANT_FILES entry: {name!r}")
+        path = variants_path.parent / name
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        sources[name] = path.read_text()
+    return sources
+
+
 def _b64_cell(comment: str, src: str, dest: str) -> str:
     return bev._b64_write_cell(comment, src, dest)
 
 
-def _bench_run_cell(track: str, candidates: int, budget_s: float, guardrails: str) -> str:
+def _bench_run_cell(
+    track: str,
+    candidates: int,
+    budget_s: float,
+    guardrails: str,
+    warmup_candidates: int,
+) -> str:
     model = TRACK_MODEL[track]
     gguf_path = bev.GGUF_PATHS[model]
     path_env = bev.GGUF_PATH_ENVS[model]
@@ -64,13 +95,22 @@ def _bench_run_cell(track: str, candidates: int, budget_s: float, guardrails: st
         "!python /kaggle/working/bench_driver.py \\\n"
         "    --variants-file /kaggle/working/variants.py \\\n"
         f"    --model {model} --candidates {candidates} --guardrails {guardrails} \\\n"
+        f"    --warmup-candidates {warmup_candidates} \\\n"
         f"    --budget-s {int(budget_s)} --out /kaggle/working/bench_results.json\n"
         "print('--- bench_results.json ---')\n"
         "print(json.dumps(json.load(open('/kaggle/working/bench_results.json')), ensure_ascii=False, indent=2))\n"
     )
 
 
-def build(track: str, round_tag: str, *, candidates: int, budget_s: float, guardrails: str) -> Path:
+def build(
+    track: str,
+    round_tag: str,
+    *,
+    candidates: int,
+    budget_s: float,
+    guardrails: str,
+    warmup_candidates: int,
+) -> Path:
     if track not in TRACK_MODEL:
         raise ValueError(f"未知の track '{track}'（gpt|gemma）")
     model = TRACK_MODEL[track]
@@ -82,9 +122,8 @@ def build(track: str, round_tag: str, *, candidates: int, budget_s: float, guard
     driver_src = Path(bev.DRIVER_PATH).read_text()
     bench_src = BENCH_DRIVER.read_text()
     variants_src = variants_path.read_text()
-    guardrail_sources = {
-        p.name: p.read_text() for p in sorted(Path(bev.GUARDRAILS_DIR).glob("*.py")) if p.is_file()
-    }
+    extra_variant_sources = _extra_variant_sources(variants_path, variants_src)
+    guardrail_sources = {p.name: p.read_text() for p in sorted(Path(bev.GUARDRAILS_DIR).glob("*.py")) if p.is_file()}
 
     out_dir = BUILD_DIR / track / round_tag
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -103,13 +142,17 @@ def build(track: str, round_tag: str, *, candidates: int, budget_s: float, guard
         nbf.v4.new_markdown_cell("## ③ driver / bench_driver / variants / guardrails 復元"),
         nbf.v4.new_code_cell(_b64_cell("eval_driver.py", driver_src, "/kaggle/working/eval_driver.py")),
         nbf.v4.new_code_cell(_b64_cell("bench_driver.py", bench_src, "/kaggle/working/bench_driver.py")),
+        *[
+            nbf.v4.new_code_cell(_b64_cell(f"variant dependency {name}", src, f"/kaggle/working/{name}"))
+            for name, src in extra_variant_sources.items()
+        ],
         nbf.v4.new_code_cell(_b64_cell("variants.py", variants_src, "/kaggle/working/variants.py")),
         *[
             nbf.v4.new_code_cell(_b64_cell(f"guardrail {name}", src, f"/kaggle/working/guardrails/{name}"))
             for name, src in guardrail_sources.items()
         ],
         nbf.v4.new_markdown_cell(f"## ④ 計測（{model}）→ bench_results.json"),
-        nbf.v4.new_code_cell(_bench_run_cell(track, candidates, budget_s, guardrails)),
+        nbf.v4.new_code_cell(_bench_run_cell(track, candidates, budget_s, guardrails, warmup_candidates)),
     ]
     nb.metadata["kernelspec"] = {"name": "python3", "language": "python", "display_name": "Python 3"}
     nb.metadata["language_info"] = {"name": "python"}
@@ -184,25 +227,33 @@ def fetch(track: str, round_tag: str) -> None:
 
 
 def _print_table(track: str, data: dict) -> None:
-    print("\n" + "=" * 92)
+    print("\n" + "=" * 125)
     print(f"bench {track} — model={data.get('model')} N={data.get('candidates_per_variant')}")
-    print("=" * 92)
+    print("=" * 125)
     print(
         f"{'variant':22} {'guard':8} {'fire':>6} {'emit_ok':>8} {'emit_any':>9} "
-        f"{'mean_s':>7} {'hops':>6} {'raw':>8} {'raw/s':>7} {'cells':>6} {'tok':>5} {'len':>5}"
+        f"{'mean_s':>7} {'hops':>6} {'gens':>6} {'out_tok':>7} {'to_exact':>8} "
+        f"{'raw':>8} {'raw/s':>7} {'cells':>6} {'tok':>5} {'pfx':>5} {'len':>5}"
     )
-    print("-" * 92)
+    print("-" * 125)
     for vname, v in data.get("results", {}).items():
         slen = v.get("sample_len", "")
         stokens = v.get("sample_tokens", "")
+        prefix_tokens = v.get("sample_recipient_common_prefix_tokens", "")
+        if prefix_tokens is None:
+            prefix_tokens = ""
         for gname, g in v.get("guardrails", {}).items():
+            exact_rate = g.get("email_to_exact_rate")
+            exact_text = "-" if exact_rate is None else f"{exact_rate:.3f}"
             print(
                 f"{vname:22} {gname:8} {g['fire_rate']:>6.3f} {g.get('emit_ok_rate', 0):>8.3f} "
                 f"{g.get('emit_any_rate', 0):>9.3f} {g['replay_mean_s']:>7.2f} "
-                f"{g.get('tool_events_mean', 0):>6.2f} {g['score_raw']:>8.1f} "
-                f"{g.get('score_raw_per_s', 0):>7.2f} {g['unique_cells']:>6} {stokens:>5} {slen:>5}"
+                f"{g.get('tool_events_mean', 0):>6.2f} {g.get('generations_mean', 0):>6.2f} "
+                f"{g.get('completion_tokens_mean', 0):>7.2f} {exact_text:>8} {g['score_raw']:>8.1f} "
+                f"{g.get('score_raw_per_s', 0):>7.2f} {g['unique_cells']:>6} "
+                f"{stokens:>5} {prefix_tokens:>5} {slen:>5}"
             )
-    print("=" * 92)
+    print("=" * 125)
 
 
 def main() -> None:
@@ -213,9 +264,15 @@ def main() -> None:
     ap.add_argument("--candidates", type=int, default=30)
     ap.add_argument("--budget-s", type=float, default=8000.0)
     ap.add_argument("--guardrails", default="public,private")
+    ap.add_argument("--warmup-candidates", type=int, default=1)
     args = ap.parse_args()
 
-    kw = dict(candidates=args.candidates, budget_s=args.budget_s, guardrails=args.guardrails)
+    kw = dict(
+        candidates=args.candidates,
+        budget_s=args.budget_s,
+        guardrails=args.guardrails,
+        warmup_candidates=args.warmup_candidates,
+    )
     if args.action == "build":
         build(args.track, args.round, **kw)
     elif args.action == "push":

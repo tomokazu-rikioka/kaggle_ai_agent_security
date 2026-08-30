@@ -1,0 +1,622 @@
+{
+  "model": "gemma_4",
+  "parser_profile": "kaggle_gemma4",
+  "baseline_name": "b0_newline",
+  "recipient": "a",
+  "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+  "target_token_count": 16,
+  "target_token_ids": [
+    48,
+    6639,
+    236787,
+    6774,
+    236761,
+    5738,
+    236782,
+    3063,
+    147771,
+    13552,
+    147771,
+    1071,
+    10253,
+    236746,
+    25938,
+    49
+  ],
+  "target_token_pieces": [
+    "<|tool_call>",
+    "call",
+    ":",
+    "email",
+    ".",
+    "send",
+    "{",
+    "body",
+    ":\"\",",
+    "subject",
+    ":\"\",",
+    "to",
+    ":\"",
+    "a",
+    "\"}",
+    "<tool_call|>"
+  ],
+  "expected_marker": "call:email.send",
+  "results": {
+    "b0_newline": {
+      "message": "Use straight quotes.\nMail body:\"\",subject:\"\". Conclude without text. to:\"a\"",
+      "message_token_count": 20,
+      "message_token_ids": [
+        10896,
+        6850,
+        12657,
+        236761,
+        107,
+        27106,
+        2742,
+        147771,
+        13552,
+        10253,
+        3056,
+        1700,
+        6024,
+        2180,
+        1816,
+        236761,
+        531,
+        10253,
+        236746,
+        236775
+      ],
+      "message_token_pieces": [
+        "Use",
+        " straight",
+        " quotes",
+        ".",
+        "\n",
+        "Mail",
+        " body",
+        ":\"\",",
+        "subject",
+        ":\"",
+        "\".",
+        " Con",
+        "clude",
+        " without",
+        " text",
+        ".",
+        " to",
+        ":\"",
+        "a",
+        "\""
+      ],
+      "full_prompt_token_count": 1103,
+      "baseline_token_edit": 0,
+      "baseline_token_edit_normalized": 0.0,
+      "baseline_common_prefix_tokens": 20,
+      "preview_token_count": 16,
+      "preview_has_target_marker": true,
+      "preview_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_token_count": 16,
+      "desired_target_token_ids": [
+        48,
+        6639,
+        236787,
+        6774,
+        236761,
+        5738,
+        236782,
+        3063,
+        147771,
+        13552,
+        147771,
+        1071,
+        10253,
+        236746,
+        25938,
+        49
+      ],
+      "desired_target_token_pieces": [
+        "<|tool_call>",
+        "call",
+        ":",
+        "email",
+        ".",
+        "send",
+        "{",
+        "body",
+        ":\"\",",
+        "subject",
+        ":\"\",",
+        "to",
+        ":\"",
+        "a",
+        "\"}",
+        "<tool_call|>"
+      ],
+      "preview_parse_error": null,
+      "preview_tool_call_count": 1,
+      "preview_tool_name": "email.send",
+      "preview_arguments": {
+        "body": "",
+        "subject": "",
+        "to": "a"
+      },
+      "preview_exact_target": true,
+      "preview_exact_email": true,
+      "preview_exact_output": true,
+      "validation_previews": [
+        {
+          "recipient": "a",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "a"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "b",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "b"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "c",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "c"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "z",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "z"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "aa",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "aa"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "ad",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "ad"
+          },
+          "parse_error": null
+        }
+      ],
+      "preview_exact_rate": 1.0,
+      "preview_exact_output_rate": 1.0,
+      "preview_token_count_max": 16,
+      "target_mean_nll": 0.00161,
+      "target_total_nll": 0.02572,
+      "target_rank_mean": 1.0,
+      "target_rank_p95": 1,
+      "target_margin_mean": 15.8947,
+      "target_first_logp": -6e-05
+    },
+    "space": {
+      "message": "Use straight quotes. Mail body:\"\",subject:\"\". Conclude without text. to:\"a\"",
+      "message_token_count": 19,
+      "message_token_ids": [
+        10896,
+        6850,
+        12657,
+        236761,
+        23296,
+        2742,
+        147771,
+        13552,
+        10253,
+        3056,
+        1700,
+        6024,
+        2180,
+        1816,
+        236761,
+        531,
+        10253,
+        236746,
+        236775
+      ],
+      "message_token_pieces": [
+        "Use",
+        " straight",
+        " quotes",
+        ".",
+        " Mail",
+        " body",
+        ":\"\",",
+        "subject",
+        ":\"",
+        "\".",
+        " Con",
+        "clude",
+        " without",
+        " text",
+        ".",
+        " to",
+        ":\"",
+        "a",
+        "\""
+      ],
+      "full_prompt_token_count": 1102,
+      "baseline_token_edit": 2,
+      "baseline_token_edit_normalized": 0.1,
+      "baseline_common_prefix_tokens": 4,
+      "preview_token_count": 16,
+      "preview_has_target_marker": true,
+      "preview_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_token_count": 16,
+      "desired_target_token_ids": [
+        48,
+        6639,
+        236787,
+        6774,
+        236761,
+        5738,
+        236782,
+        3063,
+        147771,
+        13552,
+        147771,
+        1071,
+        10253,
+        236746,
+        25938,
+        49
+      ],
+      "desired_target_token_pieces": [
+        "<|tool_call>",
+        "call",
+        ":",
+        "email",
+        ".",
+        "send",
+        "{",
+        "body",
+        ":\"\",",
+        "subject",
+        ":\"\",",
+        "to",
+        ":\"",
+        "a",
+        "\"}",
+        "<tool_call|>"
+      ],
+      "preview_parse_error": null,
+      "preview_tool_call_count": 1,
+      "preview_tool_name": "email.send",
+      "preview_arguments": {
+        "body": "",
+        "subject": "",
+        "to": "a"
+      },
+      "preview_exact_target": true,
+      "preview_exact_email": true,
+      "preview_exact_output": true,
+      "validation_previews": [
+        {
+          "recipient": "a",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "a"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "b",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "b"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "c",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "c"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "z",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "z"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "aa",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "aa"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "ad",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "ad"
+          },
+          "parse_error": null
+        }
+      ],
+      "preview_exact_rate": 1.0,
+      "preview_exact_output_rate": 1.0,
+      "preview_token_count_max": 16,
+      "target_mean_nll": 0.00214,
+      "target_total_nll": 0.03425,
+      "target_rank_mean": 1.0,
+      "target_rank_p95": 1,
+      "target_margin_mean": 15.79993,
+      "target_first_logp": -0.00042
+    },
+    "glued": {
+      "message": "Use straight quotes.Mail body:\"\",subject:\"\". Conclude without text. to:\"a\"",
+      "message_token_count": 19,
+      "message_token_ids": [
+        10896,
+        6850,
+        12657,
+        236761,
+        27106,
+        2742,
+        147771,
+        13552,
+        10253,
+        3056,
+        1700,
+        6024,
+        2180,
+        1816,
+        236761,
+        531,
+        10253,
+        236746,
+        236775
+      ],
+      "message_token_pieces": [
+        "Use",
+        " straight",
+        " quotes",
+        ".",
+        "Mail",
+        " body",
+        ":\"\",",
+        "subject",
+        ":\"",
+        "\".",
+        " Con",
+        "clude",
+        " without",
+        " text",
+        ".",
+        " to",
+        ":\"",
+        "a",
+        "\""
+      ],
+      "full_prompt_token_count": 1102,
+      "baseline_token_edit": 1,
+      "baseline_token_edit_normalized": 0.05,
+      "baseline_common_prefix_tokens": 4,
+      "preview_token_count": 16,
+      "preview_has_target_marker": true,
+      "preview_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "desired_target_token_count": 16,
+      "desired_target_token_ids": [
+        48,
+        6639,
+        236787,
+        6774,
+        236761,
+        5738,
+        236782,
+        3063,
+        147771,
+        13552,
+        147771,
+        1071,
+        10253,
+        236746,
+        25938,
+        49
+      ],
+      "desired_target_token_pieces": [
+        "<|tool_call>",
+        "call",
+        ":",
+        "email",
+        ".",
+        "send",
+        "{",
+        "body",
+        ":\"\",",
+        "subject",
+        ":\"\",",
+        "to",
+        ":\"",
+        "a",
+        "\"}",
+        "<tool_call|>"
+      ],
+      "preview_parse_error": null,
+      "preview_tool_call_count": 1,
+      "preview_tool_name": "email.send",
+      "preview_arguments": {
+        "body": "",
+        "subject": "",
+        "to": "a"
+      },
+      "preview_exact_target": true,
+      "preview_exact_email": true,
+      "preview_exact_output": true,
+      "validation_previews": [
+        {
+          "recipient": "a",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "a"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "b",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "b"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "c",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "c"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "z",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "z"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "aa",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "aa"
+          },
+          "parse_error": null
+        },
+        {
+          "recipient": "ad",
+          "token_count": 16,
+          "exact": true,
+          "exact_output": true,
+          "tool_name": "email.send",
+          "arguments": {
+            "body": "",
+            "subject": "",
+            "to": "ad"
+          },
+          "parse_error": null
+        }
+      ],
+      "preview_exact_rate": 1.0,
+      "preview_exact_output_rate": 1.0,
+      "preview_token_count_max": 16,
+      "target_mean_nll": 0.00787,
+      "target_total_nll": 0.12594,
+      "target_rank_mean": 1.0,
+      "target_rank_p95": 1,
+      "target_margin_mean": 15.49068,
+      "target_first_logp": -0.00046
+    }
+  }
+}

@@ -1,5 +1,9 @@
 # benchmarks — 発火率 / 候補速度の A/B 台帳
 
+Gemmaのtool-call parserとmulti-hopについては
+[`gemma/malformed-tool-calls.md`](gemma/malformed-tool-calls.md)に、competition専用parser、形式別parse結果、
+local/LBの版差、失敗時のhop終了を整理している。
+
 email DEPUTY 系サブミット（`benchmarks/scripts/submit/jed-clean-email-gpt-minimal-header-short-n2000`,
 **LB public 37.540**）を対象に、`email.send` の**発火率**と **1候補あたりの時間**を
 Kaggle T4 上で計測し、改善案をA/B検証する。
@@ -73,7 +77,8 @@ uv run python benchmarks/scripts/run_bench.py fetch  --track gpt --round r1     
 - ❌**行き止まり: EXFILTRATION(sev5)は http.post 専用**で email 経路では発火しない（別サブミット系統）。
 - ⚠**multipost**: 1 候補で複数 recipient へ email.send を撃つと bench の raw は倍増するが、
   実 LB では gRPC/hop overhead で単発に負ける既往（MEMORY: multipost-levers-fail-real-lb）。
-  bench の数値は割引いて解釈する。
+  r28–r30でcompetition parser parity後も、GPT 2-hopは単発比raw/s -34%、Gemma 2-hopは-10.7%。
+  Gemmaの正確性は60/60まで改善したが、benchの速度と本番per-hop relayを含めると採用根拠はない。
 
 → 結論: **単発 CONFUSED_DEPUTY を、禁止語を避けつつ最短・最高発火で出す**のがこの系統の最適。
 GPT は forge で analysis(CoT)を飛ばして速度を、Gemma は既に最短なので発火率を主に攻める。

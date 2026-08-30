@@ -84,8 +84,17 @@ def _install_cell() -> str:
     """
     return (
         "!pip -q install gymnasium 'pydantic>=2' huggingface_hub\n"
-        "!pip -q install llama-cpp-python "
-        "--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124\n"
+        "import subprocess, sys, time\n"
+        "_llama_install = [sys.executable, '-m', 'pip', '-q', 'install', 'llama-cpp-python', "
+        "'--extra-index-url', 'https://abetlen.github.io/llama-cpp-python/whl/cu124']\n"
+        "for _attempt in range(1, 4):\n"
+        "    _result = subprocess.run(_llama_install, check=False)\n"
+        "    if _result.returncode == 0:\n"
+        "        break\n"
+        "    print(f'llama-cpp-python install retry {_attempt}/3')\n"
+        "    time.sleep(2)\n"
+        "else:\n"
+        "    raise RuntimeError('llama-cpp-python install failed after 3 attempts')\n"
         "import llama_cpp; print('llama_cpp OK', llama_cpp.__version__)\n"
     )
 

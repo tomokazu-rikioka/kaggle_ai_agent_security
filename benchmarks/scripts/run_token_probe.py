@@ -26,7 +26,16 @@ def _kernel_id(track: str, round_tag: str) -> str:
     return f"{bev.KAGGLE_USER}/aas-token-probe-{track}-{round_tag}"
 
 
-def build(track: str, round_tag: str, *, target_tokens: int, preview_tokens: int) -> Path:
+def build(
+    track: str,
+    round_tag: str,
+    *,
+    target_tokens: int,
+    preview_tokens: int,
+    validation_recipients: str,
+    prune_primary_miss: bool,
+    prune_primary_output_miss: bool,
+) -> Path:
     model = TRACK_MODEL[track]
     candidates_path = SCRIPT_DIR / track / f"{round_tag}_candidates.py"
     for path in (bev.DRIVER_PATH, DRIVER, candidates_path):
@@ -40,6 +49,8 @@ def build(track: str, round_tag: str, *, target_tokens: int, preview_tokens: int
     }
     model_path = bev.GGUF_PATHS[model]
     path_env = bev.GGUF_PATH_ENVS[model]
+    prune_flag = " --prune-primary-miss" if prune_primary_miss else ""
+    prune_output_flag = " --prune-primary-output-miss" if prune_primary_output_miss else ""
     run_cell = (
         "import json, os\n"
         f'os.environ["{path_env}"] = "{model_path}"\n'
@@ -47,6 +58,7 @@ def build(track: str, round_tag: str, *, target_tokens: int, preview_tokens: int
         "!python /kaggle/working/token_probe.py \\\n"
         "    --candidates-file /kaggle/working/candidates.py \\\n"
         f"    --model {model} --target-tokens {target_tokens} --preview-tokens {preview_tokens} \\\n"
+        f"    --validation-recipients {validation_recipients}{prune_flag}{prune_output_flag} \\\n"
         "    --out /kaggle/working/token_probe_results.json\n"
         "print(json.dumps(json.load(open('/kaggle/working/token_probe_results.json')), ensure_ascii=False, indent=2))\n"
     )
@@ -100,8 +112,25 @@ def _run(command: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(command, check=False, capture_output=True, text=True)
 
 
-def push(track: str, round_tag: str, *, target_tokens: int, preview_tokens: int) -> None:
-    out_dir = build(track, round_tag, target_tokens=target_tokens, preview_tokens=preview_tokens)
+def push(
+    track: str,
+    round_tag: str,
+    *,
+    target_tokens: int,
+    preview_tokens: int,
+    validation_recipients: str,
+    prune_primary_miss: bool,
+    prune_primary_output_miss: bool,
+) -> None:
+    out_dir = build(
+        track,
+        round_tag,
+        target_tokens=target_tokens,
+        preview_tokens=preview_tokens,
+        validation_recipients=validation_recipients,
+        prune_primary_miss=prune_primary_miss,
+        prune_primary_output_miss=prune_primary_output_miss,
+    )
     result = _run(["kaggle", "kernels", "push", "-p", str(out_dir)])
     print(result.stdout)
     if result.returncode != 0 or "successfully pushed" not in (result.stdout + result.stderr).lower():
@@ -134,8 +163,17 @@ def main() -> None:
     ap.add_argument("--round", default="r13")
     ap.add_argument("--target-tokens", type=int, default=48)
     ap.add_argument("--preview-tokens", type=int, default=64)
+    ap.add_argument("--validation-recipients", default="a,b,c,z,aa,ad")
+    ap.add_argument("--prune-primary-miss", action="store_true")
+    ap.add_argument("--prune-primary-output-miss", action="store_true")
     args = ap.parse_args()
-    kwargs = {"target_tokens": args.target_tokens, "preview_tokens": args.preview_tokens}
+    kwargs = {
+        "target_tokens": args.target_tokens,
+        "preview_tokens": args.preview_tokens,
+        "validation_recipients": args.validation_recipients,
+        "prune_primary_miss": args.prune_primary_miss,
+        "prune_primary_output_miss": args.prune_primary_output_miss,
+    }
     if args.action == "build":
         build(args.track, args.round, **kwargs)
     elif args.action == "push":

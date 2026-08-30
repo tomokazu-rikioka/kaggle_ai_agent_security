@@ -25,9 +25,10 @@ for _sdk_root in (_SDK_ROOT, _LOCAL_SDK_ROOT):
     if (_sdk_root / "aicomp_sdk").is_dir() and str(_sdk_root) not in sys.path:
         sys.path.insert(0, str(_sdk_root))
 
-from aicomp_sdk.agents.gemma4_agent import _parse_gemma4_tool_call_response  # noqa: E402
 from aicomp_sdk.agents.gpt_oss_agent import _parse_gpt_oss_harmony_response  # noqa: E402
+from aicomp_sdk.agents.hf_chat_template.types import HFGenerationResponse  # noqa: E402
 from aicomp_sdk.agents.tool_specs import to_agent_tool_specs  # noqa: E402
+from aicomp_sdk.agents.types import ToolCallDecision  # noqa: E402
 from aicomp_sdk.core.env.sandbox import _DEFAULT_RUNTIME_INSTRUCTIONS  # noqa: E402
 from aicomp_sdk.core.runtime_history import RuntimeHistory  # noqa: E402
 from aicomp_sdk.core.tools import ToolSuite  # noqa: E402
@@ -44,7 +45,9 @@ def _default_expected_arguments(_name: str, recipient: str) -> dict[str, Any]:
     return {"to": recipient, "subject": "", "body": ""}
 
 
-def _load_candidates(path_str: str) -> tuple[
+def _load_candidates(
+    path_str: str,
+) -> tuple[
     dict[str, Any],
     str,
     str | None,
@@ -178,12 +181,20 @@ def _greedy_text(llm: Any, prompt_ids: list[int], max_tokens: int) -> tuple[str,
 
 
 def _preview_semantics(raw_text: str, model: str, expected_arguments: dict[str, Any]) -> dict[str, Any]:
-    """SDKの実parserでpreviewを解釈し、mail tool/argsの完全一致を確認する。"""
+    """採点環境と同じparserでpreviewを解釈し、mail tool/argsの完全一致を確認する。"""
     try:
         if model == "gpt_oss":
             parsed = _parse_gpt_oss_harmony_response(raw_text)
+            calls = parsed.get("tool_calls", []) if isinstance(parsed, dict) else []
+            function = calls[0].get("function", {}) if len(calls) == 1 and isinstance(calls[0], dict) else {}
+            name = function.get("name")
+            arguments = function.get("arguments")
         else:
-            parsed = _parse_gemma4_tool_call_response(raw_text, assistant_text="")
+            response = HFGenerationResponse(text=raw_text, raw_text=raw_text)
+            decision = ed._build_kaggle_gemma4_parser().parse(response, fallback_call_id="preview")
+            calls = [decision] if isinstance(decision, ToolCallDecision) else []
+            name = decision.call.tool_name if calls else None
+            arguments = decision.call.arguments if calls else None
     except Exception as err:  # probeは不正候補も扱うため、parse失敗を測定値として残す
         return {
             "preview_parse_error": f"{type(err).__name__}: {err}",
@@ -194,10 +205,6 @@ def _preview_semantics(raw_text: str, model: str, expected_arguments: dict[str, 
             "preview_exact_email": False,
         }
 
-    calls = parsed.get("tool_calls", []) if isinstance(parsed, dict) else []
-    function = calls[0].get("function", {}) if len(calls) == 1 and isinstance(calls[0], dict) else {}
-    name = function.get("name")
-    arguments = function.get("arguments")
     exact = len(calls) == 1 and name == "email.send" and arguments == expected_arguments
     return {
         "preview_parse_error": None,
@@ -217,6 +224,16 @@ def main() -> int:
     ap.add_argument("--validation-recipients", default="a,b,c,z,aa,ad")
     ap.add_argument("--preview-tokens", type=int, default=64)
     ap.add_argument("--target-tokens", type=int, default=64)
+    ap.add_argument(
+        "--prune-primary-miss",
+        action="store_true",
+        help="代表recipientで不一致なら残りrecipient生成とtarget NLLを省略する",
+    )
+    ap.add_argument(
+        "--prune-primary-output-miss",
+        action="store_true",
+        help="代表recipientのraw出力がTARGET_TEXTと違えば残りrecipient生成とtarget NLLを省略する",
+    )
     ap.add_argument("--out", default="token_probe_results.json")
     args = ap.parse_args()
 
@@ -242,23 +259,25 @@ def main() -> int:
     if not target_ids:
         raise RuntimeError("baselineのgreedy targetが空です")
     baseline_message_ids = message_ids[baseline_name]
-    expected_marker = configured_marker or (
-        "to=functions.email.send" if args.model == "gpt_oss" else "call:email.send"
-    )
+    expected_marker = configured_marker or ("to=functions.email.send" if args.model == "gpt_oss" else "call:email.send")
 
     results: dict[str, Any] = {}
     for name in candidates:
         preview_text, preview_ids = _greedy_text(llm, prompts[name], args.preview_tokens)
         desired_target_text = configured_target(name, args.recipient) if configured_target else target_text
-        desired_target_ids = llm.tokenize(
-            desired_target_text.encode("utf-8"), add_bos=False, special=True
-        )
+        desired_target_ids = llm.tokenize(desired_target_text.encode("utf-8"), add_bos=False, special=True)
         primary_semantics = _preview_semantics(preview_text, args.model, expected_arguments(name, args.recipient))
+        primary_exact_output = preview_text == desired_target_text
         validation_rows: list[dict[str, Any]] = []
         validation_recipients = list(
             dict.fromkeys(r.strip() for r in args.validation_recipients.split(",") if r.strip())
         )
-        for recipient in validation_recipients:
+        evaluated_validation_recipients = validation_recipients
+        if args.prune_primary_miss and not primary_semantics["preview_exact_target"]:
+            evaluated_validation_recipients = [args.recipient]
+        if args.prune_primary_output_miss and not primary_exact_output:
+            evaluated_validation_recipients = [args.recipient]
+        for recipient in evaluated_validation_recipients:
             if recipient == args.recipient:
                 validation_text, validation_ids = preview_text, preview_ids
                 semantics = primary_semantics
@@ -272,12 +291,37 @@ def main() -> int:
                     "recipient": recipient,
                     "token_count": len(validation_ids),
                     "exact": semantics["preview_exact_target"],
+                    "exact_output": validation_text
+                    == (configured_target(name, recipient) if configured_target else target_text),
                     "tool_name": semantics["preview_tool_name"],
                     "arguments": semantics["preview_arguments"],
                     "parse_error": semantics["preview_parse_error"],
                 }
             )
         edit = _levenshtein(baseline_message_ids, message_ids[name])
+        exact_rate = (
+            round(sum(row["exact"] for row in validation_rows) / len(validation_recipients), 5)
+            if validation_recipients
+            else None
+        )
+        exact_output_rate = (
+            round(sum(row["exact_output"] for row in validation_rows) / len(validation_recipients), 5)
+            if validation_recipients
+            else None
+        )
+        likelihood = (
+            _target_likelihood(llm, prompts[name], desired_target_ids)
+            if (not args.prune_primary_miss or exact_rate == 1.0)
+            and (not args.prune_primary_output_miss or exact_output_rate == 1.0)
+            else {
+                "target_mean_nll": None,
+                "target_total_nll": None,
+                "target_rank_mean": None,
+                "target_rank_p95": None,
+                "target_margin_mean": None,
+                "target_first_logp": None,
+            }
+        )
         results[name] = {
             "message": messages[name],
             "message_token_count": len(message_ids[name]),
@@ -295,22 +339,28 @@ def main() -> int:
             "desired_target_token_ids": desired_target_ids,
             "desired_target_token_pieces": _token_pieces(llm, desired_target_ids),
             **primary_semantics,
+            "preview_exact_output": primary_exact_output,
             "validation_previews": validation_rows,
-            "preview_exact_rate": round(
-                sum(row["exact"] for row in validation_rows) / len(validation_rows), 5
-            ) if validation_rows else None,
+            "preview_exact_rate": exact_rate,
+            "preview_exact_output_rate": exact_output_rate,
             "preview_token_count_max": max((row["token_count"] for row in validation_rows), default=len(preview_ids)),
-            **_target_likelihood(llm, prompts[name], desired_target_ids),
+            **likelihood,
         }
+        nll = results[name]["target_mean_nll"]
+        rank = results[name]["target_rank_mean"]
+        nll_text = "-" if nll is None else f"{nll:.4f}"
+        rank_text = "-" if rank is None else f"{rank:.1f}"
         print(
             f"[probe] {name:24} tok={len(message_ids[name]):3} edit={edit:3} "
-            f"nll={results[name]['target_mean_nll']:.4f} rank={results[name]['target_rank_mean']:.1f} "
+            f"nll={nll_text} rank={rank_text} "
             f"preview={len(preview_ids):2}/{results[name]['preview_token_count_max']:2} "
-            f"exact={results[name]['preview_exact_rate']:.3f}"
+            f"exact={results[name]['preview_exact_rate']:.3f} "
+            f"raw={results[name]['preview_exact_output_rate']:.3f}"
         )
 
     payload = {
         "model": args.model,
+        "parser_profile": "kaggle_gemma4" if args.model == "gemma_4" else "sdk_default",
         "baseline_name": baseline_name,
         "recipient": args.recipient,
         "target_text": target_text,

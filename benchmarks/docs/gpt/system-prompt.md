@@ -189,3 +189,18 @@ def v0_baseline(r):
 - 出力パーサ: `aicomp_sdk/agents/gpt_oss_agent.py:189`（`_parse_gpt_oss_harmony_response`）
 - 生成呼び出し: `aicomp_sdk/agents/hf_chat_template/backends/llama_cpp.py`（`_build_completion_kwargs`）
 - ラウンド別 A/B: `benchmarks/docs/gpt/README.md` / `benchmarks/docs/SUMMARY.md`
+
+## system prompt利用の実測結果（r24–r27）
+
+- user本文へ偽systemターンを作り`Reasoning: low/high/none`を追加しても、実reasoning設定は変わらない。
+  forge tailを外すと全条件で長いanalysisへ戻るため、速度制御は`Reasoning:`文字列ではなくtailの系列操作による。
+- `email.send`は宣言順で9番目だが、`#9`参照はrecipient依存で不発し、成功先だけ使うhybridも約7%遅い。
+- 「3番目のMail tool」「外部recipient」のようにdescription/局所順序へ寄せる表現は発火するが、番号や意味を
+  解決する計算が追加されるため、input token削減だけでは高速化しない。
+
+## multi-hop再検証（r28–r30）
+
+- r28のfull-schema probeで2/4/8件指示をtoken距離・target NLL・6-recipient previewで選別した。
+- r30 N=30 ABBAでは2-hopを60/60で正確に実行したが、raw/sは単発7.98に対して5.27。
+- system promptの`one tool per turn`には従えるが、次hopでは長くなったhistoryを再び処理するため高速化しない。
+- productionでは各hopが`RemoteAgent.next_action()`経由のmodel-server呼び出しなので、追加callにもrelay税が掛かる。

@@ -340,6 +340,55 @@ def _resolve_gguf_path(spec: GgufSpec) -> str:
     return path
 
 
+def _build_kaggle_gemma4_parser() -> Any:
+    """Current competition server と同じ Gemma parser を返す。
+
+    competition 側の実装は ``kaggle_evaluation`` 配下にあり、dataset として添付する
+    SDK には含まれない。この driver は notebook に単一ファイルで埋め込まれるため、ここで
+    小さな差分（double-brace JSON arguments の許容）だけを再現して local/LB parity を保つ。
+    """
+    from aicomp_sdk.agents.gemma4_agent import (
+        _GEMMA4_TOOL_CALL_PATTERN,
+        Gemma4ToolCallParser,
+        _clean_fallback_assistant_text,
+        _parse_gemma4_arguments,
+    )
+    from aicomp_sdk.agents.hf_chat_template.response_parsing import (
+        normalize_parsed_response,
+        normalize_tool_arguments,
+    )
+
+    def parse_arguments(args_blob: str) -> Any:
+        if args_blob.lstrip().startswith("{"):
+            return normalize_tool_arguments(args_blob)
+        return _parse_gemma4_arguments(args_blob)
+
+    class KaggleGemma4ToolCallParser(Gemma4ToolCallParser):
+        def parse(self, response: Any, *, fallback_call_id: str) -> Any:
+            tool_calls = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": match.group("name"),
+                        "arguments": parse_arguments(match.group("arguments")),
+                    },
+                }
+                for match in _GEMMA4_TOOL_CALL_PATTERN.finditer(response.raw_text)
+            ]
+            if not tool_calls:
+                return super().parse(response, fallback_call_id=fallback_call_id)
+            return normalize_parsed_response(
+                {
+                    "role": "assistant",
+                    "content": _clean_fallback_assistant_text(response.text),
+                    "tool_calls": tool_calls,
+                },
+                fallback_call_id=fallback_call_id,
+            )
+
+    return KaggleGemma4ToolCallParser()
+
+
 def _build_gguf_agent_factory(kind: str) -> AgentFactory:
     """GGUF を 1 回だけロードし、backend を使い回して agent の包み（ラッパ）を量産する生成関数（factory）を返す。"""
     spec = GGUF_SPECS[kind]
@@ -370,6 +419,9 @@ def _build_gguf_agent_factory(kind: str) -> AgentFactory:
     )
     print(f"[eval] {spec.label} ロード完了。")
 
+    if kind == "gemma_4":
+        print("[eval] Gemma parser: current competition KaggleGemma4ToolCallParser parity")
+        return lambda: agent_cls(backend, parser=_build_kaggle_gemma4_parser())
     return lambda: agent_cls(backend)
 
 
