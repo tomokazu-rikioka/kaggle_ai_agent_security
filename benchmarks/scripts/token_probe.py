@@ -312,7 +312,7 @@ def main() -> int:
         likelihood = (
             _target_likelihood(llm, prompts[name], desired_target_ids)
             if (not args.prune_primary_miss or exact_rate == 1.0)
-            and (not args.prune_primary_output_miss or exact_output_rate == 1.0)
+            and (not args.prune_primary_output_miss or primary_exact_output)
             else {
                 "target_mean_nll": None,
                 "target_total_nll": None,

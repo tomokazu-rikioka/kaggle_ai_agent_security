@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import subprocess
 import sys
@@ -20,6 +21,30 @@ SCRIPT_DIR = REPO_ROOT / "benchmarks" / "scripts"
 DRIVER = SCRIPT_DIR / "token_probe.py"
 BUILD_DIR = REPO_ROOT / "build" / "token_probe"
 TRACK_MODEL = {"gpt": "gpt_oss", "gemma": "gemma_4"}
+
+
+def _extra_candidate_sources(candidates_path: Path) -> dict[str, str]:
+    """Bundle sibling modules explicitly declared by a candidate module."""
+    extra_names: tuple[str, ...] = ()
+    for node in ast.parse(candidates_path.read_text()).body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "EXTRA_CANDIDATE_FILES" for target in node.targets
+        ):
+            value = ast.literal_eval(node.value)
+            if not isinstance(value, tuple) or not all(isinstance(name, str) for name in value):
+                raise TypeError("EXTRA_CANDIDATE_FILES must be a tuple of file names")
+            extra_names = value
+            break
+
+    sources: dict[str, str] = {}
+    for name in extra_names:
+        if Path(name).name != name or not name.endswith(".py"):
+            raise ValueError(f"invalid EXTRA_CANDIDATE_FILES entry: {name!r}")
+        path = candidates_path.parent / name
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        sources[name] = path.read_text()
+    return sources
 
 
 def _kernel_id(track: str, round_tag: str) -> str:
@@ -47,6 +72,7 @@ def build(
     guardrail_sources = {
         path.name: path.read_text() for path in sorted(Path(bev.GUARDRAILS_DIR).glob("*.py")) if path.is_file()
     }
+    extra_candidate_sources = _extra_candidate_sources(candidates_path)
     model_path = bev.GGUF_PATHS[model]
     path_env = bev.GGUF_PATH_ENVS[model]
     prune_flag = " --prune-primary-miss" if prune_primary_miss else ""
@@ -60,7 +86,12 @@ def build(
         f"    --model {model} --target-tokens {target_tokens} --preview-tokens {preview_tokens} \\\n"
         f"    --validation-recipients {validation_recipients}{prune_flag}{prune_output_flag} \\\n"
         "    --out /kaggle/working/token_probe_results.json\n"
-        "print(json.dumps(json.load(open('/kaggle/working/token_probe_results.json')), ensure_ascii=False, indent=2))\n"
+        "_probe_result = json.load(open('/kaggle/working/token_probe_results.json'))\n"
+        "print(json.dumps({\n"
+        "    'model': _probe_result.get('model'),\n"
+        "    'baseline': _probe_result.get('baseline'),\n"
+        "    'result_count': len(_probe_result.get('results', {})),\n"
+        "}, ensure_ascii=False, indent=2))\n"
     )
     nb = nbf.v4.new_notebook()
     nb.cells = [
@@ -76,6 +107,10 @@ def build(
         nbf.v4.new_code_cell(
             bev._b64_write_cell("candidates.py", candidates_path.read_text(), "/kaggle/working/candidates.py")
         ),
+        *[
+            nbf.v4.new_code_cell(bev._b64_write_cell(name, source, f"/kaggle/working/{name}"))
+            for name, source in extra_candidate_sources.items()
+        ],
         *[
             nbf.v4.new_code_cell(bev._b64_write_cell(f"guardrail {name}", source, f"/kaggle/working/guardrails/{name}"))
             for name, source in guardrail_sources.items()

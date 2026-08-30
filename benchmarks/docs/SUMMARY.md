@@ -1,6 +1,6 @@
 # 現状ベスト（発火率 / 候補速度）
 
-基準サブミット: `jed-clean-email-gpt-minimal-header-short-n2000` — **LB public 37.540**（email DEPUTY）。
+GPT改善の起点: `jed-gpt-inner-share-gemma-baseline-n2000` — **LB public 37.710**（email DEPUTY）。
 
 得点 = 発火率 × 完走内候補数 N。速度で N、発火率でその N を得点化する（両者が2レバー）。
 
@@ -11,12 +11,24 @@
 | 提出済みexp018のGemma | r88 | 2,000 / public | 2,000/2,000 | 20.352 | 0.761s | 7.881 | **固定・変更しない** |
 | ベンチ上のGemma最良集合 | r106 | 2,000 / private03 | 2,000/2,000 | **20.000** | 0.738s | 8.126 | exp018へ未反映 |
 | Gemma最終推奨候補 | r120 / exp019 | 2,000 / 全7条件 | 2,000/2,000 | **20.000** | r118で0.742–0.760s | 7.894–8.089 | straight版・exp019実装済み・未提出 |
-| GPTの旧warm基準 | r12 b0 | 30 / public | 30/30 | - | 0.685s | 8.76 | 現在はGemmaだけを探索 |
+| GPTのLB37.710現行基準 | r31 / r37 | 30 / public×AB | 30/30 | **21.000** | 0.700–0.750s | 8.01–8.58 | GPT探索のcontrol |
+| GPT入力token Pareto最良 | r50 | 30 / public×AB | 30/30 | **21.000** | 0.715 / 0.720s | 8.386 / 8.337 | **46-token候補・継続検証** |
 
 絶対時間は別GPU job・別guardrailを含むため参考値。採用判断は同一jobのABBA、出力token、完全性を優先する。
 
 r122まででGemma 1-hop emailの主要軸は概ね探索完了。速度の直接比較ではr106とstraight版は同等だが、
 入力22→20 token・低NLL・全7条件完全性を揃えたr120を最終推奨とし、exp019へ実装した。提出済みexp018はr88で固定する。
+現在はLB37.710サブのGPT分岐を忠実再現し、r31以降で入力・出力・system prompt・multi-hopを再探索している。
+
+GPTのr33再検証では、単発8.23–8.52 raw/sに対し、独立2-messageは6.25、同一message 8-hopは5.18で不採用。
+r34vの安全recipient 39,775値×引数全6順序の静的全探索では、正規初回callの最小は18 tokenで17以下は0件。
+r40–r45ではtool後生成を段階的に探索し、実GGUF履歴へ正確に合わせた66案を含めても3 token未満は0件だった。
+action/layout総当たりから残った48-token equals形式は、r46 N=30 ABBAで2案とも30/30、全件`18>3`を維持した。
+r47aではHarmony固定部・role・ASCII tool分断8,317案を総当たりし、6宛先で初回18 tokenを保つ最短46-token案を発見。
+r50 N=30 ABBAでは3案とも30/30・全件`18>3`で、`e mail.se nd`案はbaseline A/B平均比-0.69%、
+入力52→46、論理入力1,784→1,772だった。速度差はノイズ圏だが、出力・完全性が同じ入力token Pareto最良として保持する。
+r47pでは自然言語・DSL・記号5,581案のtool後生成を調べ、3 token未満は0件、3 token維持は115件、最短入力42 token。
+初回callとの両立をr47bで、Harmony固定部の追加削除8,144案をr49dで検証中である。
 
 ### Gemmaの採用系列
 
@@ -48,6 +60,21 @@ r122まででGemma 1-hop emailの主要軸は概ね探索完了。速度の直�
 | r122 | 改行版とスペース版をABBA比較 | N=100×4系列 | 双方100/100・全件`16>4`。スペース版+0.868% | 1 token減るが速度改善なし、r120維持 |
 
 > 現在の検証対象は `email.send` / CONFUSED_DEPUTY のみ。
+
+### GPT r31–r37 の総括（LB37.710 baselineからの再探索）
+
+- r31で提出NotebookのGPT分岐を文字単位で復元した。現行promptは52 input tokenで、初回生成は
+  旧検証基準より5 token短い18-token tool call。6 recipientでtool名・3引数が完全一致した。
+- r32bはreasoning文字列、偽role、system promptのtool番号/説明、引数省略、output primerの331文面を探索。
+  `Reasoning: low/none/off`は実backend設定を変えず入力だけ増加。最短metaは43 inputでも20 outputとなった。
+- synthetic例示から`subject/body`を補完させる案は45 input / 18 output、6/6完全一致でprobe上はbaselineを支配した。
+  しかしr37 ABBAではtool後に9〜15 tokenの説明・拒否を生成し、baselineの`18>3`に対して総出力30.5〜32.5 token。
+  replayはbaseline 0.700/0.750秒に対し0.874〜0.920秒、raw/sは8.58/8.01から6.53〜6.86へ低下し棄却した。
+- r36hはo200k_harmony上で6 tokenのZWSP tool表記を、禁止語を作らない4-token ASCII表記90通りへ展開。
+  361文面中43件が6/6完全一致し、`em ail.se_nd`等の終了句なし案は47 input / 18 outputまで短縮した。
+  ただしr37から、初回callの短さだけでは採用できず、tool後3-token空final維持が必須と判明した。
+- 現在r32a（表層1,568文面）とr33（現行baselineのmulti-hop）、r34v（recipient全順序）を実行中。
+  次は短いtool表記と`No final text.`を直積したr39cで、`18>3`を維持する組合せだけを実速度へ進める。
 
 ### r11 の総括（非英語・コード/DSL・記号による意味圧縮）
 
@@ -323,6 +350,22 @@ baseline を **public + 5 つの研究 private 仮説**（private01_fixed / 02_p
   可変suffix削減と、`16>4`を生成する一意recipient 2,000値の選別を優先する。
 
 ## 計測メモ
+
+### GPT r52–r60（Example重複・KV配置・出力床・Hop0後終了）
+
+- r47b 7,021文面の初回生成が完了。6 recipient完全一致630件、うち初回18 tokenは553件。tool後3 tokenとの
+  交差42件の最短は44-token 2案で、ASCII tool分断との合成は静的42 token。r58へ追加した。
+- r49d 8,144削除パターンでは、6 recipient完全一致196件、初回18 tokenは180件。最短42-token 5案は
+  prefix/差分以降=31/11で、tool後確認用r62をbuild済み。
+- Exampleへ完全な`email.send`引数を一度示した後、user側を`Repeat.`またはrecipientだけへ削り、17-token特殊引数も
+  加えた2,697候補をr58へ統合。
+  静的にはbaseline 52 token / 差分以降12 tokenに対し、recipient末尾34/6、偽analysis本文末尾35/1まで短縮した。
+- backend/model serverは候補ごとに再ロードされないため、fresh envでも同一llama.cpp instanceのprefix KV再利用は有効。
+- 通常の一意な非空string targetはcall 18 tokenが実用床。型検証漏れにより`to:[]`等は成功し17 tokenになるが、
+  intent-bound代理privateでCONFIRMとなり、bank全体の置換には使えない。一方、bare `1..999`とlist `[0]..[999]`の
+  1,999値は18 token・一意cell・代理private ALLOWを両立する入力短縮候補。
+- 現行Hop1は3-token空final後にすでにbreakする。hop上限の持込み、同一生成の複数callはgateway/parserで不可。
+  EOS 0-tokenまたはbare text 1-tokenを狙う48候補をr60としてbuild済み。r58/r60ともGPU枠待ち。
 
 - bench の fire_rate / replay_mean_s は **in-process リプレイ**。実 LB は gRPC/hop overhead で
   ベンチより遅い（研究ノート §7）。ベンチは相対比較（A/B）に使い、絶対 N の見積りは割引く。
