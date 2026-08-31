@@ -9,6 +9,7 @@ import os
 import sys
 from collections import Counter
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 from statistics import mean
 from typing import Any
@@ -45,7 +46,11 @@ def _default_tool_arguments(_name: str, recipient: str) -> dict[str, Any]:
 
 def _load_variants(
     path_str: str,
-) -> tuple[dict[str, Any], Callable[[str, str], dict[str, Any]]]:
+) -> tuple[
+    dict[str, Any],
+    Callable[[str, str], dict[str, Any]],
+    Callable[[str, str], dict[str, Any]] | None,
+]:
     path = Path(path_str).resolve()
     spec = importlib.util.spec_from_file_location("_post_tool_variants", path)
     if not spec or not spec.loader:
@@ -58,7 +63,10 @@ def _load_variants(
     tool_arguments = getattr(mod, "TOOL_ARGUMENTS", _default_tool_arguments)
     if not callable(tool_arguments):
         raise TypeError("TOOL_ARGUMENTS は(candidate_name, recipient)を受けるcallableにしてください")
-    return variants, tool_arguments
+    expected_next_arguments = getattr(mod, "EXPECTED_NEXT_ARGUMENTS", None)
+    if expected_next_arguments is not None and not callable(expected_next_arguments):
+        raise TypeError("EXPECTED_NEXT_ARGUMENTS は(candidate_name, recipient)を受けるcallableにしてください")
+    return variants, tool_arguments, expected_next_arguments
 
 
 def _backend_from_factory(agent_factory: Any) -> Any:
@@ -98,10 +106,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--variants-file", required=True)
     parser.add_argument("--recipients", default="a,b,c,z,aa,ad")
+    parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=0,
+        help="一次screen用の生成上限。0なら本番backend既定値を維持する。",
+    )
     parser.add_argument("--out", default="post_tool_probe.json")
     args = parser.parse_args()
 
-    variants, tool_arguments = _load_variants(args.variants_file)
+    variants, tool_arguments, expected_next_arguments = _load_variants(args.variants_file)
     recipients = tuple(dict.fromkeys(value.strip() for value in args.recipients.split(",") if value.strip()))
     if not recipients:
         raise ValueError("recipientが空です")
@@ -109,6 +123,8 @@ def main() -> None:
     fixtures_dir = ed.ops.resolve_fixtures_dir(None)
     factory = ed.build_agent_factory("gpt_oss")
     backend = _backend_from_factory(factory)
+    if args.max_new_tokens > 0:
+        backend.config = replace(backend.config, max_new_tokens=args.max_new_tokens)
     llm = backend.llm
     suite = ToolSuite(fixtures_dir)
     tools = to_agent_tool_specs(tuple(suite.specs.values()))
@@ -165,19 +181,33 @@ def main() -> None:
                 elif isinstance(decision, ToolCallDecision):
                     decision_type = "tool"
                     decision_text = decision.call.tool_name
+                    decision_arguments = dict(decision.call.arguments)
                 else:
                     decision_type = type(decision).__name__
                     decision_text = ""
+                    decision_arguments = None
+                if not isinstance(decision, ToolCallDecision):
+                    decision_arguments = None
                 parse_error = None
             except InvalidModelOutputError as err:
                 decision_type = "invalid"
                 decision_text = ""
+                decision_arguments = None
                 parse_error = str(err)
+            expected_arguments = expected_next_arguments(name, recipient) if expected_next_arguments else None
             rows.append(
                 {
                     "recipient": recipient,
                     "decision": decision_type,
                     "decision_text": decision_text,
+                    "decision_arguments": decision_arguments,
+                    "expected_next_exact": (
+                        decision_type == "tool"
+                        and decision_text == "email.send"
+                        and decision_arguments == expected_arguments
+                        if expected_arguments is not None
+                        else None
+                    ),
                     "parse_error": parse_error,
                     **last_generation,
                 }
@@ -189,6 +219,11 @@ def main() -> None:
             "message_tokens": len(llm.tokenize(builder(recipients[0]).encode(), add_bos=False, special=True)),
             "post_tool_completion": _summary(completion_tokens),
             "decision_distribution": dict(sorted(Counter(row["decision"] for row in rows).items())),
+            "expected_next_exact_rate": (
+                round(sum(row["expected_next_exact"] is True for row in rows) / len(rows), 5)
+                if expected_next_arguments is not None
+                else None
+            ),
             "content_distribution": dict(sorted(Counter(str(row["content"]) for row in rows).items())),
             "rows": rows,
         }
@@ -197,7 +232,12 @@ def main() -> None:
             f"post={results[name]['post_tool_completion']} decision={results[name]['decision_distribution']}"
         )
 
-    payload = {"model": "gpt_oss", "recipients": recipients, "results": results}
+    payload = {
+        "model": "gpt_oss",
+        "recipients": recipients,
+        "max_new_tokens": backend.config.max_new_tokens,
+        "results": results,
+    }
     Path(args.out).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
     print(f"[post] saved {args.out}")
 

@@ -53,23 +53,39 @@ class _GenerationProbe:
 
     def __init__(self, llm: Any) -> None:
         self._records: list[dict[str, Any]] = []
-        original = llm.create_chat_completion
+        self._active_eval_tokens: int | None = None
+        original_completion = llm.create_chat_completion
+        original_eval = llm.eval
+
+        def measured_eval(tokens: Sequence[int]) -> Any:
+            if self._active_eval_tokens is not None:
+                self._active_eval_tokens += len(tokens)
+            return original_eval(tokens)
 
         def measured(*args: Any, **kwargs: Any) -> Any:
-            completion = original(*args, **kwargs)
-            if isinstance(completion, dict):
-                usage = completion.get("usage") or {}
-                choices = completion.get("choices") or []
-                message = choices[0].get("message") if choices and isinstance(choices[0], dict) else None
-                self._records.append(
-                    {
-                        "prompt_tokens": usage.get("prompt_tokens"),
-                        "completion_tokens": usage.get("completion_tokens"),
-                        "content": message.get("content") if isinstance(message, dict) else None,
-                    }
-                )
-            return completion
+            self._active_eval_tokens = 0
+            try:
+                completion = original_completion(*args, **kwargs)
+                if isinstance(completion, dict):
+                    usage = completion.get("usage") or {}
+                    choices = completion.get("choices") or []
+                    message = choices[0].get("message") if choices and isinstance(choices[0], dict) else None
+                    self._records.append(
+                        {
+                            "prompt_tokens": usage.get("prompt_tokens"),
+                            "completion_tokens": usage.get("completion_tokens"),
+                            # llama.cppのprefix再利用後に実際にllm.eval()へ渡ったtoken数。
+                            # promptだけでなく生成tokenも含むが、completion token数が同じ候補間なら
+                            # 差分がそのままKV cacheで節約できたprefill量になる。
+                            "evaluated_tokens": self._active_eval_tokens,
+                            "content": message.get("content") if isinstance(message, dict) else None,
+                        }
+                    )
+                return completion
+            finally:
+                self._active_eval_tokens = None
 
+        llm.eval = measured_eval
         llm.create_chat_completion = measured
 
     def reset(self) -> None:
@@ -234,7 +250,9 @@ def _replay_variant(
     generation_counts: list[int] = []
     prompt_token_totals: list[int] = []
     completion_token_totals: list[int] = []
+    evaluated_token_totals: list[int] = []
     completion_token_sequences: Counter[str] = Counter()
+    evaluated_token_sequences: Counter[str] = Counter()
     generation_text_sequences: Counter[str] = Counter()
     emit_any = 0
     emit_ok = 0
@@ -261,10 +279,14 @@ def _replay_variant(
         generation_counts.append(len(generation_rows))
         prompt_tokens = [row.get("prompt_tokens") for row in generation_rows]
         completion_tokens = [row.get("completion_tokens") for row in generation_rows]
+        evaluated_tokens = [row.get("evaluated_tokens") for row in generation_rows]
         prompt_token_totals.append(sum(value for value in prompt_tokens if isinstance(value, int)))
         completion_token_totals.append(sum(value for value in completion_tokens if isinstance(value, int)))
+        evaluated_token_totals.append(sum(value for value in evaluated_tokens if isinstance(value, int)))
         completion_sequence = ">".join(str(value) for value in completion_tokens) or "-"
+        evaluated_sequence = ">".join(str(value) for value in evaluated_tokens) or "-"
         completion_token_sequences[completion_sequence] += 1
+        evaluated_token_sequences[evaluated_sequence] += 1
         generation_text_sequences[
             ">".join(str(row.get("content") or "") for row in generation_rows) or "-"
         ] += 1
@@ -347,7 +369,9 @@ def _replay_variant(
         "generations_mean": round(sum(generation_counts) / n, 3) if n else 0.0,
         "logical_prompt_tokens_mean": round(sum(prompt_token_totals) / n, 3) if n else 0.0,
         "completion_tokens_mean": round(sum(completion_token_totals) / n, 3) if n else 0.0,
+        "evaluated_tokens_mean": round(sum(evaluated_token_totals) / n, 3) if n else 0.0,
         "completion_token_sequences": dict(completion_token_sequences.most_common(12)),
+        "evaluated_token_sequences": dict(evaluated_token_sequences.most_common(12)),
         "generation_text_sequences": dict(generation_text_sequences.most_common(12)),
         "tool_sequences": dict(tool_sequences.most_common(12)),
         "email_to_sequences": dict(email_to_sequences.most_common(12)),

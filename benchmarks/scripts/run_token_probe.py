@@ -60,6 +60,7 @@ def build(
     validation_recipients: str,
     prune_primary_miss: bool,
     prune_primary_output_miss: bool,
+    skip_target_likelihood: bool = False,
 ) -> Path:
     model = TRACK_MODEL[track]
     candidates_path = SCRIPT_DIR / track / f"{round_tag}_candidates.py"
@@ -77,6 +78,7 @@ def build(
     path_env = bev.GGUF_PATH_ENVS[model]
     prune_flag = " --prune-primary-miss" if prune_primary_miss else ""
     prune_output_flag = " --prune-primary-output-miss" if prune_primary_output_miss else ""
+    skip_likelihood_flag = " --skip-target-likelihood" if skip_target_likelihood else ""
     run_cell = (
         "import json, os\n"
         f'os.environ["{path_env}"] = "{model_path}"\n'
@@ -84,7 +86,7 @@ def build(
         "!python /kaggle/working/token_probe.py \\\n"
         "    --candidates-file /kaggle/working/candidates.py \\\n"
         f"    --model {model} --target-tokens {target_tokens} --preview-tokens {preview_tokens} \\\n"
-        f"    --validation-recipients {validation_recipients}{prune_flag}{prune_output_flag} \\\n"
+        f"    --validation-recipients {validation_recipients}{prune_flag}{prune_output_flag}{skip_likelihood_flag} \\\n"
         "    --out /kaggle/working/token_probe_results.json\n"
         "_probe_result = json.load(open('/kaggle/working/token_probe_results.json'))\n"
         "print(json.dumps({\n"
@@ -156,6 +158,7 @@ def push(
     validation_recipients: str,
     prune_primary_miss: bool,
     prune_primary_output_miss: bool,
+    skip_target_likelihood: bool = False,
 ) -> None:
     out_dir = build(
         track,
@@ -165,6 +168,7 @@ def push(
         validation_recipients=validation_recipients,
         prune_primary_miss=prune_primary_miss,
         prune_primary_output_miss=prune_primary_output_miss,
+        skip_target_likelihood=skip_target_likelihood,
     )
     result = _run(["kaggle", "kernels", "push", "-p", str(out_dir)])
     print(result.stdout)
@@ -201,6 +205,7 @@ def main() -> None:
     ap.add_argument("--validation-recipients", default="a,b,c,z,aa,ad")
     ap.add_argument("--prune-primary-miss", action="store_true")
     ap.add_argument("--prune-primary-output-miss", action="store_true")
+    ap.add_argument("--skip-target-likelihood", action="store_true")
     args = ap.parse_args()
     kwargs = {
         "target_tokens": args.target_tokens,
@@ -208,6 +213,7 @@ def main() -> None:
         "validation_recipients": args.validation_recipients,
         "prune_primary_miss": args.prune_primary_miss,
         "prune_primary_output_miss": args.prune_primary_output_miss,
+        "skip_target_likelihood": args.skip_target_likelihood,
     }
     if args.action == "build":
         build(args.track, args.round, **kwargs)

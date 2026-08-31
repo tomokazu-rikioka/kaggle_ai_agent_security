@@ -234,6 +234,11 @@ def main() -> int:
         action="store_true",
         help="代表recipientのraw出力がTARGET_TEXTと違えば残りrecipient生成とtarget NLLを省略する",
     )
+    ap.add_argument(
+        "--skip-target-likelihood",
+        action="store_true",
+        help="大規模な生成screenではteacher-forcing NLLを省略する",
+    )
     ap.add_argument("--out", default="token_probe_results.json")
     args = ap.parse_args()
 
@@ -311,7 +316,8 @@ def main() -> int:
         )
         likelihood = (
             _target_likelihood(llm, prompts[name], desired_target_ids)
-            if (not args.prune_primary_miss or exact_rate == 1.0)
+            if not args.skip_target_likelihood
+            and (not args.prune_primary_miss or exact_rate == 1.0)
             and (not args.prune_primary_output_miss or primary_exact_output)
             else {
                 "target_mean_nll": None,

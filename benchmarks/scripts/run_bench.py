@@ -233,7 +233,7 @@ def _print_table(track: str, data: dict) -> None:
     print(
         f"{'variant':22} {'guard':8} {'fire':>6} {'emit_ok':>8} {'emit_any':>9} "
         f"{'mean_s':>7} {'hops':>6} {'gens':>6} {'out_tok':>7} {'to_exact':>8} "
-        f"{'raw':>8} {'raw/s':>7} {'cells':>6} {'tok':>5} {'pfx':>5} {'len':>5}"
+        f"{'raw':>8} {'raw/s':>7} {'cells':>6} {'eval':>6} {'tok':>5} {'pfx':>5} {'len':>5}"
     )
     print("-" * 125)
     for vname, v in data.get("results", {}).items():
@@ -251,6 +251,7 @@ def _print_table(track: str, data: dict) -> None:
                 f"{g.get('tool_events_mean', 0):>6.2f} {g.get('generations_mean', 0):>6.2f} "
                 f"{g.get('completion_tokens_mean', 0):>7.2f} {exact_text:>8} {g['score_raw']:>8.1f} "
                 f"{g.get('score_raw_per_s', 0):>7.2f} {g['unique_cells']:>6} "
+                f"{g.get('evaluated_tokens_mean', 0):>6.1f} "
                 f"{stokens:>5} {prefix_tokens:>5} {slen:>5}"
             )
     print("=" * 125)

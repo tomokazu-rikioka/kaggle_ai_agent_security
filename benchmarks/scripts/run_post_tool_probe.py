@@ -50,7 +50,7 @@ def _extra_variant_sources(variants: Path) -> dict[str, str]:
     return sources
 
 
-def build(round_tag: str, recipients: str) -> Path:
+def build(round_tag: str, recipients: str, max_new_tokens: int) -> Path:
     variants = SCRIPT_DIR / "gpt" / f"{round_tag}_variants.py"
     for path in (bev.DRIVER_PATH, DRIVER, variants):
         if not Path(path).is_file():
@@ -69,7 +69,8 @@ def build(round_tag: str, recipients: str) -> Path:
         f'assert os.path.exists("{model_path}")\n'
         "!python /kaggle/working/post_tool_probe.py "
         "--variants-file /kaggle/working/variants.py "
-        f"--recipients {recipients} --out /kaggle/working/post_tool_probe.json\n"
+        f"--recipients {recipients} --max-new-tokens {max_new_tokens} "
+        "--out /kaggle/working/post_tool_probe.json\n"
         "print(json.dumps(json.load(open('/kaggle/working/post_tool_probe.json')), ensure_ascii=False)[:5000])\n"
     )
     notebook = nbf.v4.new_notebook()
@@ -125,13 +126,16 @@ def main() -> None:
     parser.add_argument("action", choices=("build", "push", "status", "fetch"))
     parser.add_argument("--round", default="r40")
     parser.add_argument("--recipients", default="a,b,c,z,aa,ad")
+    parser.add_argument("--max-new-tokens", type=int, default=0)
     args = parser.parse_args()
     kernel_id = _kernel_id(args.round)
     if args.action == "build":
-        print(build(args.round, args.recipients))
+        print(build(args.round, args.recipients, args.max_new_tokens))
         return
     if args.action == "push":
-        result = _run(["kaggle", "kernels", "push", "-p", str(build(args.round, args.recipients))])
+        result = _run(
+            ["kaggle", "kernels", "push", "-p", str(build(args.round, args.recipients, args.max_new_tokens))]
+        )
         print(result.stdout)
         if result.returncode or "successfully pushed" not in (result.stdout + result.stderr).lower():
             raise SystemExit(result.stderr or result.stdout)

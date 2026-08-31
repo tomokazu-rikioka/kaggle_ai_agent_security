@@ -3,6 +3,8 @@
 GPT改善の起点: `jed-gpt-inner-share-gemma-baseline-n2000` — **LB public 37.710**（email DEPUTY）。
 
 得点 = 発火率 × 完走内候補数 N。速度で N、発火率でその N を得点化する（両者が2レバー）。
+2026-08-31以降の新規GPT検証はpublicのみとし、仮想privateは選別・速度計測から外す。
+1-hopはN=30の選別通過後に直接public N=2,000へ上げる。8-hopは計算量を考慮し、最終確認をN=500とする。
 
 ## 現在の状態
 
@@ -12,13 +14,18 @@ GPT改善の起点: `jed-gpt-inner-share-gemma-baseline-n2000` — **LB public 3
 | ベンチ上のGemma最良集合 | r106 | 2,000 / private03 | 2,000/2,000 | **20.000** | 0.738s | 8.126 | exp018へ未反映 |
 | Gemma最終推奨候補 | r120 / exp019 | 2,000 / 全7条件 | 2,000/2,000 | **20.000** | r118で0.742–0.760s | 7.894–8.089 | straight版・exp019実装済み・未提出 |
 | GPTのLB37.710現行基準 | r31 / r37 | 30 / public×AB | 30/30 | **21.000** | 0.700–0.750s | 8.01–8.58 | GPT探索のcontrol |
-| GPT入力token Pareto最良 | r50 | 30 / public×AB | 30/30 | **21.000** | 0.715 / 0.720s | 8.386 / 8.337 | **46-token候補・継続検証** |
+| GPT 1-hop最終候補 | r94 / exp020 | 2,000×4 / public ABBA | 全反復2,000/2,000発火・厳密1-call各1,999/2,000 | 21.327 | suffix-9 pooled 2,978.532s | **8.060** | baseline 7.880比 **+2.29%**・exp020実装済み |
+| GPT 8-call棄却案 | r96 | 500 / public | 発火500/500・exact 8-call 299/500 | 333.316 | 9.141s | 3.283 | exp020比-59.3%のため不採用・exp021削除済み |
 
 絶対時間は別GPU job・別guardrailを含むため参考値。採用判断は同一jobのABBA、出力token、完全性を優先する。
 
 r122まででGemma 1-hop emailの主要軸は概ね探索完了。速度の直接比較ではr106とstraight版は同等だが、
 入力22→20 token・低NLL・全7条件完全性を揃えたr120を最終推奨とし、exp019へ実装した。提出済みexp018はr88で固定する。
-現在はLB37.710サブのGPT分岐を忠実再現し、r31以降で入力・出力・system prompt・multi-hopを再探索している。
+LB37.710サブのGPT分岐を起点に、r31以降で入力・出力・system prompt・multi-hopを再探索した。
+1-hopはr94で入力52→40 token、実KV評価token約76.1→74.3、pooled raw/s **+2.29%**を確認し、exp020へ実装済み。
+8-tool-callは1生成内の複数call拒否を避けるため8 user messageへ分け、r93のexact率80%案を検証した。
+r96 public N=500では発火500/500、exact 299/500（59.8%）、raw/s 3.283で、単発exp020より59.3%低かった。
+したがって8-call案は棄却し、試作したexp021も削除した。最高スコア推奨はexp020である。
 
 GPTのr33再検証では、単発8.23–8.52 raw/sに対し、独立2-messageは6.25、同一message 8-hopは5.18で不採用。
 r34vの安全recipient 39,775値×引数全6順序の静的全探索では、正規初回callの最小は18 tokenで17以下は0件。
@@ -356,16 +363,89 @@ baseline を **public + 5 つの研究 private 仮説**（private01_fixed / 02_p
 - r47b 7,021文面の初回生成が完了。6 recipient完全一致630件、うち初回18 tokenは553件。tool後3 tokenとの
   交差42件の最短は44-token 2案で、ASCII tool分断との合成は静的42 token。r58へ追加した。
 - r49d 8,144削除パターンでは、6 recipient完全一致196件、初回18 tokenは180件。最短42-token 5案は
-  prefix/差分以降=31/11で、tool後確認用r62をbuild済み。
-- Exampleへ完全な`email.send`引数を一度示した後、user側を`Repeat.`またはrecipientだけへ削り、17-token特殊引数も
-  加えた2,697候補をr58へ統合。
-  静的にはbaseline 52 token / 差分以降12 tokenに対し、recipient末尾34/6、偽analysis本文末尾35/1まで短縮した。
+  prefix/差分以降=31/11。r62で上位5案とr47b合成6案の全てが6/6でtool後3 tokenを維持し、
+  r49d上位は`42>18>3`を確定した。r64 N=30 ABBAでは安定3案が30/30・宛先完全一致を維持したが、
+  A/B平均raw/sはpublicでbaseline比-0.9〜-1.3%、privateで-0.4〜+0.1%となり、速度更新は確認できなかった。
+- Example重複除去・recipient末尾・特殊型の2,697候補をr58で実GGUF測定した。r52実recipient入りExampleは
+  6/6成功5件だが18-token callは0、17-token特殊型とbare整数/listは完全一致0。r55通常user末尾は
+  108件が6/6、69件が18-token callを維持し、private代理対応の`42 input / suffix 7 / 18 call`を2件得た。
+  userを宛先だけにする案も成立したが44 tokenで、現在は3引数再掲の42-token案が最短。r70でtool後を確認する。
+- r63の完全Exampleなし／部分header 420案は、代表成功123、6/6成功101。Exampleなし最短は17 input / 23 call、
+  private代理対応の空引数Exampleは38 / 20 / suffix 6。18-token callを保ったのはbaselineだけで、完全Exampleは
+  short headerとJSON順の誘導に必要。後者はr66 post-tool後に速度比較する。
+- r49短縮scaffoldと偽analysis本文末尾recipientを合成したr65 3,840案は、代表完全一致28、6/6完全一致は
+  baseline込み4。18-token callを保ったはbaselineのみだった。非baselineは`37 input / 26 call`または
+  `44 / 23〜26`で、r63の38/20交換より悪い。analysis末尾軸を棄却し、同構造のr67も省略する。
+- 通常user本文内のrecipient位置を保つr69 3,220案は、代表完全一致312、6/6完全一致200、うち13非baselineが
+  18-token callを維持した。絶対最短37 inputはintent-bound代理不安全。`Repeat silently`のprivate代理対応案が
+  **38 input / suffix 7 / 18 call**で、r49/r58の42 inputを4 token更新した。しかしr76 post-toolでは13件すべてが
+  Hop1 9 token以上となり、private-safeな38-token案も平均13 token、全体の最悪は200 tokenだったため棄却した。
+- user指示を実recipient入りExampleの前へ置くr71 1,200案では、6/6の18-token完全callを保つ非baselineを2件発見。
+  入力は**33 / 32 token、recipient後suffix 6**だったが、r77 Hop1は平均16.33 / 13 token、最大53 tokenとなり棄却。
+  また、完全引数をanalysis末尾に移し、Example側を空またはheaderのみへ削るr75 896案は、代表引数成功が
+  nonbaseline 14件あったが全て20〜30 call tokenへ悪化し、18-token完全出力は0件だった。r80の宛先横断再検証でも
+  6/6完全一致は0、最良4/6だったため棄却した。
 - backend/model serverは候補ごとに再ロードされないため、fresh envでも同一llama.cpp instanceのprefix KV再利用は有効。
 - 通常の一意な非空string targetはcall 18 tokenが実用床。型検証漏れにより`to:[]`等は成功し17 tokenになるが、
   intent-bound代理privateでCONFIRMとなり、bank全体の置換には使えない。一方、bare `1..999`とlist `[0]..[999]`の
   1,999値は18 token・一意cell・代理private ALLOWを両立する入力短縮候補。
 - 現行Hop1は3-token空final後にすでにbreakする。hop上限の持込み、同一生成の複数callはgateway/parserで不可。
-  EOS 0-tokenまたはbare text 1-tokenを狙う48候補をr60としてbuild済み。r58/r60ともGPU枠待ち。
+  r60の48候補×6 recipientでも0〜2 tokenは0件。control-token履歴破壊は最大472 tokenや追加callを誘発したため棄却。
+  r70では未確認だった`<|endoftext|>` / `<|constrain|>`と複合stop列をsubject/body/toの4位置に置く32案も確認したが、
+  0〜2 tokenは0件、19件は3 token維持、最悪は再tool callを含む1,024 tokenだった。Hop1強制終了軸は終了する。
+  r58のprivate-safeな42/18候補はr70でHop1が10〜60 tokenへ悪化した一方、r63の38/20候補2件は3 tokenを維持した。
+  r64ではr49安定3案を入力Paretoとして残したが、raw/sの有意な更新は確認できなかった。
+  r78 N=30 public ABBAでも、r49最良`p_19f0`は30/30完全一致だがbaseline比-0.13%、r63安定案は-2.34%。
+  N=100/N=500を省略し、baselineとr49 `p_19f0`を各2,000件×2反復するpublic r79を完了した。
+  r49は全件得点したが602/2,000件で`18>3`が`20>3`へ増え、pooled raw/sはbaseline 8.295対r49 8.279
+  （-0.19%）。高Nでも逆転しなかったためexp020へは採用しない。
+  続いてemail.send 8-hop / 8-callの最小生成を検証したが、r96でexp020比-59.3%となり棄却した。
+- r75の代表成功14案をr80で宛先横断確認したが、6/6完全一致は0。最良4/6でcallも20〜25 tokenのため棄却。
+- public条件へ限定したことで、r55/r56の初回6/6・18-token・recipient後suffix 6以下の全68候補を再昇格した。
+  r81でbaselineを含む69案のHop1を確認した。
+- r81ではbaseline以外の68案が全てHop1で退行し、r56 suffix 1案は平均458・最大1,024 tokenだった。
+  終了命令をrecipient前へ動かすだけではtool後に忘れるため、r82は固定例示2×task 10×analysis header 2×末尾6×
+  post-recipient ending 18の4,321案を実行した。代表18-token exactは558案、6宛先exactは294案。最短2案は
+  44 input tokenかつrecipient後suffix 0。r85では294案中70案が代表tool後の3-token finalを維持し、最短
+  `k_0_09_1_1_00`は44 input / suffix 0 / `18>3`。r86pの8宛先横断では53/70案が`18>3`を維持したが、
+  全宛先安定案の最短は45 input tokenだった。
+- bench driverへgeneration中の`llm.eval()`投入token数を記録する`evaluated_tokens_mean`を追加した。論理入力長ではなく、
+  実際のprefix KV再利用後に再計算したtoken数で仮説を検証し、最終採用は同一集合ABBA raw/sで決める。
+- 8-hopは異なる8宛先を追跡させず、候補ごとの同一recipientへ同じcallを8回繰り返すr83へ変更した。各成功eventの
+  DEPUTY predicateと候補間noveltyは維持でき、SDK直値は1候補raw 34（8×4+2）。8回計数16指示と無条件repeat
+  8指示を合わせ、指示24×偽履歴3×引数/call断片4×命令位置2×tail 3の1,728案を用意した。まず固定した
+  1回目成功履歴後に正しい2回目callをanalysis本文なしで生成できるかを代表1宛先・上限24 tokenでscreenし、
+  通過案だけを`x`を含む7宛先へ広げる。
+  理想形は8 callを
+  8 generationで終え、単発8候補の16 generationに対しLB relay往復を半減する。
+  汎用SDK evaluatorの既定4 hopとは異なりLB gatewayは8 hop固定なので、全リプレイbenchも8を明示する。
+  代表では9案が正しい18-token再callだったが、8宛先では完全18-token案は0。`m_2_03_2_1_2`だけが8/8で
+  正しいcallを維持したものの半数は5-token analysis header付きだったため、この構造へNo-analysis表現を直積した
+  r87 96案を追加screenする。
+- 1-hopの保守的な追加軸として、r49 `p_19f0` scaffoldへaction 8×引数4×終了句22を合成したr84の704案を準備。
+  r41で1 token短かった`Output nothing.`等を組み合わせ、recipient後suffixをr49からさらに削る。一次screenは
+  `x`を除く6境界宛先に、交換候補の未使用同token床`ai`を加えた7宛先で行う。
+  r84dでは49案が7宛先すべてで正確な18-token callを維持し、最短`d_0_2_21`は入力35 tokenだった
+  （baseline 52、r49 42）。r88pでは13/49案が8宛先すべてで`18>3`を維持し、最短安定案は
+  `d_0_2_04` / `d_2_2_04`の39 input token。35-token案はHop1が退行したため、39-token 2案をr90 N=30へ進めた。
+- r87の8-hop継続screenでは、96案中7案が8宛先すべてで正しい再callとなった。`z_1_2_01`と`z_2_2_01`は
+  全8宛先でanalysisなしの18 token固定、最短前者は入力122 token。次にr89 N=30で実際の8-hopを通し、
+  8 call・同一recipient・18 token×8を確認する。r89では`z1`が平均4.73 call・206.47 completion token・
+  8-call完全一致0/30・raw/s 4.63、`z2`も完全一致0/30・raw/s 3.10だった。3 call前後から回数計数analysisへ
+  移行するため、偽developer/system roleへ無限反復規則を置くr92を追加し、N=500昇格は保留する。
+- r90 N=30は39-token案2種が全件成功し、pooled raw/sはbaseline 8.75に対し8.89/8.91だった。ただしrecipient後
+  suffixがbaselineと同じ11 tokenで、実評価tokenも75.5対75.6/75.7と減っていない。見かけの時間差だけでは採用せず、
+  r86pの45-input/suffix-0案とr88pの40-input/suffix-9案をr91 ABBAで比較する。
+- r91ではsuffix-9案が60/60完全成功し、実評価token 75.5→73.6、pooled raw/s 8.49→8.51（+0.18%）。
+  suffix-0案は実評価token 65〜66まで削減したが、1/60でrecipient `s`を例示値`x`へ誤送信し、出力も20/23 tokenへ
+  変動した。r94 public N=2,000 ABBAではsuffix-9も全4反復2,000/2,000発火・宛先完全一致。
+  pooled raw/sはbaseline 7.880に対し**8.060（+2.29%）**、実評価token約76.1→74.3。exp020へ採用した。
+- r92の偽developer/system永続反復48案は、8宛先で正しい再callが0件だった。公式gatewayが最大32 user messageを
+  同一envで逐次実行する仕様を利用し、suffix文面8回、または初回完全指示+短い`Repeat.` 7回で8 callを作るr93を
+  public N=30で検証した。最良`same_suffix0_8`は指定recipientへの8-call完全一致24/30（80%）だが、平均8.43 call・
+  平均356.17 completion token・raw/s 3.58。履歴により各user turnが追加hopを続ける場合があった。
+  各turnへ`exactly once`を明記するr95 N=10も、完全一致は同一baseline 8/10、unique表現7/10、
+  exactly-once同文2/10で改善しなかった。8-call率優先の最終候補を`same_suffix0_8`とし、r96 public N=500で確定する。
 
 - bench の fire_rate / replay_mean_s は **in-process リプレイ**。実 LB は gRPC/hop overhead で
   ベンチより遅い（研究ノート §7）。ベンチは相対比較（A/B）に使い、絶対 N の見積りは割引く。
