@@ -1,0 +1,68 @@
+{
+  "experiment": "r192",
+  "source": "experiments/exp021/attack.py",
+  "actual_recipients": 2000,
+  "measurements_per_recipient": 3,
+  "measurement_orders": [
+    "forward",
+    "reverse",
+    "shuffle192"
+  ],
+  "measurement_note": "各系列の先頭に計測用sentinelを1件置いたため、run_summaryはN=2001。候補統計はsentinelを除くN=2000。",
+  "gpt_oss": {
+    "run_summary": {
+      "forward": {"total_s": 756.897, "raw_s": 15.859, "raw": 12004.0, "cells": 2000, "to_exact": 0.9995},
+      "reverse": {"total_s": 757.353, "raw_s": 15.850, "raw": 12004.0, "cells": 2000, "to_exact": 0.9995},
+      "shuffle192": {"total_s": 761.830, "raw_s": 15.757, "raw": 12004.0, "cells": 2000, "to_exact": 0.9995}
+    },
+    "stable_recipients": 1999,
+    "unstable_recipients": ["erb"],
+    "unstable_note": "erbは3系列すべてemail.send/fireだが宛先不一致。exp025では末尾へ移動。",
+    "mean_seconds": {"min": 0.373239, "median": 0.3788975, "mean": 0.379054372, "max": 0.398964},
+    "mean_by_recipient_length": {
+      "1": {"count": 26, "mean_s": 0.376379, "average_rank": 238.4},
+      "2": {"count": 615, "mean_s": 0.378602, "average_rank": 825.5},
+      "3": {"count": 1358, "mean_s": 0.379313, "average_rank": 1093.6}
+    },
+    "spearman": {
+      "forward_vs_reverse": -0.4879,
+      "forward_vs_shuffle192": 0.0515,
+      "reverse_vs_shuffle192": -0.0474
+    },
+    "prefix_projection": {
+      "500": {"ordered_s": 188.404283, "original_s": 189.116078, "time_reduction_pct": 0.377802},
+      "1000": {"ordered_s": 377.601376, "original_s": 378.782777, "time_reduction_pct": 0.312870},
+      "1500": {"ordered_s": 567.323140, "original_s": 568.421834, "time_reduction_pct": 0.193663, "ordered_stable": 1500, "original_stable": 1499}
+    },
+    "top20": ["jb", "fx", "fg", "ebu", "cir", "m", "s", "i", "w", "az", "fp", "j", "bg", "t", "ex", "bf", "ey", "iby", "fsm", "kd"],
+    "last20": ["cf", "aha", "dub", "bj", "cia", "vr", "dok", "bbc", "ast", "few", "cpf", "gi", "hpp", "od", "gar", "env", "eux", "hp", "ne", "erb"]
+  },
+  "gemma_4": {
+    "run_summary": {
+      "forward": {"total_s": 800.081, "raw_s": 15.006, "raw": 12006.0, "cells": 2001, "to_exact": 1.0},
+      "reverse": {"total_s": 799.336, "raw_s": 15.020, "raw": 12006.0, "cells": 2001, "to_exact": 1.0},
+      "shuffle192": {"total_s": 799.652, "raw_s": 15.014, "raw": 12006.0, "cells": 2001, "to_exact": 1.0}
+    },
+    "stable_recipients": 2000,
+    "unstable_recipients": [],
+    "mean_seconds": {"min": 0.395298, "median": 0.3990965, "mean": 0.399512642, "max": 0.434865},
+    "mean_by_recipient_length": {
+      "1": {"count": 59, "mean_s": 0.397638, "average_rank": 392.3},
+      "2": {"count": 1876, "mean_s": 0.399578, "average_rank": 1020.0},
+      "3": {"count": 65, "mean_s": 0.399338, "average_rank": 990.6}
+    },
+    "spearman": {
+      "forward_vs_reverse": -0.3217,
+      "forward_vs_shuffle192": -0.0022,
+      "reverse_vs_shuffle192": 0.0337
+    },
+    "prefix_projection": {
+      "500": {"ordered_s": 198.705947, "original_s": 199.669484, "time_reduction_pct": 0.484906},
+      "1000": {"ordered_s": 398.035106, "original_s": 399.395110, "time_reduction_pct": 0.341679},
+      "1500": {"ordered_s": 597.894370, "original_s": 599.048039, "time_reduction_pct": 0.192955, "ordered_stable": 1500, "original_stable": 1500}
+    },
+    "top20": ["AB", "t", "FQ", "AY", "A", "V", "Q", "z", "vy", "9", "CI", "ng", "M", "AID", "YT", "aq", "AC", "AIM", "L", "v"],
+    "last20": ["FK", "JR", "zt", "Vr", "mm", "Nh", "wh", "ea", "Od", "et", "Bi", "EX", "IS", "Iv", "ec", "cP", "sf", "RY", "yp", "RW"]
+  },
+  "projection_warning": "prefix_projectionは順位作成に使った同じN=3データによるin-sample推定。独立した並べ替えAB実測ではない。全2,000件完走時の総時間は順序だけでは原理上ほぼ不変。"
+}

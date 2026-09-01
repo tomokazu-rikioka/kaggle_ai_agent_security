@@ -25,6 +25,9 @@ MODELS: dict[str, dict[str, Any]] = {
     "gemma_4": {
         "repo": "unsloth/gemma-4-26B-A4B-it-GGUF",
         "filename": "gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+        # mainのGGUF metadata/chat templateは更新され得る。競技添付版と同じ
+        # size/SHAを持つrevisionへ固定し、A100の比較母集団を変えない。
+        "revision": "c462057f7ed65ccdb7f7e0778fae67894d425d92",
         "size_bytes": 16_947_539_744,
         "sha256": "34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35",
         "kaggle_handle": "llkh0a/gemma-4-26b-a4b-it-ud-q4-k-m-gguf/pyTorch/default/1",
@@ -80,7 +83,8 @@ def ensure_model(kind: str) -> Path:
                 hf_hub_download(
                     repo_id=spec["repo"],
                     filename=spec["filename"],
-                    local_dir=str(ROOT / "hf-models" / kind),
+                    revision=spec.get("revision"),
+                    local_dir=str(ROOT / "hf-models" / kind / str(spec.get("revision", "main"))[:12]),
                 )
             )
     actual_size = path.stat().st_size

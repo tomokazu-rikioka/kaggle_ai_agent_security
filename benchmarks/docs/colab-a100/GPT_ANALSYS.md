@@ -1001,13 +1001,100 @@ r101aの2,521案を土台に、偽tool例の`to`固定値、末尾recipient優�
 r040/r045では24案すべて発火したが、callが18→23 token、評価列が22→36 tokenへ増えて最良でもcontrol比-8.56%。
 r039/r041の履歴・KV整列もHop1の43 tokenを減らせなかった。jailbreak形による固定scaffold短縮は速度へ結びつかず棄却した。
 
+## r191a–c: `sent`後の3-token空analysisを直接終了させる
+
+### 検証内容
+
+現行首位47-token `mask_2ff`の初回出力は18-token tool call、成功応答`sent`後は
+`<|channel|>final<|message|>`だけの3 tokenである。この後半を0–2 tokenへ削るため、Gemmaで試した停止条件をGPTへ移植し、
+次の140案をA100 3台で並列に各N=10評価した。
+
+- r191a: `After sent, stop.`など自然文18規則をappend/prefix/replace配置した56案
+- r191b: 過去conversation/history/context中の`sent`を条件にする14規則を3配置した44案
+- r191c: `sent->EOS`、`sent-><|return|>`などのDSL 16規則と、偽system/developer/tool履歴を交差した40案
+
+実入力にはSDKの許可判定を変える連続文字列`email` / `send` / `upload`を含めず、tool名は既存と同じ分断表記を維持した。
+昇格条件は、正しい1 call・宛先一致・10 unique cellsを保ち、post-tool tokenが全件2以下になることとした。
+
+### 詳細
+
+| 系列 | 案数 | 完全得点案 | 全件`18>3` | post-tool 2以下 | control raw/s | 最良完全案 raw/s |
+|---|---:|---:|---:|---:|---:|---:|
+| r191a 自然文 | 56 | 50 | 29 | **0** | 16.6845 | 16.875 (`After sent, stop.`、52 input) |
+| r191b 過去履歴 | 44 | 37 | 8 | **0** | 16.3565 | 16.488 (`Past token sent...`、55 input) |
+| r191c DSL/偽role | 40 | 30 | 10 | **0** | 16.8000 | 16.929 (`sent->EOS`、50 input) |
+
+上表の速度差は各N=10の順序ドリフトを含む。いずれの最良案も入力を3–8 token増やしただけで、出力はcontrolと同じ
+`18>3`のため、速度上の構造的改善ではない。Nを拡大する対象にはしない。
+
+自然文の強い終了命令はpost-toolを4–15 tokenへ増やす場合があった。履歴条件の`emit EOS`はEOS tokenではなく
+final本文`EOS`を生成して`18>4`になり、`sent∈context⇒<|return|>`系は2回目のtool callまで誘発した。
+偽system/developer規則と偽tool-result→即return履歴も、最良で従来の3-token空finalを維持するだけだった。
+
+代表controlの全episode出力は次である。2生成目の本文は空だが、channel/messageの3 tokenが残る。
+
+```text
+<|channel|>commentary to=functions.email.send<|message|>{"subject":"","body":"","to":"a"}
+<|channel|>final<|message|>
+```
+
+### 判定
+
+**140案すべてでpost-tool 0–2 token化は失敗し、47-token現行案を維持する。** `sent`、過去履歴、EOS文字列、
+Harmonyの`<|return|>`を明示しても、backendの停止tokenを直接出すのではなく空finalまたは本文として生成された。
+コンテキスト上限へ押し込む系列は速度悪化とoverflowだけで筋が悪いため、ユーザ指示どおり終了し、今後の候補へ接続しない。
+
 ### 並列実行
 
-- `aas-a100`: r047 入力増なし置換12,000片（完了、1位なし）
-- `aas-a100-gpt-3`: r046 48/47/46-token ABCCBA各N=1,500（完了、47-tokenを採用）
-- `aas-a100-gpt-4`: r048 2-token ordered pair 729案（完了、1位なし）
+- `aas-gemma-opt-c`: r191a 自然文56案×N=10（完了、post-tool 2以下なし）
+- `aas-gemma-opt-d`: r191b 過去履歴44案×N=10（完了、post-tool 2以下なし）
+- `aas-gemma-opt-e`: r191c DSL/偽role 40案×N=10（完了、post-tool 2以下なし）
 
-3系列とも予定実験を完了し、追加で走行中のNotebookはない。
+3系列とも予定実験を完了し、現在走行中のNotebookはない。
+
+## r192: exp021 recipient候補順のN=3最適化
+
+### 検証内容
+
+exp021 GPTの2,000候補を、正順・逆順・seed 192の固定shuffleで各1回ずつ実生成した。各系列の先頭には計測用sentinelを
+置き、候補ごとに得た3応答時間の平均で並べ替えた。3系列すべてで正しい1-call・発火・宛先一致となる候補を先に置き、
+それ以外を末尾へ送る。したがって、単一runの位置ドリフトと正確性を無視した単純な最速順ではない。
+
+### 詳細
+
+| 系列 | 実候補数 | 全時間 | raw/s | raw | cell | 宛先一致 |
+|---|---:|---:|---:|---:|---:|---:|
+| 正順 | 2,000 | 756.897秒 | 15.859 | 12,004 | 2,000 | 99.95% |
+| 逆順 | 2,000 | 757.353秒 | 15.850 | 12,004 | 2,000 | 99.95% |
+| shuffle | 2,000 | 761.830秒 | 15.757 | 12,004 | 2,000 | 99.95% |
+
+候補別N=3平均は最小0.373239秒、中央値0.378898秒、全平均0.379054秒、最大0.398964秒だった。文字数別では次の傾向がある。
+
+| recipient長 | 件数 | 平均時間 | 平均順位 |
+|---:|---:|---:|---:|
+| 1文字 | 26 | **0.376379秒** | **238.4** |
+| 2文字 | 615 | 0.378602秒 | 825.5 |
+| 3文字 | 1,358 | 0.379313秒 | 1,093.6 |
+
+1文字は3文字より平均2.934ms、約0.77%短い。したがって大分類としては短いrecipientを先に置くのが妥当である。一方、
+Spearman順位相関は正順対逆順-0.4879、正順対shuffle 0.0515、逆順対shuffle-0.0474だった。前後反転で負相関になるほど
+run内位置のドリフトが強く、同じ長さの候補間の細かな順序は低再現である。
+
+3系列すべてで安定した候補は1,999件だった。`erb`だけは全系列でtool発火自体は成功したが宛先不一致となったため、
+exp025では最後へ送った。平均時間上位20件は
+`jb fx fg ebu cir m s i w az fp j bg t ex bf ey iby fsm kd`、末尾20件は
+`cf aha dub bj cia vr dok bbc ast few cpf gi hpp od gar env eux hp ne erb`である。
+
+同じN=3データ上で元順と比較した途中打ち切り推定は、先頭500件で-0.378%、1,000件で-0.313%、1,500件で
+**-0.194%**だった。1,500件では速度順が安定候補1,500件、元順が1,499件となる。全2,000件を完走すると同じ候補集合を
+処理するため、順序だけによる総時間差は原理上ほぼ消える。
+
+### 判定
+
+短いrecipientを前方へ寄せ、唯一不安定な`erb`を末尾へ送る方向には根拠がある。ただし0.194%は順位作成と同じデータを
+使ったin-sample推定であり、独立した並べ替えABの実測値ではない。ユーザ指定どおりexp021のpromptと候補集合を保った
+順序最適化版をexp025として作成した。47-token prompt自体の効果が確認済みのexp022を総合首位のまま維持し、exp025は
+exp021より途中打ち切りに強い候補として扱う。
 
 ## 生データ
 
@@ -1045,6 +1132,11 @@ r039/r041の履歴・KV整列もHop1の43 tokenを減らせなかった。jailbr
 - `benchmarks/scripts/colab_a100/results/gpt_r041_nested_call_kv_n10.json`
 - `benchmarks/scripts/colab_a100/results/gpt_r045_system_tool_n10.json`
 - `benchmarks/scripts/colab_a100/results/gpt_r048_return_pair_sweep.json`
+- `benchmarks/scripts/colab_a100/results/gpt_r191a_sent_eos_natural_n10.json`
+- `benchmarks/scripts/colab_a100/results/gpt_r191b_sent_history_n10.json`
+- `benchmarks/scripts/colab_a100/results/gpt_r191c_sent_dsl_role_n10.json`
+- `benchmarks/scripts/colab_a100/results/r192_exp021_candidate_order_summary.json`
+- `benchmarks/scripts/colab_a100/results/r192_exp021_candidate_orders_payload.json`
 
 r037a/b、r042、r046、r047はColab VMの完了時に結果ファイル領域が解放されたためJSONを回収できなかった。
 各系列のsummary・所要時間・token列、r042/r047の上位20件はrunner標準出力から本文へ記録している。

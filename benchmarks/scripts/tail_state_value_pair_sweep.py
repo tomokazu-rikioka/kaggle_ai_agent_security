@@ -100,6 +100,11 @@ def main() -> int:
     llm = backend.llm
     tools = to_agent_tool_specs(tuple(ToolSuite(fixtures_dir).specs.values()))
     stop_ids = sweep._stop_ids(llm, args.model)
+    empty_thought_ids = (
+        llm.tokenize(b"<|channel>thought\n<channel|>", add_bos=False, special=True)
+        if args.model == "gemma_4"
+        else []
+    )
     base_args = {"subject": "", "body": "", "to": args.recipient}
     base_target_tokens = len(
         llm.tokenize(sweep._target_text(args.model, base_args).encode(), add_bos=False, special=True)
@@ -138,7 +143,10 @@ def main() -> int:
             prompt_ids = probe._render_prompt(factory(), llm, sweep._history(message, args_dict), tools)
             llm.reset()
             llm.eval(prompt_ids)
-            stop = sweep._stats(probe._current_logits(llm), stop_ids)
+            phase_stops, greedy_stop_after = sweep._analyze_stop_phases(
+                llm, stop_ids, empty_thought_ids
+            )
+            stop = phase_stops[0]
             row = {
                 "subject": subject,
                 "body": body,
@@ -150,8 +158,10 @@ def main() -> int:
                 "call_added": call_added,
                 "post_prompt_tokens": len(prompt_ids),
                 "stop": stop,
+                "phase_stops": phase_stops,
+                "greedy_stop_after": greedy_stop_after,
             }
-            score = float(stop["logp"]) - max(call_added, 0) * 0.02
+            score = sweep._phase_search_score(phase_stops, call_added)
             serial += 1
             item = (score, serial, row)
             if len(kept) < args.keep:
@@ -175,6 +185,7 @@ def main() -> int:
         "seed_results": str(args.seed_results),
         "values": values,
         "stop_ids": stop_ids,
+        "empty_thought_ids": empty_thought_ids,
         "base_target_tokens": base_target_tokens,
         "base_message_tokens": base_message_tokens,
         "tested": tested,
