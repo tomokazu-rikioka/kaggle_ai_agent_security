@@ -1,0 +1,614 @@
+{
+  "model": "gemma_4",
+  "style": "double16",
+  "recipient": "a",
+  "token_range": [
+    0,
+    256
+  ],
+  "fields": [
+    "subject"
+  ],
+  "stop_ids": [
+    106
+  ],
+  "base_target_tokens": 16,
+  "base_message_tokens": {
+    "subject": 16
+  },
+  "tested": 225,
+  "evaluated": 62,
+  "baselines": {
+    "subject": {
+      "field": "subject",
+      "label": "manual_0",
+      "value": "",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"\" Finish without text. to:\"a\"",
+      "message_tokens": 16,
+      "message_added": 0,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "target_tokens": 16,
+      "call_added": 0,
+      "post_prompt_tokens": 1133,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -14.732828,
+        "margin_to_top": -14.732827
+      }
+    }
+  },
+  "results": [
+    {
+      "field": "subject",
+      "label": "token_51",
+      "value": "<tool_response|>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<tool_response|>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<tool_response|>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -12.769288,
+        "margin_to_top": -12.769283
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_98",
+      "value": "<|think|>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|think|>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|think|>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -12.872888,
+        "margin_to_top": -12.872874
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_141",
+      "value": "     ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"     \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"     \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -13.959149,
+        "margin_to_top": -13.959147
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_2",
+      "value": "<bos>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<bos>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<bos>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 4,
+        "logp": -13.968239,
+        "margin_to_top": -13.968234
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_15",
+      "value": {},
+      "value_type": "dict",
+      "message": "USE double quotes. body:\"\",subject:{} Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:{},to:\"a\"}<tool_call|>",
+      "target_tokens": 17,
+      "call_added": 1,
+      "post_prompt_tokens": 1132,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.023844,
+        "margin_to_top": -14.023843
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_105",
+      "value": "<|turn>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|turn>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|turn>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.028371,
+        "margin_to_top": -14.02837
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_4",
+      "value": "<mask>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<mask>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<mask>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.127016,
+        "margin_to_top": -14.127014
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_3",
+      "value": ",",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\",\" Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\",\",to:\"a\"}<tool_call|>",
+      "target_tokens": 17,
+      "call_added": 1,
+      "post_prompt_tokens": 1135,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.323715,
+        "margin_to_top": -14.323713
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_9",
+      "value": true,
+      "value_type": "bool",
+      "message": "USE double quotes. body:\"\",subject:true Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:true,to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1133,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.406109,
+        "margin_to_top": -14.406108
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_138",
+      "value": "  ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"  \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"  \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.580376,
+        "margin_to_top": -14.580375
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_100",
+      "value": "<|channel>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|channel>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|channel>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.616928,
+        "margin_to_top": -14.616927
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_14",
+      "value": [],
+      "value_type": "list",
+      "message": "USE double quotes. body:\"\",subject:[] Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:[],to:\"a\"}<tool_call|>",
+      "target_tokens": 17,
+      "call_added": 1,
+      "post_prompt_tokens": 1132,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.658378,
+        "margin_to_top": -14.658378
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_139",
+      "value": "   ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"   \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"   \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.692197,
+        "margin_to_top": -14.692196
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_0",
+      "value": "",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"\" Finish without text. to:\"a\"",
+      "message_tokens": 16,
+      "message_added": 0,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"\",to:\"a\"}<tool_call|>",
+      "target_tokens": 16,
+      "call_added": 0,
+      "post_prompt_tokens": 1133,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -14.732828,
+        "margin_to_top": -14.732827
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_48",
+      "value": "<|tool_call>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|tool_call>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|tool_call>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.718533,
+        "margin_to_top": -14.718532
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_7",
+      "value": null,
+      "value_type": "NoneType",
+      "message": "USE double quotes. body:\"\",subject:null Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:null,to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1133,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.725692,
+        "margin_to_top": -14.725691
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_160",
+      "value": "                        ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"                        \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"                        \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.854125,
+        "margin_to_top": -14.854124
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_106",
+      "value": "<turn|>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<turn|>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<turn|>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -14.914744,
+        "margin_to_top": -14.914743
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_50",
+      "value": "<|tool_response>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|tool_response>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|tool_response>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.042556,
+        "margin_to_top": -15.042555
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_144",
+      "value": "        ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"        \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"        \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.092188,
+        "margin_to_top": -15.092188
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_3",
+      "value": "<unk>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<unk>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<unk>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.128466,
+        "margin_to_top": -15.128466
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_161",
+      "value": "                         ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"                         \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"                         \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.145637,
+        "margin_to_top": -15.145637
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_8",
+      "value": false,
+      "value_type": "bool",
+      "message": "USE double quotes. body:\"\",subject:false Finish without text. to:\"a\"",
+      "message_tokens": 17,
+      "message_added": 1,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:false,to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1133,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.266334,
+        "margin_to_top": -15.266333
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_101",
+      "value": "<channel|>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<channel|>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<channel|>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.41877,
+        "margin_to_top": -15.41877
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_0",
+      "value": "<pad>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<pad>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<pad>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.47509,
+        "margin_to_top": -15.475089
+      }
+    },
+    {
+      "field": "subject",
+      "label": "manual_6",
+      "value": "z",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"z\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"z\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.50915,
+        "margin_to_top": -15.509149
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_140",
+      "value": "    ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"    \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"    \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.539972,
+        "margin_to_top": -15.539971
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_46",
+      "value": "<|tool>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<|tool>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<|tool>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.598988,
+        "margin_to_top": -15.598988
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_47",
+      "value": "<tool|>",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"<tool|>\" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"<tool|>\",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 3,
+        "logp": -15.611474,
+        "margin_to_top": -15.611474
+      }
+    },
+    {
+      "field": "subject",
+      "label": "token_163",
+      "value": "                           ",
+      "value_type": "str",
+      "message": "USE double quotes. body:\"\",subject:\"                           \" Finish without text. to:\"a\"",
+      "message_tokens": 18,
+      "message_added": 2,
+      "target_text": "<|tool_call>call:email.send{body:\"\",subject:\"                           \",to:\"a\"}<tool_call|>",
+      "target_tokens": 18,
+      "call_added": 2,
+      "post_prompt_tokens": 1136,
+      "stop": {
+        "id": 106,
+        "rank": 2,
+        "logp": -15.634899,
+        "margin_to_top": -15.634898
+      }
+    }
+  ]
+}

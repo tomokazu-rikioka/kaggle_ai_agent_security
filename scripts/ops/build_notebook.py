@@ -122,7 +122,11 @@ def _sync_kernel_metadata(exp: str, exp_dir: Path) -> None:
     elif len(km.get("title", "")) > 50:
         km["title"] = default_title
     km["code_file"] = "submission.ipynb"
-    km.setdefault("machine_shape", MACHINE_SHAPE)
+    if km.get("enable_gpu"):
+        km.setdefault("machine_shape", MACHINE_SHAPE)
+    else:
+        # KaggleのCPU commitではGPU machine_shapeを同時指定しない。
+        km.pop("machine_shape", None)
     km_path.write_text(json.dumps(km, indent=2) + "\n")
     print(f"[build] {km_path} を同期（id={km['id']}）")
 

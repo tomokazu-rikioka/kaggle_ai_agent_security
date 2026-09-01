@@ -1,0 +1,4578 @@
+{
+  "summary": {
+    "all": {
+      "pairs": 72,
+      "total_candidates": 14690,
+      "weighted_detrended_spearman": 0.042329681735302924,
+      "deadline_deltas": {
+        "0.50": {
+          "train_latency": -21,
+          "train_stability": -21
+        },
+        "0.75": {
+          "train_latency": 5,
+          "train_stability": 5
+        },
+        "0.90": {
+          "train_latency": 4,
+          "train_stability": 5
+        },
+        "0.95": {
+          "train_latency": 8,
+          "train_stability": 5
+        },
+        "0.99": {
+          "train_latency": 7,
+          "train_stability": 18
+        }
+      }
+    },
+    "gpt_oss": {
+      "pairs": 27,
+      "total_candidates": 4960,
+      "weighted_detrended_spearman": 0.11968397033942907,
+      "deadline_deltas": {
+        "0.50": {
+          "train_latency": 2,
+          "train_stability": 2
+        },
+        "0.75": {
+          "train_latency": 11,
+          "train_stability": 11
+        },
+        "0.90": {
+          "train_latency": 11,
+          "train_stability": 11
+        },
+        "0.95": {
+          "train_latency": 11,
+          "train_stability": 8
+        },
+        "0.99": {
+          "train_latency": 11,
+          "train_stability": 15
+        }
+      }
+    },
+    "gemma_4": {
+      "pairs": 45,
+      "total_candidates": 9730,
+      "weighted_detrended_spearman": 0.002897279733610669,
+      "deadline_deltas": {
+        "0.50": {
+          "train_latency": -23,
+          "train_stability": -23
+        },
+        "0.75": {
+          "train_latency": -6,
+          "train_stability": -6
+        },
+        "0.90": {
+          "train_latency": -7,
+          "train_stability": -6
+        },
+        "0.95": {
+          "train_latency": -3,
+          "train_stability": -3
+        },
+        "0.99": {
+          "train_latency": -4,
+          "train_stability": 3
+        }
+      }
+    },
+    "canonical_n100": {
+      "pairs": 51,
+      "total_candidates": 12900,
+      "weighted_detrended_spearman": 0.035673785415458494,
+      "deadline_deltas": {
+        "0.50": {
+          "train_latency": -12,
+          "train_stability": -12
+        },
+        "0.75": {
+          "train_latency": -6,
+          "train_stability": -6
+        },
+        "0.90": {
+          "train_latency": -10,
+          "train_stability": -10
+        },
+        "0.95": {
+          "train_latency": -5,
+          "train_stability": -7
+        },
+        "0.99": {
+          "train_latency": -6,
+          "train_stability": 5
+        }
+      }
+    }
+  },
+  "analyses": [
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r001_n10.json",
+      "model": "gpt_oss",
+      "variant": "exp020",
+      "n": 10,
+      "raw_pearson": 0.4345155660503615,
+      "raw_spearman": 0.13939393939393938,
+      "detrended_pearson": 0.43451556605036173,
+      "detrended_spearman": 0.13939393939393938,
+      "test_mean_s": 0.36617299999999997,
+      "train_fastest80_test_mean_s": 0.36592562500000003,
+      "train_fastest80_test_delta_s": -0.0002473749999999386,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.830865,
+          "original": 5,
+          "train_latency": 5,
+          "train_stability": 5,
+          "oracle": 5,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 2.746297,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.295557,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.478643,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.625113,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r001_n10.json",
+      "model": "gpt_oss",
+      "variant": "suffix0",
+      "n": 10,
+      "raw_pearson": 0.8915942749561127,
+      "raw_spearman": 0.4666666666666666,
+      "detrended_pearson": 0.8915942749561125,
+      "detrended_spearman": 0.4666666666666666,
+      "test_mean_s": 0.3660006,
+      "train_fastest80_test_mean_s": 0.363747625,
+      "train_fastest80_test_delta_s": -0.0022529749999999904,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.830003,
+          "original": 4,
+          "train_latency": 5,
+          "train_stability": 5,
+          "oracle": 5,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 2.745005,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.294005,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.477006,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.623406,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r002_n100.json",
+      "model": "gpt_oss",
+      "variant": "exp020",
+      "n": 100,
+      "raw_pearson": 0.13614115494930612,
+      "raw_spearman": 0.06523852385238524,
+      "detrended_pearson": 0.1175074144590304,
+      "detrended_spearman": 0.05633363336333633,
+      "test_mean_s": 0.37267991,
+      "train_fastest80_test_mean_s": 0.37272416249999996,
+      "train_fastest80_test_delta_s": 4.425249999995273e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.633996,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.950993,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.541192,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 35.404591,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 36.895311,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r002_n100.json",
+      "model": "gpt_oss",
+      "variant": "suffix0",
+      "n": 100,
+      "raw_pearson": 0.8211987203155344,
+      "raw_spearman": 0.7494749474947494,
+      "detrended_pearson": 0.8145619853387852,
+      "detrended_spearman": 0.7713891389138913,
+      "test_mean_s": 0.37145321000000003,
+      "train_fastest80_test_mean_s": 0.369798975,
+      "train_fastest80_test_delta_s": -0.0016542350000000594,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.572661,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.858991,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.430789,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 35.288055,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 36.773868,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r019_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "exp020",
+      "n": 100,
+      "raw_pearson": 0.2090529986495824,
+      "raw_spearman": 0.09174917491749174,
+      "detrended_pearson": 0.13565343458755633,
+      "detrended_spearman": 0.02958295829582958,
+      "test_mean_s": 0.3706244,
+      "train_fastest80_test_mean_s": 0.37064037499999997,
+      "train_fastest80_test_delta_s": 1.5974999999945894e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.53122,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.79683,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.356196,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 35.209318,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 36.691816,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r019_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "suffix0",
+      "n": 100,
+      "raw_pearson": 0.8210303686923314,
+      "raw_spearman": 0.681104110411041,
+      "detrended_pearson": 0.7818635813301019,
+      "detrended_spearman": 0.6938613861386138,
+      "test_mean_s": 0.37023604,
+      "train_fastest80_test_mean_s": 0.368794925,
+      "train_fastest80_test_delta_s": -0.0014411149999999928,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.511802,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 27.767703,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.321244,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 35.172424,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 36.653368,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r019_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "demo_end_z",
+      "n": 100,
+      "raw_pearson": 0.3281885993295147,
+      "raw_spearman": 0.30010201020102006,
+      "detrended_pearson": 0.31877376996946655,
+      "detrended_spearman": 0.3301890189018901,
+      "test_mean_s": 0.36649009000000005,
+      "train_fastest80_test_mean_s": 0.36619762499999997,
+      "train_fastest80_test_delta_s": -0.000292465000000075,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.324505,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.486757,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 32.984108,
+          "original": 89,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 34.816559,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 36.282519,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r019_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "demo_call_z",
+      "n": 100,
+      "raw_pearson": 0.24342675618751716,
+      "raw_spearman": 0.1922232223222322,
+      "detrended_pearson": 0.22923139256389116,
+      "detrended_spearman": 0.1554035403540354,
+      "test_mean_s": 0.36663106999999995,
+      "train_fastest80_test_mean_s": 0.3667182375,
+      "train_fastest80_test_delta_s": 8.716750000004048e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.331553,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.49733,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 32.996796,
+          "original": 89,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 34.829952,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 36.296476,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r019_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "demo_end_empty",
+      "n": 100,
+      "raw_pearson": 0.2729715685816382,
+      "raw_spearman": 0.26725472547254725,
+      "detrended_pearson": 0.2756271025572788,
+      "detrended_spearman": 0.32517251725172513,
+      "test_mean_s": 0.36599428,
+      "train_fastest80_test_mean_s": 0.3655631125,
+      "train_fastest80_test_delta_s": -0.00043116749999999593,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.299714,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.449571,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 32.939485,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 34.769457,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 36.233434,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r031_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "exp020",
+      "n": 100,
+      "raw_pearson": 0.2143305505868652,
+      "raw_spearman": 0.15265526552655265,
+      "detrended_pearson": 0.19757203361323256,
+      "detrended_spearman": 0.1913471347134713,
+      "test_mean_s": 0.37042176,
+      "train_fastest80_test_mean_s": 0.3701530625,
+      "train_fastest80_test_delta_s": -0.0002686974999999703,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.521088,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.781632,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 33.337958,
+          "original": 89,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 35.190067,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 36.671754,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r031_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "demo_48",
+      "n": 100,
+      "raw_pearson": 0.05732903368622596,
+      "raw_spearman": -0.0046324632463246316,
+      "detrended_pearson": 0.10041156934236825,
+      "detrended_spearman": 0.06225022502250224,
+      "test_mean_s": 0.36644675,
+      "train_fastest80_test_mean_s": 0.3664865125,
+      "train_fastest80_test_delta_s": 3.97624999999846e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.322337,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.483506,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 32.980207,
+          "original": 89,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 34.812441,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 36.278228,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r031_final_demo_n100.json",
+      "model": "gpt_oss",
+      "variant": "demo_45",
+      "n": 100,
+      "raw_pearson": 0.18687514731942767,
+      "raw_spearman": 0.06067806780678067,
+      "detrended_pearson": 0.1745739176106543,
+      "detrended_spearman": -0.06913891389138914,
+      "test_mean_s": 0.3626931500000001,
+      "train_fastest80_test_mean_s": 0.3625237,
+      "train_fastest80_test_delta_s": -0.00016945000000007093,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.134658,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.201986,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 32.642384,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 34.455849,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 35.906622,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r032_final_demo_45_vs_48_n1500.json",
+      "model": "gpt_oss",
+      "variant": "demo_48",
+      "n": 1500,
+      "raw_pearson": 0.1593786358260654,
+      "raw_spearman": 0.28733799437244195,
+      "detrended_pearson": -0.02275981127135723,
+      "detrended_spearman": -0.00011554494024219567,
+      "test_mean_s": 0.3760263053333333,
+      "train_fastest80_test_mean_s": 0.3760868683333333,
+      "train_fastest80_test_delta_s": 6.056300000001347e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 282.019729,
+          "original": 752,
+          "train_latency": 749,
+          "train_stability": 749,
+          "oracle": 754,
+          "latency_delta": -3,
+          "stability_delta": -3
+        },
+        "0.75": {
+          "budget_s": 423.029593,
+          "original": 1125,
+          "train_latency": 1124,
+          "train_stability": 1124,
+          "oracle": 1128,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 507.635512,
+          "original": 1350,
+          "train_latency": 1349,
+          "train_stability": 1349,
+          "oracle": 1352,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 535.837485,
+          "original": 1425,
+          "train_latency": 1424,
+          "train_stability": 1424,
+          "oracle": 1426,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 558.399063,
+          "original": 1484,
+          "train_latency": 1484,
+          "train_stability": 1484,
+          "oracle": 1485,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r032_final_demo_45_vs_48_n1500.json",
+      "model": "gpt_oss",
+      "variant": "demo_45",
+      "n": 1500,
+      "raw_pearson": 0.9990428516037301,
+      "raw_spearman": 0.5485353549046021,
+      "detrended_pearson": 0.9990778544515312,
+      "detrended_spearman": 0.11047960110204494,
+      "test_mean_s": 0.37579011399999995,
+      "train_fastest80_test_mean_s": 0.37230458083333334,
+      "train_fastest80_test_delta_s": -0.00348553316666661,
+      "train_noncanonical": 4,
+      "test_noncanonical": 4,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 281.842585,
+          "original": 754,
+          "train_latency": 757,
+          "train_stability": 757,
+          "oracle": 760,
+          "latency_delta": 3,
+          "stability_delta": 3
+        },
+        "0.75": {
+          "budget_s": 422.763878,
+          "original": 1123,
+          "train_latency": 1135,
+          "train_stability": 1135,
+          "oracle": 1138,
+          "latency_delta": 12,
+          "stability_delta": 12
+        },
+        "0.90": {
+          "budget_s": 507.316654,
+          "original": 1349,
+          "train_latency": 1362,
+          "train_stability": 1362,
+          "oracle": 1364,
+          "latency_delta": 13,
+          "stability_delta": 13
+        },
+        "0.95": {
+          "budget_s": 535.500912,
+          "original": 1424,
+          "train_latency": 1438,
+          "train_stability": 1437,
+          "oracle": 1439,
+          "latency_delta": 14,
+          "stability_delta": 13
+        },
+        "0.99": {
+          "budget_s": 558.048319,
+          "original": 1484,
+          "train_latency": 1497,
+          "train_stability": 1497,
+          "oracle": 1497,
+          "latency_delta": 13,
+          "stability_delta": 13
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_x",
+      "n": 100,
+      "raw_pearson": -0.017369739483031974,
+      "raw_spearman": -0.09827782778277827,
+      "detrended_pearson": -0.0712215408748617,
+      "detrended_spearman": -0.09725772577257724,
+      "test_mean_s": 0.37521392000000003,
+      "train_fastest80_test_mean_s": 0.3754594875,
+      "train_fastest80_test_delta_s": 0.00024556749999998795,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.760696,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 28.141044,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 33.769253,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 35.645322,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 37.146178,
+          "original": 99,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_question",
+      "n": 100,
+      "raw_pearson": 0.36055448122982425,
+      "raw_spearman": 0.46480648064806473,
+      "detrended_pearson": 0.34136012120335746,
+      "detrended_spearman": 0.4719951995199519,
+      "test_mean_s": 0.39375228999999995,
+      "train_fastest80_test_mean_s": 0.391716775,
+      "train_fastest80_test_delta_s": -0.0020355149999999322,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.687614,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 51,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 29.531422,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 76,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.437706,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 91,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.406468,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 38.981477,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_underscore",
+      "n": 100,
+      "raw_pearson": 0.42576834737900704,
+      "raw_spearman": 0.4337593759375937,
+      "detrended_pearson": 0.4266280271845161,
+      "detrended_spearman": 0.42496249624962495,
+      "test_mean_s": 0.38909358,
+      "train_fastest80_test_mean_s": 0.3856961375,
+      "train_fastest80_test_delta_s": -0.003397442500000014,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.454679,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 51,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 29.182018,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 76,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.018422,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 36.96389,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 38.520264,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_zero",
+      "n": 100,
+      "raw_pearson": 0.11896722803228381,
+      "raw_spearman": 0.1676447644764476,
+      "detrended_pearson": 0.06334008420737748,
+      "detrended_spearman": 0.08699669966996698,
+      "test_mean_s": 0.37405707000000005,
+      "train_fastest80_test_mean_s": 0.37404143749999996,
+      "train_fastest80_test_delta_s": -1.5632500000084537e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 1,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.702854,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 28.05428,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 33.665136,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 35.535422,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 37.03165,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_a",
+      "n": 100,
+      "raw_pearson": 0.0021161742964994987,
+      "raw_spearman": -0.10537053705370536,
+      "detrended_pearson": -0.08548903200578929,
+      "detrended_spearman": -0.16324032403240324,
+      "test_mean_s": 0.3725383200000001,
+      "train_fastest80_test_mean_s": 0.3727668875,
+      "train_fastest80_test_delta_s": 0.00022856749999988768,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.626916,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 27.940374,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 33.528449,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 35.39114,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 36.881294,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_z",
+      "n": 100,
+      "raw_pearson": 0.12701952000598635,
+      "raw_spearman": 0.047956795679567954,
+      "detrended_pearson": 0.15183971878285266,
+      "detrended_spearman": 0.0576057605760576,
+      "test_mean_s": 0.37251985,
+      "train_fastest80_test_mean_s": 0.3722576,
+      "train_fastest80_test_delta_s": -0.0002622499999999639,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.625992,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 27.938989,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 33.526787,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 35.389386,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 36.879465,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_upper_x",
+      "n": 100,
+      "raw_pearson": 0.1336812372512035,
+      "raw_spearman": 0.04855685568556855,
+      "detrended_pearson": 0.09113046641558845,
+      "detrended_spearman": -0.00042004200420042004,
+      "test_mean_s": 0.37311888,
+      "train_fastest80_test_mean_s": 0.372874325,
+      "train_fastest80_test_delta_s": -0.00024455499999997965,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.655944,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 27.983916,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.580699,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 35.446294,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 36.938769,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_dest",
+      "n": 100,
+      "raw_pearson": 0.23859436172557452,
+      "raw_spearman": 0.12286828682868287,
+      "detrended_pearson": 0.20793901960518413,
+      "detrended_spearman": 0.08325232523252324,
+      "test_mean_s": 0.37462609999999996,
+      "train_fastest80_test_mean_s": 0.37362985,
+      "train_fastest80_test_delta_s": -0.0009962499999999763,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 18.731305,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 28.096957,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 33.716349,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 35.589479,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 37.087984,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r035_final_placeholders_n100.json",
+      "model": "gpt_oss",
+      "variant": "final_empty",
+      "n": 100,
+      "raw_pearson": 0.9590640611749256,
+      "raw_spearman": 0.7738373837383739,
+      "detrended_pearson": 0.9601184908899479,
+      "detrended_spearman": 0.7869426942694269,
+      "test_mean_s": 0.39001291000000005,
+      "train_fastest80_test_mean_s": 0.38206992500000003,
+      "train_fastest80_test_delta_s": -0.007942985000000014,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.500646,
+          "original": 50,
+          "train_latency": 51,
+          "train_stability": 51,
+          "oracle": 51,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 29.250968,
+          "original": 75,
+          "train_latency": 76,
+          "train_stability": 76,
+          "oracle": 76,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 35.101162,
+          "original": 90,
+          "train_latency": 91,
+          "train_stability": 91,
+          "oracle": 91,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 37.051226,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 38.611278,
+          "original": 99,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r039_kv_aligned_n10.json",
+      "model": "gpt_oss",
+      "variant": "demo_48",
+      "n": 10,
+      "raw_pearson": 0.0419862232181316,
+      "raw_spearman": -0.23636363636363633,
+      "detrended_pearson": 0.04198622321813163,
+      "detrended_spearman": -0.23636363636363633,
+      "test_mean_s": 0.3614436,
+      "train_fastest80_test_mean_s": 0.36133249999999995,
+      "train_fastest80_test_delta_s": -0.00011110000000003062,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.807218,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.710827,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.252992,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.433714,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.578292,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r041_nested_call_kv_n10.json",
+      "model": "gpt_oss",
+      "variant": "demo_48",
+      "n": 10,
+      "raw_pearson": 0.2439740923093092,
+      "raw_spearman": 0.35757575757575755,
+      "detrended_pearson": 0.24397409230930908,
+      "detrended_spearman": 0.35757575757575755,
+      "test_mean_s": 0.3620656,
+      "train_fastest80_test_mean_s": 0.361666625,
+      "train_fastest80_test_delta_s": -0.0003989749999999681,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.810328,
+          "original": 5,
+          "train_latency": 5,
+          "train_stability": 5,
+          "oracle": 5,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 2.715492,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.25859,
+          "original": 9,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 3.439623,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.584449,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r045_system_tool_n10.json",
+      "model": "gpt_oss",
+      "variant": "demo_48",
+      "n": 10,
+      "raw_pearson": 0.274419079657791,
+      "raw_spearman": 0.11515151515151514,
+      "detrended_pearson": 0.27441907965779105,
+      "detrended_spearman": 0.11515151515151514,
+      "test_mean_s": 0.36128740000000004,
+      "train_fastest80_test_mean_s": 0.361027,
+      "train_fastest80_test_delta_s": -0.0002604000000000495,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.806437,
+          "original": 5,
+          "train_latency": 5,
+          "train_stability": 5,
+          "oracle": 5,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 2.709656,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.251587,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.43223,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.576745,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gpt_r120_two_call_n10.json",
+      "model": "gpt_oss",
+      "variant": "single",
+      "n": 10,
+      "raw_pearson": -0.2234301857462287,
+      "raw_spearman": -0.006060606060606061,
+      "detrended_pearson": -0.22343018574622872,
+      "detrended_spearman": -0.006060606060606061,
+      "test_mean_s": 0.35815749999999996,
+      "train_fastest80_test_mean_s": 0.3580485,
+      "train_fastest80_test_delta_s": -0.00010899999999997023,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.790787,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.686181,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.223417,
+          "original": 8,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.402496,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.545759,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r001_n10.json",
+      "model": "gemma_4",
+      "variant": "newline",
+      "n": 10,
+      "raw_pearson": -0.5739453089097301,
+      "raw_spearman": -0.5878787878787878,
+      "detrended_pearson": -0.5739453089097301,
+      "detrended_spearman": -0.5878787878787878,
+      "test_mean_s": 0.3980726,
+      "train_fastest80_test_mean_s": 0.39957624999999997,
+      "train_fastest80_test_delta_s": 0.0015036499999999675,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.990363,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.985544,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.582653,
+          "original": 9,
+          "train_latency": 8,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": -1,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.78169,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.940919,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r001_n10.json",
+      "model": "gemma_4",
+      "variant": "space",
+      "n": 10,
+      "raw_pearson": 0.4225075440656408,
+      "raw_spearman": 0.33333333333333326,
+      "detrended_pearson": 0.42250754406564067,
+      "detrended_spearman": 0.33333333333333326,
+      "test_mean_s": 0.3963291,
+      "train_fastest80_test_mean_s": 0.395883125,
+      "train_fastest80_test_delta_s": -0.00044597499999998735,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.981645,
+          "original": 5,
+          "train_latency": 5,
+          "train_stability": 5,
+          "oracle": 5,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 2.972468,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.566962,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.765126,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.923658,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r002_n100.json",
+      "model": "gemma_4",
+      "variant": "newline",
+      "n": 100,
+      "raw_pearson": -0.028672217183274593,
+      "raw_spearman": -0.08273627362736273,
+      "detrended_pearson": -0.05865781791504583,
+      "detrended_spearman": -0.20194419441944195,
+      "test_mean_s": 0.40386266000000004,
+      "train_fastest80_test_mean_s": 0.40399717500000004,
+      "train_fastest80_test_delta_s": 0.00013451500000000172,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.193133,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 30.2897,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 36.347639,
+          "original": 89,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 38.366953,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.982403,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r002_n100.json",
+      "model": "gemma_4",
+      "variant": "space",
+      "n": 100,
+      "raw_pearson": 0.2582838503764606,
+      "raw_spearman": 0.3091029102910291,
+      "detrended_pearson": 0.0962728731250022,
+      "detrended_spearman": 0.12466846684668464,
+      "test_mean_s": 0.4022648199999999,
+      "train_fastest80_test_mean_s": 0.401913525,
+      "train_fastest80_test_delta_s": -0.0003512949999999182,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.113241,
+          "original": 50,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 30.169861,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 36.203834,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 38.215158,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.824217,
+          "original": 99,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r123a_case_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.05769226583573704,
+      "raw_spearman": -0.006060606060606061,
+      "detrended_pearson": -0.0576922658357371,
+      "detrended_spearman": -0.006060606060606061,
+      "test_mean_s": 0.39640020000000004,
+      "train_fastest80_test_mean_s": 0.39667474999999996,
+      "train_fastest80_test_delta_s": 0.000274549999999929,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.982001,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.973002,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.567602,
+          "original": 9,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 3.765802,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.924362,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r123b_layout_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.30808144724979664,
+      "raw_spearman": 0.16363636363636364,
+      "detrended_pearson": -0.30808144724979664,
+      "detrended_spearman": 0.16363636363636364,
+      "test_mean_s": 0.39737100000000003,
+      "train_fastest80_test_mean_s": 0.398062375,
+      "train_fastest80_test_delta_s": 0.0006913749999999941,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.986855,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.980283,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.576339,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.775025,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.933973,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r123c_tail_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.4962220002845056,
+      "raw_spearman": -0.3696969696969697,
+      "detrended_pearson": -0.49622200028450575,
+      "detrended_spearman": -0.3696969696969697,
+      "test_mean_s": 0.3960347,
+      "train_fastest80_test_mean_s": 0.397105125,
+      "train_fastest80_test_delta_s": 0.001070424999999986,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.980174,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.97026,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.564312,
+          "original": 8,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.76233,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.920744,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r124_pool_n100.json",
+      "model": "gemma_4",
+      "variant": "r88_use",
+      "n": 100,
+      "raw_pearson": 0.1295212017129035,
+      "raw_spearman": 0.28217221722172214,
+      "detrended_pearson": 0.005576417197914004,
+      "detrended_spearman": 0.10609060906090609,
+      "test_mean_s": 0.39697488999999997,
+      "train_fastest80_test_mean_s": 0.3969269125,
+      "train_fastest80_test_delta_s": -4.79774999999627e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.848744,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 29.773117,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.72774,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 37.712615,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.300514,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r124_pool_n500.json",
+      "model": "gemma_4",
+      "variant": "r88_use",
+      "n": 500,
+      "raw_pearson": 0.24739738824347848,
+      "raw_spearman": 0.40955991023964095,
+      "detrended_pearson": 0.1659195285468132,
+      "detrended_spearman": 0.2561198084792339,
+      "test_mean_s": 0.40159611800000006,
+      "train_fastest80_test_mean_s": 0.40118086750000004,
+      "train_fastest80_test_delta_s": -0.0004152505000000195,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.39903,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 150.598544,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 180.718253,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 190.758156,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 198.790078,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r125_straight_n100.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 100,
+      "raw_pearson": 0.18865610365607854,
+      "raw_spearman": 0.4166576657665766,
+      "detrended_pearson": 0.05155244886583474,
+      "detrended_spearman": 0.15734773477347733,
+      "test_mean_s": 0.3994016899999999,
+      "train_fastest80_test_mean_s": 0.39936685,
+      "train_fastest80_test_delta_s": -3.483999999992493e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.970084,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 29.955127,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.946152,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.943161,
+          "original": 94,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.540767,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r125_straight_n100.json",
+      "model": "gemma_4",
+      "variant": "straight",
+      "n": 100,
+      "raw_pearson": 0.03606704896503014,
+      "raw_spearman": 0.0935133513351335,
+      "detrended_pearson": 0.005061398302162739,
+      "detrended_spearman": 0.0909090909090909,
+      "test_mean_s": 0.39871477,
+      "train_fastest80_test_mean_s": 0.398756925,
+      "train_fastest80_test_delta_s": 4.2154999999988174e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.935738,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 29.903608,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 35.884329,
+          "original": 89,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 37.877903,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.472762,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r125_straight_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.16863525640939508,
+      "raw_spearman": 0.2931226764907059,
+      "detrended_pearson": -0.05776993174321167,
+      "detrended_spearman": -0.050590474361897446,
+      "test_mean_s": 0.40206923,
+      "train_fastest80_test_mean_s": 0.4020944275,
+      "train_fastest80_test_delta_s": 2.519750000001819e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.517308,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.775961,
+          "original": 375,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 376,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 180.931153,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 190.982884,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 199.024269,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r125_straight_n500.json",
+      "model": "gemma_4",
+      "variant": "straight",
+      "n": 500,
+      "raw_pearson": 0.11109204341198013,
+      "raw_spearman": 0.12283489133956535,
+      "detrended_pearson": 0.0486512299676908,
+      "detrended_spearman": 0.012336625346501385,
+      "test_mean_s": 0.40170773000000004,
+      "train_fastest80_test_mean_s": 0.40167283249999997,
+      "train_fastest80_test_delta_s": -3.489750000007508e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.426933,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 150.640399,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 180.768479,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 190.811172,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 198.845326,
+          "original": 494,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r126_case_n100.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 100,
+      "raw_pearson": -0.005395077243129712,
+      "raw_spearman": -0.04226822682268226,
+      "detrended_pearson": 0.027387109965164854,
+      "detrended_spearman": 0.027998799879987997,
+      "test_mean_s": 0.39870110000000003,
+      "train_fastest80_test_mean_s": 0.39865215,
+      "train_fastest80_test_delta_s": -4.8950000000047567e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.935055,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 29.902583,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.883099,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.876604,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.471409,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r130_tail_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.17483350085384997,
+      "raw_spearman": -0.006060606060606061,
+      "detrended_pearson": -0.17483350085384994,
+      "detrended_spearman": -0.006060606060606061,
+      "test_mean_s": 0.3974586,
+      "train_fastest80_test_mean_s": 0.397342125,
+      "train_fastest80_test_delta_s": -0.00011647500000000477,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.987293,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.980939,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.577127,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.775857,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.93484,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r132_finish_neighbors_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.25815135674620737,
+      "raw_spearman": 0.05454545454545454,
+      "detrended_pearson": -0.2581513567462074,
+      "detrended_spearman": 0.05454545454545454,
+      "test_mean_s": 0.39718909999999996,
+      "train_fastest80_test_mean_s": 0.39815425000000004,
+      "train_fastest80_test_delta_s": 0.0009651500000000812,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.985945,
+          "original": 4,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 2.978918,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.574702,
+          "original": 8,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.773296,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.932172,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r133_prefix_finish_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.38421458923344487,
+      "raw_spearman": -0.49090909090909085,
+      "detrended_pearson": -0.38421458923344487,
+      "detrended_spearman": -0.49090909090909085,
+      "test_mean_s": 0.3977258,
+      "train_fastest80_test_mean_s": 0.398090375,
+      "train_fastest80_test_delta_s": 0.0003645749999999781,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.988629,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.982944,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.579532,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.778395,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.937485,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r134_core_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.1166461424620445,
+      "raw_spearman": -0.19999999999999998,
+      "detrended_pearson": -0.1166461424620445,
+      "detrended_spearman": -0.19999999999999998,
+      "test_mean_s": 0.39503330000000003,
+      "train_fastest80_test_mean_s": 0.39543712499999994,
+      "train_fastest80_test_delta_s": 0.0004038249999999133,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.975167,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.96275,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.5553,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.752816,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.91083,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r135_finish_quotes_n100.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 100,
+      "raw_pearson": -0.21050185844491046,
+      "raw_spearman": -0.2974377437743774,
+      "detrended_pearson": -0.12000881697598685,
+      "detrended_spearman": -0.14106210621062104,
+      "test_mean_s": 0.40173781,
+      "train_fastest80_test_mean_s": 0.4018883625,
+      "train_fastest80_test_delta_s": 0.00015055250000001186,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.08689,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 30.130336,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 36.156403,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 38.165092,
+          "original": 94,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.772043,
+          "original": 99,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r135_finish_quotes_n100.json",
+      "model": "gemma_4",
+      "variant": "straight",
+      "n": 100,
+      "raw_pearson": 0.18474747854652335,
+      "raw_spearman": 0.12535253525352535,
+      "detrended_pearson": 0.19414328739886177,
+      "detrended_spearman": 0.11176717671767175,
+      "test_mean_s": 0.4012243300000001,
+      "train_fastest80_test_mean_s": 0.4010746375,
+      "train_fastest80_test_delta_s": -0.00014969250000007595,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.061217,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 30.091825,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 36.11019,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 38.116311,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.721209,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r135_finish_quotes_n100.json",
+      "model": "gemma_4",
+      "variant": "double",
+      "n": 100,
+      "raw_pearson": 0.03132488638276665,
+      "raw_spearman": -0.0768196819681968,
+      "detrended_pearson": 0.03988592436594487,
+      "detrended_spearman": -0.06012601260126012,
+      "test_mean_s": 0.4007545500000001,
+      "train_fastest80_test_mean_s": 0.4007243,
+      "train_fastest80_test_delta_s": -3.025000000012046e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.037728,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 30.056591,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 36.06791,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 38.071682,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.6747,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r136_short_core_n100.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 100,
+      "raw_pearson": 0.00036390553234227685,
+      "raw_spearman": -0.16236423642364234,
+      "detrended_pearson": 0.007296216390408112,
+      "detrended_spearman": -0.2194299429942994,
+      "test_mean_s": 0.3967133599999999,
+      "train_fastest80_test_mean_s": 0.39659011250000004,
+      "train_fastest80_test_delta_s": -0.00012324749999986784,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.835668,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 29.753502,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.704202,
+          "original": 89,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 37.687769,
+          "original": 94,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.274623,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r137_tail_finalists_n100.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 100,
+      "raw_pearson": 0.05644272496175492,
+      "raw_spearman": 0.1492109210921092,
+      "detrended_pearson": 0.039606033519213615,
+      "detrended_spearman": 0.01630963096309631,
+      "test_mean_s": 0.40021867,
+      "train_fastest80_test_mean_s": 0.4002087625,
+      "train_fastest80_test_delta_s": -9.907500000017055e-06,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.010934,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 30.0164,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 36.01968,
+          "original": 89,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 38.020774,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.621648,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r138_prefix_core_cross_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.7110984328257073,
+      "raw_spearman": -0.8181818181818182,
+      "detrended_pearson": -0.7110984328257073,
+      "detrended_spearman": -0.8181818181818182,
+      "test_mean_s": 0.4000886,
+      "train_fastest80_test_mean_s": 0.401315125,
+      "train_fastest80_test_delta_s": 0.0012265249999999783,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 2.000443,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 3.000665,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.600797,
+          "original": 9,
+          "train_latency": 8,
+          "train_stability": 8,
+          "oracle": 9,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 3.800842,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.960877,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r139_prefix_core_n100.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 100,
+      "raw_pearson": 0.23305492850751156,
+      "raw_spearman": 0.2946174617461746,
+      "detrended_pearson": 0.2795881443945937,
+      "detrended_spearman": 0.3199159915991599,
+      "test_mean_s": 0.4008728200000001,
+      "train_fastest80_test_mean_s": 0.4005951,
+      "train_fastest80_test_delta_s": -0.00027772000000009234,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 20.043641,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 30.065462,
+          "original": 74,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.90": {
+          "budget_s": 36.078554,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 38.082918,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.686409,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r140_response_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.02851977772654937,
+      "raw_spearman": 0.1759444157776631,
+      "detrended_pearson": -0.11198250309446678,
+      "detrended_spearman": -0.21122302089208353,
+      "test_mean_s": 0.400536162,
+      "train_fastest80_test_mean_s": 0.40069367499999997,
+      "train_fastest80_test_delta_s": 0.00015751299999999802,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.13404,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 250,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.201061,
+          "original": 375,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 375,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 180.241273,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 190.254677,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 198.2654,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r140_response_n500.json",
+      "model": "gemma_4",
+      "variant": "response",
+      "n": 500,
+      "raw_pearson": 0.13247353678738005,
+      "raw_spearman": 0.2537308389233557,
+      "detrended_pearson": -0.007762416709542564,
+      "detrended_spearman": -0.11346544586178343,
+      "test_mean_s": 0.40045474400000003,
+      "train_fastest80_test_mean_s": 0.4005428449999999,
+      "train_fastest80_test_delta_s": 8.810099999989607e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.113686,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.170529,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 375,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 180.204635,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 190.216003,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 198.225098,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r141_no_schema_dot_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.12886755213489073,
+      "raw_spearman": 0.30183192732770925,
+      "detrended_pearson": -0.013934303469231255,
+      "detrended_spearman": 0.041648710594842375,
+      "test_mean_s": 0.399343702,
+      "train_fastest80_test_mean_s": 0.3992954899999999,
+      "train_fastest80_test_delta_s": -4.821200000010295e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.835926,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 149.753888,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.704666,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 189.688258,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 197.675132,
+          "original": 494,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r141_no_schema_dot_n500.json",
+      "model": "gemma_4",
+      "variant": "no_schema_dot",
+      "n": 500,
+      "raw_pearson": 0.29503748407290725,
+      "raw_spearman": 0.30011275245100977,
+      "detrended_pearson": 0.20393093652515748,
+      "detrended_spearman": 0.10659181836727347,
+      "test_mean_s": 0.39940423199999997,
+      "train_fastest80_test_mean_s": 0.39926972,
+      "train_fastest80_test_delta_s": -0.00013451199999997554,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.851058,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 149.776587,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.731904,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 189.71701,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 197.705095,
+          "original": 494,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r143_recipient_binding_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.06976528997308949,
+      "raw_spearman": -0.0303030303030303,
+      "detrended_pearson": -0.06976528997308953,
+      "detrended_spearman": -0.0303030303030303,
+      "test_mean_s": 0.4005488,
+      "train_fastest80_test_mean_s": 0.400202875,
+      "train_fastest80_test_delta_s": -0.0003459249999999692,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 2.002744,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 3.004116,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.604939,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.805214,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.965433,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r144_compaction_cross_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": -0.1855549476538233,
+      "raw_spearman": -0.22424242424242422,
+      "detrended_pearson": -0.18555494765382327,
+      "detrended_spearman": -0.22424242424242422,
+      "test_mean_s": 0.39344260000000003,
+      "train_fastest80_test_mean_s": 0.39332725,
+      "train_fastest80_test_delta_s": -0.00011535000000001405,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 1.967213,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 2.95082,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.540983,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 3.737705,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.895082,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r146_compact_frontier_n10.json",
+      "model": "gemma_4",
+      "variant": "control",
+      "n": 10,
+      "raw_pearson": 0.17981487349524844,
+      "raw_spearman": 0.06666666666666665,
+      "detrended_pearson": 0.1798148734952484,
+      "detrended_spearman": 0.06666666666666665,
+      "test_mean_s": 0.40209949999999994,
+      "train_fastest80_test_mean_s": 0.40190800000000004,
+      "train_fastest80_test_delta_s": -0.00019149999999990008,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 2.010497,
+          "original": 5,
+          "train_latency": 4,
+          "train_stability": 4,
+          "oracle": 5,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 3.015746,
+          "original": 7,
+          "train_latency": 7,
+          "train_stability": 7,
+          "oracle": 7,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 3.618895,
+          "original": 8,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.95": {
+          "budget_s": 3.819945,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 3.980785,
+          "original": 9,
+          "train_latency": 9,
+          "train_stability": 9,
+          "oracle": 9,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r148_compact_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.04261102088429638,
+      "raw_spearman": 0.13693638774555095,
+      "detrended_pearson": -0.05929260461083667,
+      "detrended_spearman": -0.043167820671282685,
+      "test_mean_s": 0.403565088,
+      "train_fastest80_test_mean_s": 0.40369971500000007,
+      "train_fastest80_test_delta_s": 0.0001346270000000538,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.891272,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 151.336908,
+          "original": 375,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 376,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 181.60429,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 191.693417,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 199.764719,
+          "original": 494,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r148_compact_n500.json",
+      "model": "gemma_4",
+      "variant": "double17",
+      "n": 500,
+      "raw_pearson": 0.040161789154339086,
+      "raw_spearman": 0.12820889683558734,
+      "detrended_pearson": -0.062104967486009695,
+      "detrended_spearman": -0.14884504338017351,
+      "test_mean_s": 0.40309870999999997,
+      "train_fastest80_test_mean_s": 0.4032065249999999,
+      "train_fastest80_test_delta_s": 0.00010781499999995559,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.774677,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 151.162016,
+          "original": 375,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 376,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 181.394419,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 191.471887,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 199.533861,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r148_compact_n500.json",
+      "model": "gemma_4",
+      "variant": "double16",
+      "n": 500,
+      "raw_pearson": 0.0425972692873306,
+      "raw_spearman": 0.13665193860775443,
+      "detrended_pearson": -0.09678708860787391,
+      "detrended_spearman": -0.21707347629390517,
+      "test_mean_s": 0.40253445400000004,
+      "train_fastest80_test_mean_s": 0.40270551999999993,
+      "train_fastest80_test_delta_s": 0.00017106599999988648,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.633614,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.95042,
+          "original": 375,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 376,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 181.140504,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 450,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 191.203866,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 199.254555,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r149_compact_repeat_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.20907921646841277,
+      "raw_spearman": 0.4152187488749955,
+      "detrended_pearson": 0.044033320541687085,
+      "detrended_spearman": 0.15069909879639518,
+      "test_mean_s": 0.398020954,
+      "train_fastest80_test_mean_s": 0.397926605,
+      "train_fastest80_test_delta_s": -9.434899999999358e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.505238,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 149.257858,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.109429,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 189.059953,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 197.020372,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r149_compact_repeat_n500.json",
+      "model": "gemma_4",
+      "variant": "double16",
+      "n": 500,
+      "raw_pearson": 0.16995508207368182,
+      "raw_spearman": 0.255690494761979,
+      "detrended_pearson": 0.1052575002227021,
+      "detrended_spearman": 0.16285658742634967,
+      "test_mean_s": 0.397799876,
+      "train_fastest80_test_mean_s": 0.3976855775,
+      "train_fastest80_test_delta_s": -0.00011429849999999853,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.449969,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 149.174953,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.009944,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 188.954941,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 196.910939,
+          "original": 495,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r150_tail_n100.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 100,
+      "raw_pearson": -0.09828276877259755,
+      "raw_spearman": -0.11243924392439242,
+      "detrended_pearson": -0.11998217189999089,
+      "detrended_spearman": -0.20428442844284428,
+      "test_mean_s": 0.3992490900000001,
+      "train_fastest80_test_mean_s": 0.39944955000000004,
+      "train_fastest80_test_delta_s": 0.0002004599999999579,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.962455,
+          "original": 50,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 29.943682,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 35.932418,
+          "original": 89,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.928664,
+          "original": 94,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.52566,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r150_tail_n100.json",
+      "model": "gemma_4",
+      "variant": "double_finish",
+      "n": 100,
+      "raw_pearson": 0.010085809996828378,
+      "raw_spearman": 0.06011401140114011,
+      "detrended_pearson": -0.016548211979158074,
+      "detrended_spearman": -0.05624962496249625,
+      "test_mean_s": 0.3986233,
+      "train_fastest80_test_mean_s": 0.398587925,
+      "train_fastest80_test_delta_s": -3.537500000000415e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.931165,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 29.896748,
+          "original": 74,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.876097,
+          "original": 90,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 37.869214,
+          "original": 95,
+          "train_latency": 94,
+          "train_stability": 94,
+          "oracle": 95,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 39.463707,
+          "original": 99,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r150_tail_n100.json",
+      "model": "gemma_4",
+      "variant": "straight_end",
+      "n": 100,
+      "raw_pearson": 0.3620149713444337,
+      "raw_spearman": 0.08296429642964295,
+      "detrended_pearson": 0.36722035581895535,
+      "detrended_spearman": -0.03134713471347134,
+      "test_mean_s": 0.39776564999999997,
+      "train_fastest80_test_mean_s": 0.3975672,
+      "train_fastest80_test_delta_s": -0.00019844999999996116,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.888282,
+          "original": 49,
+          "train_latency": 50,
+          "train_stability": 50,
+          "oracle": 50,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.75": {
+          "budget_s": 29.832424,
+          "original": 75,
+          "train_latency": 75,
+          "train_stability": 75,
+          "oracle": 75,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 35.798908,
+          "original": 90,
+          "train_latency": 90,
+          "train_stability": 90,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.787737,
+          "original": 94,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 1,
+          "stability_delta": 1
+        },
+        "0.99": {
+          "budget_s": 39.378799,
+          "original": 98,
+          "train_latency": 99,
+          "train_stability": 99,
+          "oracle": 99,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r150_tail_n100.json",
+      "model": "gemma_4",
+      "variant": "double_end",
+      "n": 100,
+      "raw_pearson": 0.006691834512336481,
+      "raw_spearman": 0.15571557155715568,
+      "detrended_pearson": -0.03712247524665443,
+      "detrended_spearman": 0.11043504350435043,
+      "test_mean_s": 0.39781975,
+      "train_fastest80_test_mean_s": 0.3978057,
+      "train_fastest80_test_delta_s": -1.4050000000043195e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 19.890988,
+          "original": 49,
+          "train_latency": 49,
+          "train_stability": 49,
+          "oracle": 50,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 29.836481,
+          "original": 75,
+          "train_latency": 74,
+          "train_stability": 74,
+          "oracle": 75,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.90": {
+          "budget_s": 35.803778,
+          "original": 89,
+          "train_latency": 89,
+          "train_stability": 89,
+          "oracle": 90,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 37.792876,
+          "original": 95,
+          "train_latency": 95,
+          "train_stability": 95,
+          "oracle": 95,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 39.384155,
+          "original": 98,
+          "train_latency": 98,
+          "train_stability": 98,
+          "oracle": 99,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r151_compact_reverse_n500.json",
+      "model": "gemma_4",
+      "variant": "double16",
+      "n": 500,
+      "raw_pearson": 0.1948304289302061,
+      "raw_spearman": 0.31959027036108145,
+      "detrended_pearson": -0.032052617947811446,
+      "detrended_spearman": -0.091437965751863,
+      "test_mean_s": 0.40255676,
+      "train_fastest80_test_mean_s": 0.40268797749999996,
+      "train_fastest80_test_delta_s": 0.00013121749999994714,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.63919,
+          "original": 251,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.958785,
+          "original": 376,
+          "train_latency": 374,
+          "train_stability": 374,
+          "oracle": 376,
+          "latency_delta": -2,
+          "stability_delta": -2
+        },
+        "0.90": {
+          "budget_s": 181.150542,
+          "original": 450,
+          "train_latency": 449,
+          "train_stability": 449,
+          "oracle": 451,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.95": {
+          "budget_s": 191.214461,
+          "original": 475,
+          "train_latency": 474,
+          "train_stability": 474,
+          "oracle": 475,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.99": {
+          "budget_s": 199.265596,
+          "original": 495,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 0,
+          "stability_delta": 0
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r151_compact_reverse_n500.json",
+      "model": "gemma_4",
+      "variant": "ordinary",
+      "n": 500,
+      "raw_pearson": 0.14479900425005715,
+      "raw_spearman": 0.26694423577694315,
+      "detrended_pearson": 0.015545759089527735,
+      "detrended_spearman": 0.03499645998583994,
+      "test_mean_s": 0.402581058,
+      "train_fastest80_test_mean_s": 0.4025442375,
+      "train_fastest80_test_delta_s": -3.682049999997883e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 100.645264,
+          "original": 250,
+          "train_latency": 249,
+          "train_stability": 249,
+          "oracle": 251,
+          "latency_delta": -1,
+          "stability_delta": -1
+        },
+        "0.75": {
+          "budget_s": 150.967897,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 181.161476,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 191.226003,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 199.277624,
+          "original": 494,
+          "train_latency": 495,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": 1,
+          "stability_delta": 1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r161_finish_end_n500.json",
+      "model": "gemma_4",
+      "variant": "finish",
+      "n": 500,
+      "raw_pearson": 0.1693709133510181,
+      "raw_spearman": 0.38988722354889416,
+      "detrended_pearson": 0.00811440857979926,
+      "detrended_spearman": 0.08543563774255097,
+      "test_mean_s": 0.39934265199999996,
+      "train_fastest80_test_mean_s": 0.399324015,
+      "train_fastest80_test_delta_s": -1.8636999999988024e-05,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.835663,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 149.753494,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.704193,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 189.68776,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 197.674613,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 494,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": -1
+        }
+      }
+    },
+    {
+      "file": "benchmarks/scripts/colab_a100/results/gemma_r161_finish_end_n500.json",
+      "model": "gemma_4",
+      "variant": "end",
+      "n": 500,
+      "raw_pearson": 0.1750195924255395,
+      "raw_spearman": 0.2749270517082068,
+      "detrended_pearson": 0.07603061044683108,
+      "detrended_spearman": 0.09360277441109764,
+      "test_mean_s": 0.398935936,
+      "train_fastest80_test_mean_s": 0.39878739999999996,
+      "train_fastest80_test_delta_s": -0.00014853600000003242,
+      "train_noncanonical": 0,
+      "test_noncanonical": 0,
+      "deadlines": {
+        "0.50": {
+          "budget_s": 99.733984,
+          "original": 250,
+          "train_latency": 250,
+          "train_stability": 250,
+          "oracle": 251,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.75": {
+          "budget_s": 149.600976,
+          "original": 375,
+          "train_latency": 375,
+          "train_stability": 375,
+          "oracle": 376,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.90": {
+          "budget_s": 179.521171,
+          "original": 450,
+          "train_latency": 450,
+          "train_stability": 450,
+          "oracle": 450,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.95": {
+          "budget_s": 189.49457,
+          "original": 475,
+          "train_latency": 475,
+          "train_stability": 475,
+          "oracle": 475,
+          "latency_delta": 0,
+          "stability_delta": 0
+        },
+        "0.99": {
+          "budget_s": 197.473288,
+          "original": 495,
+          "train_latency": 494,
+          "train_stability": 495,
+          "oracle": 495,
+          "latency_delta": -1,
+          "stability_delta": 0
+        }
+      }
+    }
+  ]
+}
