@@ -68,6 +68,8 @@ def ensure_model(kind: str) -> Path:
         path = previous_path
     else:
         try:
+            if os.environ.get("AAS_MODEL_SOURCE") == "hf":
+                raise RuntimeError("HF Hub source requested")
             path = Path(
                 kagglehub.model_download(
                     spec["kaggle_handle"],
@@ -89,9 +91,7 @@ def ensure_model(kind: str) -> Path:
             )
     actual_size = path.stat().st_size
     if actual_size != spec["size_bytes"]:
-        raise RuntimeError(
-            f"GGUF size mismatch: {kind} expected={spec['size_bytes']} actual={actual_size} path={path}"
-        )
+        raise RuntimeError(f"GGUF size mismatch: {kind} expected={spec['size_bytes']} actual={actual_size} path={path}")
 
     sha256 = previous.get("sha256") if previous.get("path") == str(path) else None
     if not sha256:
